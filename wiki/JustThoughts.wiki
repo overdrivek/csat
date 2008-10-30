@@ -53,7 +53,6 @@ You need to edit *xorg.conf* and add device section *Option "GARTSize" "64"*.
 *Example:*
 {{{
 Section "Device"
-   Identifier   "GeForce 8600M GS"
-   Driver      "nvidia"
+   Identifier "Configured Video Device"
    Option      "GARTSize" "64"
 }}}
