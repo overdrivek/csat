@@ -1,4 +1,5 @@
-#instruction, thoughts, bugs, etc
+=Instruction, thoughts, bugs, etc=
+----
 
 =Programming=
 
@@ -33,4 +34,26 @@ as bounding box/sphere. `BBox_car` uses this bbox to object named car
 = Known bugs =
 
  * test1, (2D mode), when you change window size, images doesnt scale.
- * test8, when updating lights, scene flickers (on linux)
+ * test3, (particles), on linux, particles are too dark.
+ * test8, when updating lights, scene flickers (on linux).
+
+----
+
+*Linux + Mesa:*
+If one see this warning:
+
+*WARN ONCE*
+
+*Ran out of GART memory*
+
+it can crash linux. 
+
+You need to edit *xorg.conf* and add device section *Option "GARTSize" "64"*.
+
+*Example:*
+{{{
+Section "Device"
+   Identifier   "GeForce 8600M GS"
+   Driver      "nvidia"
+   Option      "GARTSize" "64"
+}}}
