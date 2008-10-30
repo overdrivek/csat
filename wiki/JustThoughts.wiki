@@ -1,0 +1,34 @@
+=Programming=
+
+== Loading shaders ==
+You can write in the *.mtl* (material file) 
+{{{  
+map_Ka Shader_(shader filename without extension)
+}}}
+so every object that uses this material, uses shader as well.
+Example:
+{{{  
+map_Ka Shader_toon
+}}}
+will load *toon.vert* and *toon.frag* shaders.
+
+
+----
+=Work in progress=
+
+==Pathes:==
+If objects name contains `Path_` then it will be used as path.
+So `Path_camerapath1` will load camerapath1 and this can be
+attached to the camera/object (coming soon) .
+
+==Bounding volumes==
+If objects name contains `BBox_` or `BSphere_` then object will be used
+as bounding box/sphere. `BBox_car` uses this bbox to object named car
+(coming soon).
+
+
+----
+= Known bugs =
+
+ * test1, (2D mode), when you change window size, images doesnt scale.
+ * test8, when updating lights, scene flickers (on linux)
