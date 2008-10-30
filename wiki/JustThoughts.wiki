@@ -20,12 +20,12 @@ will load *toon.vert* and *toon.frag* shaders.
 =Work in progress=
 
 ==Pathes:==
-If objects name contains `Path_` then it will be used as path.
+If name of the object contains `Path_` then it will be used as path.
 So `Path_camerapath1` will load camerapath1 and this can be
 attached to the camera/object (coming soon) .
 
 ==Bounding volumes==
-If objects name contains `BBox_` or `BSphere_` then object will be used
+If name of the object contains `BBox_` or `BSphere_` then object will be used
 as bounding box/sphere. `BBox_car` uses this bbox to object named car
 (coming soon).
 
@@ -48,7 +48,7 @@ If one see this warning:
 
 it can crash linux. 
 
-You need to edit *xorg.conf* and add device section *Option "GARTSize" "64"*.
+You need to edit *xorg.conf* and add to the device section *Option "GARTSize" "64"*.
 
 *Example:*
 {{{
