@@ -33,9 +33,14 @@ as bounding box/sphere. `BBox_car` uses this bbox to object named car
 ----
 = Known bugs =
 
- * test1, (2D mode), when you change window size, images doesnt scale.
- * test3, (particles), on linux, particles are too dark.
- * test8, when updating lights, scene flickers (on linux).
+
+
+----
+= Fixes =
+
+ * test1, (2D mode), when you change window size, images doesnt scale: insert GL:Viewport line in Set2DMode method
+ * test3, (particles), on linux, particles are too dark: changed blending func and images
+ * test8, when updating lights, scene flickers (on linux): position must be { x, y, z, 1 }
 
 ----
 
