@@ -13,16 +13,15 @@ Example:
 {{{  
 map_Ka Shader_toon
 }}}
-will load *toon.vert* and *toon.frag* shaders.
-
-
-----
-=Work in progress=
+will load *toon.vert* and *toon.frag* shaders. Test9 shows how to do it.
 
 ==Pathes:==
 If name of the object contains `Path_` then it will be used as path.
 So `Path_camerapath1` will load camerapath1 and this can be
-attached to the camera/object (coming soon) .
+attached to the camera/object. And Test10 shows how to do it.
+
+----
+=Work in progress=
 
 ==Bounding volumes==
 If name of the object contains `BBox_` or `BSphere_` then object will be used
@@ -32,15 +31,10 @@ as bounding box/sphere. `BBox_car` uses this bbox to object named car
 
 ----
 = Known bugs =
+test9/test10: car doesnt "look" at the right direction. And camera doesnt follow the
+ugly guy in "mode 1".
 
-
-
-----
-= Fixes =
-
- * test1, (2D mode), when you change window size, images doesnt scale: insert GL:Viewport line in Set2DMode method
- * test3, (particles), on linux, particles are too dark: changed blending func and images
- * test8, when updating lights, scene flickers (on linux): position must be { x, y, z, 1 }
+test8: hierarcy doesnt work yet very well..
 
 ----
 
