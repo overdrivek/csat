@@ -31,8 +31,7 @@ as bounding box/sphere. `BBox_car` uses this bbox to object named car
 
 ----
 = Known bugs =
-test9/test10: car doesnt "look" at the right direction. And camera doesnt follow the
-ugly guy in "mode 1".
+* collision detection doesnt work.
 
 ----
 
