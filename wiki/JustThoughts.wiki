@@ -31,7 +31,7 @@ as bounding box/sphere. `BBox_car` uses this bbox to object named car
 
 ----
 = Known bugs =
-* collision detection doesnt work.
+ * collision detection doesnt work.
 
 ----
 
