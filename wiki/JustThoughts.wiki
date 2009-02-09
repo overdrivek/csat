@@ -15,23 +15,11 @@ map_Ka Shader_toon
 }}}
 will load *toon.vert* and *toon.frag* shaders. Test9 shows how to do it.
 
-==Paths:==
-If name of the object contains `Path_` then it will be used as path.
-So `Path_camerapath1` will load camerapath1 and this can be
-attached to the camera/object. And Test10 shows how to do it.
 
-----
 =Work in progress=
 
-==Bounding volumes==
-If name of the object contains `BBox_` or `BSphere_` then object will be used
-as bounding box/sphere. `BBox_car` uses this bbox to object named car
-(coming soon).
-
-
-----
-= Known bugs =
- * collision detection doesnt work.
+ * collision detection needs work.
+ * test10 needs work
 
 ----
 
