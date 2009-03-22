@@ -18,8 +18,7 @@ will load *toon.vert* and *toon.frag* shaders. Test9 shows how to do it.
 
 =Work in progress=
 
- * collision detection needs work.
- * test11 needs work (modes, car, camera)
+ * collision detection and paths doesnt work very well
 
 ----
 
