@@ -123,7 +123,7 @@ namespace CSat
                     vout = MathExt.VectorMatrixMult(ref v[2], ref matrix);
                     v[2] = vout;
                 }
-                // TODO: huono ja hidas tapa, k‰‰nnet‰‰n joka polygoni. FIX
+                // TODO FIX: huono ja hidas tapa, k‰‰nnet‰‰n joka polygoni.
 
                 v[0] += position;
                 v[1] += position;
@@ -169,7 +169,7 @@ namespace CSat
             if (CheckBB_Poly(ref group, len, ref obj, ref obj) == true) return true;
 
             // ei osunut joten tsekataan joka meshin bbox erikseen.
-            //TODO: --liian hidas
+            //TODO FIX: --liian hidas
             /*for (int q = 0; q < obj.Meshes().Count; q++)
             {
                 Mesh m = obj.Meshes()[q];

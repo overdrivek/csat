@@ -26,7 +26,7 @@ namespace CSatExamples
         static Random random = new Random();
 
         Font font = new Font(FontFamily.GenericSansSerif, 24.0f);
-        OpenTK.Graphics.TextPrinter text = new OpenTK.Graphics.TextPrinter();
+        ////OpenTK.Graphics.TextPrinter text = new //OpenTK.Graphics.TextPrinter();
 
         Object2D[] partObj = new Object2D[3];
 
@@ -146,9 +146,9 @@ namespace CSatExamples
 
             Texture.ActiveUnit(0);
             GL.Color4(1f, 1, 1, 1);
-            text.Begin();
-            text.Print("Particles demo", font, Color.White);
-            text.End();
+            //text.Begin();
+            //text.Print("Particles demo", font, Color.White);
+            //text.End();
 
             Util.RenderGrid();
 
