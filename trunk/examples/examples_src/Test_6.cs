@@ -24,7 +24,7 @@ namespace CSatExamples
         Billboard obj = new Billboard("billboard");
 
         Font font = new Font(FontFamily.GenericSansSerif, 24.0f);
-        OpenTK.Graphics.TextPrinter text = new OpenTK.Graphics.TextPrinter();
+        //OpenTK.Graphics.TextPrinter text = new //OpenTK.Graphics.TextPrinter();
 
         public Game6(int width, int height) : base(width, height, OpenTK.Graphics.GraphicsMode.Default, "Billboard test") { }
 
@@ -127,9 +127,9 @@ namespace CSatExamples
             Util.RenderGrid();
 
             Texture.ActiveUnit(0);
-            text.Begin();
-            text.Print("camerapos: " + cam.Position.ToString(), font, Color.White);
-            text.End();
+            //text.Begin();
+            //text.Print("camerapos: " + cam.Position.ToString(), font, Color.White);
+            //text.End();
 
             SwapBuffers();
         }

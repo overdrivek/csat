@@ -23,7 +23,7 @@ namespace CSatExamples
     class Game1 : GameWindow
     {
         Font font = new Font(FontFamily.GenericSansSerif, 24.0f);
-        OpenTK.Graphics.TextPrinter text = new OpenTK.Graphics.TextPrinter();
+        //OpenTK.Graphics.TextPrinter text = new //OpenTK.Graphics.TextPrinter();
 
         Object2D t1 = new Object2D("image");
         Object2D[] tx = new Object2D[3];
@@ -103,9 +103,9 @@ namespace CSatExamples
 
             Texture.ActiveUnit(0);
 
-            text.Begin();
-            text.Print("2D test", font, Color.White);
-            text.End();
+            //text.Begin();
+            //text.Print("2D test", font, Color.White);
+            //text.End();
 
             SwapBuffers();
         }

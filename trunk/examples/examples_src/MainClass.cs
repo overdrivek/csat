@@ -31,9 +31,9 @@ namespace CSatExamples
             Settings.TextureDir = "../data/texture/";
             Settings.ShaderDir = "../data/shader/";
 
-            // jos true, käynnistä vain haluttu demo
-            //if (true)
-            if (false)
+
+            /*
+            // käynnistä vain haluttu demo
             {
                 GameWindow game = new Game5(800, 600); // mikä demo halutaan
                 //game.WindowBorder = WindowBorder.Fixed;
@@ -42,6 +42,7 @@ namespace CSatExamples
                 game.Run(30.0, 0.0);
                 return;
             }
+             */
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

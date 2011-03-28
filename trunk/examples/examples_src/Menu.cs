@@ -114,7 +114,8 @@ namespace CSatExamples
             }
 
             PrintInfo();
-            game.Run(30.0, 0.0);
+            game.VSync = VSyncMode.Off;
+            game.Run(60.0, 0.0);
 
             if (checkBox1.Checked)
                 dev.RestoreResolution();

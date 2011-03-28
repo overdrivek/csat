@@ -37,7 +37,7 @@ namespace CSatExamples
         Mesh uglyModel;
 
         Font font = new Font(FontFamily.GenericSansSerif, 24.0f);
-        OpenTK.Graphics.TextPrinter text = new OpenTK.Graphics.TextPrinter();
+        //OpenTK.Graphics.TextPrinter text = new //OpenTK.Graphics.TextPrinter();
 
         Light light = new Light("light");
 
@@ -187,9 +187,9 @@ namespace CSatExamples
 
             Light.Disable();
             Texture.ActiveUnit(0);
-            text.Begin();
-            text.Print("objs: " + Settings.NumOfObjects, font, Color.White);
-            text.End();
+            //text.Begin();
+            //text.Print("objs: " + Settings.NumOfObjects, font, Color.White);
+            //text.End();
             Light.Enable();
 
             SwapBuffers();

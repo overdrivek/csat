@@ -257,12 +257,13 @@ namespace CSat
 
             if (vertexFlags != VertexMode.OnlyVertex)
             {
-                GL.EnableClientState(EnableCap.NormalArray);
+                GL.EnableClientState(ArrayCap.NormalArray);
+                GL.EnableClientState(ArrayCap.NormalArray);
                 GL.NormalPointer(NormalPointerType.Float, vertexSize, (IntPtr)(3 * sizeof(float)));
 
                 if (vertexFlags == VertexMode.Color)
                 {
-                    GL.EnableClientState(EnableCap.ColorArray);
+                    GL.EnableClientState(ArrayCap.ColorArray);
                     GL.ColorPointer(4, ColorPointerType.Float, vertexSize, (IntPtr)(10 * sizeof(float)));
                 }
                 else
@@ -274,14 +275,14 @@ namespace CSat
                         {
 
                             GL.ClientActiveTexture(TextureUnit.Texture0);
-                            GL.EnableClientState(EnableCap.TextureCoordArray);
+                            GL.EnableClientState(ArrayCap.TextureCoordArray);
                             GL.TexCoordPointer(2, TexCoordPointerType.Float, vertexSize, (IntPtr)(6 * sizeof(float)));
                             GL.Enable(EnableCap.Texture2D);
                         }
                         if ((useTexUnits & 2) == 2)
                         {
                             GL.ClientActiveTexture(TextureUnit.Texture1);
-                            GL.EnableClientState(EnableCap.TextureCoordArray);
+                            GL.EnableClientState(ArrayCap.TextureCoordArray);
                             GL.TexCoordPointer(2, TexCoordPointerType.Float, vertexSize, (IntPtr)(8 * sizeof(float)));
                             GL.Enable(EnableCap.Texture2D);
                         }
@@ -290,7 +291,7 @@ namespace CSat
                     else GL.Disable(EnableCap.Texture2D);
                 }
             }
-            GL.EnableClientState(EnableCap.VertexArray);
+            GL.EnableClientState(ArrayCap.VertexArray);
             GL.VertexPointer(3, VertexPointerType.Float, vertexSize, (IntPtr)(0));
         }
 
@@ -319,14 +320,14 @@ namespace CSat
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
 
-            GL.DisableClientState(EnableCap.NormalArray);
-            GL.DisableClientState(EnableCap.VertexArray);
+            GL.DisableClientState(ArrayCap.NormalArray);
+            GL.DisableClientState(ArrayCap.VertexArray);
 
             GL.ClientActiveTexture(TextureUnit.Texture1);
-            GL.DisableClientState(EnableCap.TextureCoordArray);
+            GL.DisableClientState(ArrayCap.TextureCoordArray);
 
             GL.ClientActiveTexture(TextureUnit.Texture0);
-            GL.DisableClientState(EnableCap.TextureCoordArray);
+            GL.DisableClientState(ArrayCap.TextureCoordArray);
         }
 
     }

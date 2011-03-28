@@ -26,11 +26,11 @@ namespace CSatExamples
         private int _oldMouseX, _oldMouseY;
         Camera cam = new Camera();
         Font font = new Font(FontFamily.GenericSansSerif, 24.0f);
-        OpenTK.Graphics.TextPrinter text = new OpenTK.Graphics.TextPrinter();
+        //OpenTK.Graphics.TextPrinter text = new //OpenTK.Graphics.TextPrinter();
 
         const int OBJS = 20;
 
-        Mesh toonBall, toonStar;
+        Mesh toonBall, star;
         Mesh[] objs = new Mesh[OBJS];
 
         Node world = new Node();
@@ -57,7 +57,7 @@ namespace CSatExamples
             light.Rotation = new Vector3(0, 0, -40);
 
             toonBall = new ObjModel("ball", "ball.obj");
-            toonStar = new ObjModel("star", "star.obj");
+            star = new ObjModel("star", "star.obj");
 
             world.Add(light); // lisää valo (aurinko)
             light.Add(toonBall.Clone()); // lisää valoon pallo, liikkuu valon mukana
@@ -67,7 +67,7 @@ namespace CSatExamples
             {
                 // nämä käyttää toon shaderia (kirjoitettu .mtl tiedostoon)
                 if (q < OBJS / 2) objs[q] = toonBall.Clone();
-                else objs[q] = toonStar.Clone();
+                else objs[q] = star.Clone();
 
                 objs[q].Position.X = random.Next(20) - 10;
                 objs[q].Position.Y = random.Next(20) - 10;
@@ -81,7 +81,7 @@ namespace CSatExamples
             for (int q = 0; q < OBJS; q++) toonBall.Add(objs[q]);
 
             world.Add(toonBall);
-            
+
             cam.Position.Y = 1;
             cam.Position.Z = 2;
 
@@ -92,6 +92,9 @@ namespace CSatExamples
         protected override void OnUnload(EventArgs e)
         {
             font.Dispose();
+            for (int q = 0; q < OBJS; q++)
+                objs[q].Clean();
+
             Util.ClearArrays(); // poistaa kaikki materiaalit ja texturet
 
         }
@@ -161,9 +164,9 @@ namespace CSatExamples
             Texture.ActiveUnit(0);
 
             Light.Disable();
-            text.Begin();
-            text.Print("Objs: " + Settings.NumOfObjects, font, Color.White);
-            text.End();
+            //text.Begin();
+            //text.Print("Objs: " + Settings.NumOfObjects, font, Color.White);
+            //text.End();
             Light.Enable();
 
             SwapBuffers();

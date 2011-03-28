@@ -21,7 +21,6 @@ namespace CSatExamples
         private int _oldMouseX, _oldMouseY;
         Camera cam = new Camera();
         Font font = new Font(FontFamily.GenericSansSerif, 24.0f);
-        OpenTK.Graphics.TextPrinter text = new OpenTK.Graphics.TextPrinter();
 
         public Game0(int width, int height) : base(width, height, OpenTK.Graphics.GraphicsMode.Default, "xxx") { }
 
@@ -91,9 +90,9 @@ namespace CSatExamples
 
 
             Texture.ActiveUnit(0);
-            text.Begin();
-            text.Print("blaa bluu: " + Settings.NumOfObjects, font, Color.White);
-            text.End();
+            //text.Begin();
+            //text.Print("blaa bluu: " + Settings.NumOfObjects, font, Color.White);
+            //text.End();
 
             SwapBuffers();
         }

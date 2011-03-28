@@ -28,7 +28,7 @@ namespace CSatExamples
 
         Camera cam = new Camera();
         Font font = new Font(FontFamily.GenericSansSerif, 24.0f);
-        OpenTK.Graphics.TextPrinter text = new OpenTK.Graphics.TextPrinter();
+        //OpenTK.Graphics.TextPrinter text = new //OpenTK.Graphics.TextPrinter();
         public Game10(int width, int height) : base(width, height, OpenTK.Graphics.GraphicsMode.Default, "Camera path") { }
 
         Node world = new Node(); // tänne lisäillään kaikki kamat
@@ -91,9 +91,9 @@ namespace CSatExamples
             world.Render();
 
             Texture.ActiveUnit(0);
-            text.Begin();
-            text.Print("objs: " + Settings.NumOfObjects, font, Color.White);
-            text.End();
+            //text.Begin();
+            //text.Print("objs: " + Settings.NumOfObjects, font, Color.White);
+            //text.End();
 
             SwapBuffers();
         }

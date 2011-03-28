@@ -27,7 +27,7 @@ namespace CSatExamples
         private int _oldMouseX, _oldMouseY;
         Camera cam = new Camera();
         Font font = new Font(FontFamily.GenericSansSerif, 24.0f);
-        OpenTK.Graphics.TextPrinter text = new OpenTK.Graphics.TextPrinter();
+        //OpenTK.Graphics.TextPrinter text = new //OpenTK.Graphics.TextPrinter();
 
         Sky skybox = new Sky("sky");
         Mesh obj;
@@ -144,9 +144,9 @@ namespace CSatExamples
             GL.Disable(EnableCap.Blend);
 
             Texture.ActiveUnit(0);
-            text.Begin();
-            text.Print("3D test -- objs: " + Settings.NumOfObjects, font, Color.White);
-            text.End();
+            //text.Begin();
+            //text.Print("3D test -- objs: " + Settings.NumOfObjects, font, Color.White);
+            //text.End();
 
             SwapBuffers();
         }

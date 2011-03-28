@@ -30,7 +30,7 @@ namespace CSatExamples
         private int _oldMouseX, _oldMouseY;
         Camera cam = new Camera();
         Font font = new Font(FontFamily.GenericSansSerif, 24.0f);
-        OpenTK.Graphics.TextPrinter text = new OpenTK.Graphics.TextPrinter();
+        //OpenTK.Graphics.TextPrinter text = new //OpenTK.Graphics.TextPrinter();
 
         Sky skybox = new Sky("skybox");
         Mesh car, car2;
@@ -219,9 +219,9 @@ namespace CSatExamples
             world.Render(); // skybox, groundplane, car ja car2 on lisätty worldiin joten tämä renderoi ne.
 
             Light.Disable();
-            text.Begin();
-            text.Print("Collision detection -- objs: " + Settings.NumOfObjects, font, Color.White);
-            text.End();
+            //text.Begin();
+            //text.Print("Collision detection -- objs: " + Settings.NumOfObjects, font, Color.White);
+            //text.End();
             Light.Enable();
 
             SwapBuffers();

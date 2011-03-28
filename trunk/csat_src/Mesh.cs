@@ -111,6 +111,22 @@ namespace CSat
             return this.Clone();
         }
 
+        public void Clean()
+        {
+            for (int q = 0; q < objects.Count; q++)
+            {
+                Mesh child = (Mesh)objects[q];
+                if (child.objects.Count > 0) child.Clean();
+
+                if (child.Shader != null)
+                {
+                    child.Shader.Dispose();
+                    child.Shader = null;
+                }
+            }
+
+        }
+
         /// <summary>
         /// Palauttaa objektin kloonin.
         /// </summary>

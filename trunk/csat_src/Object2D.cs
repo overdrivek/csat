@@ -33,9 +33,6 @@
 /* 
  * kuvien lataus ja piirto.
  * 
- * billboard tut:
- *  http://www.lighthouse3d.com/opengl/billboarding/index.php3?billCheat
- * 
  */
 using System;
 using OpenTK.Graphics.OpenGL;
