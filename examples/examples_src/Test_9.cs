@@ -30,8 +30,8 @@ namespace CSatExamples
 
         const int OBJS = 20;
 
-        Mesh toonBall, star;
-        Mesh[] objs = new Mesh[OBJS];
+        Model toonBall, star;
+        Model[] objs = new Model[OBJS];
 
         Node world = new Node();
         Light light = new Light("light");

@@ -32,7 +32,7 @@ namespace CSatExamples
         public Game10(int width, int height) : base(width, height, OpenTK.Graphics.GraphicsMode.Default, "Camera path") { }
 
         Node world = new Node(); // tänne lisäillään kaikki kamat
-        Mesh city;
+        Model city;
         Path cameraPath;
 
         protected override void OnLoad(EventArgs e)

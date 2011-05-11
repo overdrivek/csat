@@ -24,7 +24,7 @@ namespace CSatExamples
         Font font = new Font(FontFamily.GenericSansSerif, 24.0f);
         //OpenTK.Graphics.TextPrinter text = new //OpenTK.Graphics.TextPrinter();
 
-        Mesh model;
+        Model model;
 
         public Game4(int width, int height) : base(width, height, OpenTK.Graphics.GraphicsMode.Default, "Animation test") { }
 

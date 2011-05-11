@@ -33,7 +33,7 @@ namespace CSatExamples
         //OpenTK.Graphics.TextPrinter text = new //OpenTK.Graphics.TextPrinter();
 
         Sky skybox = new Sky("skybox");
-        Mesh car, car2;
+        Model car, car2;
         Object2D groundPlane = new Object2D("ground");
 
         CarInfo carinfo;

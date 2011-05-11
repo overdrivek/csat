@@ -69,7 +69,7 @@
     <Compile Include="csat_src\Log.cs" />
     <Compile Include="csat_src\Material.cs" />
     <Compile Include="csat_src\MathExt.cs" />
-    <Compile Include="csat_src\Mesh.cs" />
+    <Compile Include="csat_src\Model.cs" />
     <Compile Include="csat_src\Object2D.cs" />
     <Compile Include="csat_src\Node.cs" />
     <Compile Include="csat_src\ObjModel.cs" />

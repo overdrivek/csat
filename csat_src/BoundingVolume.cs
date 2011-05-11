@@ -54,7 +54,7 @@ namespace CSat
             Mode = mode;
         }
 
-        public void CreateBoundingVolume(Mesh mesh)
+        public void CreateBoundingVolume(Model mesh)
         {
             for (int q = 0; q < mesh.Vertices.Length; q++)
             {
@@ -79,7 +79,7 @@ namespace CSat
             SetCorners();
         }
 
-        public void CreateBoundingVolume(Mesh mesh, Vector3 min, Vector3 max)
+        public void CreateBoundingVolume(Model mesh, Vector3 min, Vector3 max)
         {
             if (mesh.Vertices.Length == 0) return;
 
