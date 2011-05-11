@@ -32,9 +32,9 @@ namespace CSatExamples
         Node world = new Node(); // tänne lisäillään kaikki kamat
 
         Sky skybox = new Sky("sky");
-        Mesh[] obj = new Mesh[10];
+        Model[] obj = new Model[10];
 
-        Mesh uglyModel;
+        Model uglyModel;
 
         Font font = new Font(FontFamily.GenericSansSerif, 24.0f);
         //OpenTK.Graphics.TextPrinter text = new //OpenTK.Graphics.TextPrinter();
@@ -98,7 +98,7 @@ namespace CSatExamples
             uglyModel.FixRotation.X = -90; // ukko on "makaavassa" asennossa joten nostetaan se fixRotationilla pystyyn.
             world.Add(uglyModel);
 
-            Mesh scene = new ObjModel("scene", "scene1.obj", 20, 20, 20);
+            Model scene = new ObjModel("scene", "scene1.obj", 20, 20, 20);
             scene.Position.X = 10;
             // katos (sen nimi on toi None_Material__9) pitää pistää 2 puoliseks, muuten se ei näy alhaalta päin
             scene.SetDoubleSided("None_Material__9", true);

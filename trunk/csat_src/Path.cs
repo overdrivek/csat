@@ -183,7 +183,7 @@ namespace CSat
         /// </summary>
         /// <param name="yp"></param>
         /// <param name="obj"></param>
-        public void FixPathY(int yp, ref Mesh obj)
+        public void FixPathY(int yp, ref Model obj)
         {
             Vector3 v;
             for (int q = 0; q < path.Length; q++)

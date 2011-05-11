@@ -38,7 +38,7 @@ using OpenTK;
 
 namespace CSat
 {
-    public class Mesh : Node, ICloneable
+    public class Model : Node, ICloneable
     {
         protected Vertex[] vertices;
         public Vertex[] Vertices
@@ -115,7 +115,7 @@ namespace CSat
         {
             for (int q = 0; q < objects.Count; q++)
             {
-                Mesh child = (Mesh)objects[q];
+                Model child = (Model)objects[q];
                 if (child.objects.Count > 0) child.Clean();
 
                 if (child.Shader != null)
@@ -131,9 +131,9 @@ namespace CSat
         /// Palauttaa objektin kloonin.
         /// </summary>
         /// <returns></returns>
-        public Mesh Clone()
+        public Model Clone()
         {
-            Mesh clone = (Mesh)this.MemberwiseClone();
+            Model clone = (Model)this.MemberwiseClone();
 
             // eri grouppi eli kloonattuihin objekteihin voi lisäillä muita objekteja
             // sen vaikuttamatta alkuperäiseen.
@@ -145,11 +145,11 @@ namespace CSat
             return clone;
         }
 
-        void CloneTree(Mesh clone)
+        void CloneTree(Model clone)
         {
             for (int q = 0; q < objects.Count; q++)
             {
-                Mesh child = (Mesh)objects[q];
+                Model child = (Model)objects[q];
                 clone.objects[q] = child.Clone();
 
                 if (child.objects.Count > 0) child.CloneTree(child);
@@ -168,7 +168,7 @@ namespace CSat
         {
             for (int q = 0; q < objects.Count; q++)
             {
-                Mesh child = (Mesh)objects[q];
+                Model child = (Model)objects[q];
 
                 if (meshName.Contains("*"))
                 {
@@ -202,7 +202,7 @@ namespace CSat
 
             for (int q = 0; q < objects.Count; q++)
             {
-                Mesh child = (Mesh)objects[q];
+                Model child = (Model)objects[q];
 
                 if (use == true)
                 {

@@ -38,7 +38,7 @@ using OpenTK;
 
 namespace CSat
 {
-    public class AnimatedModel : Mesh
+    public class AnimatedModel : Model
     {
         private bool animated = false;
         private int numJoints;
@@ -169,12 +169,6 @@ namespace CSat
                                 baseSkel[i].pos.Y = t.fbuffer[1];
                                 baseSkel[i].pos.Z = t.fbuffer[2];
                                 baseSkel[i].orient = new Quaternion(t.fbuffer[3], t.fbuffer[4], t.fbuffer[5], 1);
-                                /*
-jotain tosi outoa..
-    toi orient homma ei skulaa..
-        vaik varaa tilaa new:llä, ei toimi..
-            eikä  orient.X = 1;  eikä mikään. miks??
-                */
                                 MathExt.ComputeW(ref baseSkel[i].orient);
                             }
                         }
@@ -269,7 +263,6 @@ jotain tosi outoa..
             skeleton = baseSkel;
 
             updateAnimCount = FramesBetweenAnimUpdate;
-            updateNormalsCount = FramesBetweenNormalsUpdate;
 
             // prepare model for rendering
             PrepareMesh();
@@ -287,13 +280,11 @@ jotain tosi outoa..
             material = new Material("default");
             MaterialName = "default";
 
+            for (int k = 0; k < numMesh; k++) MathExt.CalcNormals(ref finalVert, ref model[k].faces, ref normals, false);
+
             Log.WriteDebugLine("Model: " + Name);
         }
 
-        public void UpdateNormals()
-        {
-            updateNormalsCount = FramesBetweenNormalsUpdate;
-        }
         public void UpdateAnimation()
         {
             updateAnimCount = FramesBetweenAnimUpdate;
@@ -328,14 +319,6 @@ jotain tosi outoa..
                     }
                     finalVert[i] = finalVertex;
                 }
-
-                // aika laskea normaalit uudelleen?
-                if (updateNormalsCount == FramesBetweenNormalsUpdate)
-                {
-                    MathExt.CalcNormals(ref finalVert, ref model[k].faces, ref normals, false);
-                    updateNormalsCount = 0;
-                }
-                else updateAnimCount++;
 
                 int count = 0;
                 // Organize the final vertexes acording to the meshes triangles
@@ -412,11 +395,6 @@ jotain tosi outoa..
         /// </summary>
         public int FramesBetweenAnimUpdate = 1;
         int updateAnimCount = 0;
-        /// <summary>
-        /// monenko framen välein päivitetään normaalit
-        /// </summary>
-        public int FramesBetweenNormalsUpdate = 3;
-        int updateNormalsCount = 0;
 
         /// <summary>
         /// aseta haluttu animaatio

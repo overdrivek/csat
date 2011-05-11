@@ -39,6 +39,8 @@ namespace CSat
 {
     public class Node
     {
+        static uint objCount = 0;
+
         /// <summary>
         /// objektin nimi
         /// </summary>
@@ -99,7 +101,7 @@ namespace CSat
 
         public Node()
         {
-            Name = "node";
+            Name = "node" + objCount++;
             allObjects.Add(this);
         }
         public Node(string name)
@@ -361,7 +363,7 @@ namespace CSat
         {
             foreach (Node o in Objects)
             {
-                Mesh m = o as Mesh;
+                Model m = o as Model;
 
                 // jos objekti on Mesh
                 if (m != null)
@@ -384,7 +386,7 @@ namespace CSat
         public void MakeList()
         {
             // jos objekti on Mesh
-            Mesh m = this as Mesh;
+            Model m = this as Model;
             if (m != null)
             {
                 // tarkista onko objekti näkökentässä

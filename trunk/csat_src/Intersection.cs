@@ -65,7 +65,7 @@ namespace CSat
         /// <param name="end"></param>
         /// <param name="mesh"></param>
         /// <returns></returns>
-        public static bool CheckIntersection(ref Vector3 start, ref Vector3 end, ref Mesh obj)
+        public static bool CheckIntersection(ref Vector3 start, ref Vector3 end, ref Model obj)
         {
             // jos objektia k‰‰nnetty
             Matrix4 outm = new Matrix4();
@@ -94,7 +94,7 @@ namespace CSat
         /// <param name="rotation"></param>
         /// <param name="matrix"></param>
         /// <returns></returns>
-        public static bool CheckIntersection(ref Vector3 start, ref Vector3 end, ref Mesh obj, ref Vector3 rotation, ref Matrix4 matrix)
+        public static bool CheckIntersection(ref Vector3 start, ref Vector3 end, ref Model obj, ref Vector3 rotation, ref Matrix4 matrix)
         {
             Vector3 position = obj.Position;
             Vector3 dir = new Vector3();
@@ -160,7 +160,7 @@ namespace CSat
         /// <param name="end"></param>
         /// <param name="mesh"></param>
         /// <returns></returns>
-        public static bool CheckCollisionBB_Poly(ref Node group, Vector3 start, Vector3 end, ref Mesh obj)
+        public static bool CheckCollisionBB_Poly(ref Node group, Vector3 start, Vector3 end, ref Model obj)
         {
             Vector3 len = start - end;
             if (Math.Abs(len.X + len.Y + len.Z) < Epsilon) return false;
@@ -188,11 +188,11 @@ namespace CSat
         /// <param name="mesh"></param>
         /// <param name="obj"></param>
         /// <returns></returns>
-        private static bool CheckBB_Poly(ref Node group, Vector3 len, ref Mesh mesh, ref Mesh obj)
+        private static bool CheckBB_Poly(ref Node group, Vector3 len, ref Model mesh, ref Model obj)
         {
             for (int q = 0; q < group.Objects.Length; q++)
             {
-                if (group.Objects[q] is Mesh) // vain meshit tarkistetaan
+                if (group.Objects[q] is Model) // vain meshit tarkistetaan
                 {
                     if (group.Objects[q] != mesh && group.Objects[q] != obj)
                     {
@@ -202,7 +202,7 @@ namespace CSat
                             Vector3 v = mesh.Boundings.Corner[c];
                             v += obj.Position; // huom. objektin position, koska meshill‰ ei v‰ltt‰m‰tt‰ ole paikkaa.
                             Vector3 endv = v + len;
-                            Mesh msh = (Mesh)group.Objects[q];
+                            Model msh = (Model)group.Objects[q];
                             if (CheckIntersection(ref v, ref endv, ref msh) == true)
                             {
                                 return true;

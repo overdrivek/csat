@@ -30,7 +30,7 @@ namespace CSatExamples
         //OpenTK.Graphics.TextPrinter text = new //OpenTK.Graphics.TextPrinter();
 
         Sky skybox = new Sky("sky");
-        Mesh obj;
+        Model obj;
         Texture tex = new Texture();
 
         public Game2(int width, int height) : base(width, height, OpenTK.Graphics.GraphicsMode.Default, "3D test: loads obj file") { }

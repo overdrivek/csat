@@ -31,7 +31,7 @@
 #endregion
 
 /* 
- * lataa mesh tiedostoja
+ * lataa .obj tiedostoja
  *
  */
 using System;
@@ -41,7 +41,7 @@ using OpenTK;
 
 namespace CSat
 {
-    public class ObjModel : Mesh
+    public class ObjModel : Model
     {
         VBO vbo = null;
         List<ObjModel> meshes = new List<ObjModel>();
@@ -149,8 +149,21 @@ namespace CSat
                 for (int q = 0; q < lines.Length; q++)
                 {
                     string line = lines[q];
-                    if (line.StartsWith("#")) continue;
+                    line = line.Replace("  ", " ");
                     string[] ln = line.Split(' '); // pilko datat
+
+                    if (line.StartsWith("#"))
+                    {
+                        if (ln[1] == "object") // otetaan kommentista objektin nimi
+                        {
+                            ln[0] = "o";
+                            ln[1] = ln[2];
+                        }
+                        else
+                            continue;
+                    }
+
+
                     if (ln[0] == "v") // vertex x y z
                     {
                         float x = (Util.GetFloat(ln[1]) - mesh.Position.X) * xs;
@@ -176,7 +189,7 @@ namespace CSat
                     }
 
                     // uusi objekti
-                    if (ln[0] == "o" || ln[0] == "g")
+                    if (ln[0] == "o")
                     {
                         if (mesh != null) meshes.Add(mesh); // talteen
                         mesh = new ObjModel(ln[1]);
@@ -299,7 +312,7 @@ namespace CSat
                             vertices[cc].normal = _normal[meshes[m]._normalInd[q]];
                             if (meshes[m]._uvInd.Count != 0)
                                 vertices[cc].uv_or_color = new Vector4(_uv[meshes[m]._uvInd[q]].X, _uv[meshes[m]._uvInd[q]].Y,
-                                                                                _uv[meshes[m]._uvInd[q]].X, _uv[meshes[m]._uvInd[q]].Y);
+                                                                       _uv[meshes[m]._uvInd[q]].X, _uv[meshes[m]._uvInd[q]].Y);
                             cc++;
                         }
 

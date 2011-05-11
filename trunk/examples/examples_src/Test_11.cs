@@ -27,7 +27,7 @@ namespace CSatExamples
         public Game11(int width, int height) : base(width, height, OpenTK.Graphics.GraphicsMode.Default, "City") { }
 
         Node world = new Node(); // tänne lisäillään kaikki kamat
-        Mesh city, car;
+        Model city, car;
         Path carPath;
 
         byte mode = 0;
@@ -84,7 +84,7 @@ namespace CSatExamples
             Util.Resize(Width, Height, 1, 1000);
         }
 
-        public void CheckMove(ref Vector3 orig, ref Vector3 newpos, ref Mesh obj)
+        public void CheckMove(ref Vector3 orig, ref Vector3 newpos, ref Model obj)
         {
             if (Intersection.CheckIntersection(ref orig, ref newpos, ref obj))
                 newpos = orig;

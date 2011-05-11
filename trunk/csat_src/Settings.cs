@@ -34,13 +34,17 @@ namespace CSat
 {
     public static class Settings
     {
-        public static string Version = "0.5";
+        public static string Version = "0.5.1";
         public static string DataDir = "data/model/";
         public static string TextureDir = "data/texture/";
         public static string ShaderDir = "data/shader/";
 
         public static int NumOfObjects = 0;
+#if DEBUG
         public static bool WriteDebug = true;
+#else
+        public static bool WriteDebug = false;
+#endif
     }
 
 }
