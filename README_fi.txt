@@ -1,19 +1,18 @@
-CSat + esimerkit
-(c) mjt, 2008-2009
+CSatEng
+(c) mjt, 2008-2011
 matola@sci.fi
-
--=K‰yt‰ omalla vastuullasi=-
 
 MIT-lisenssi (Licenses/csat-license.txt).
 
 Hakemistot:
- examples/examples_src/    esimerkkien l‰hdekoodit
- csat_src/                 csat l‰hdekoodit
- csat_src/TextureLoader/   texturelataaja (gdi/dds)
- Libraries/                tarvittavat kirjastot
- Licenses/                 lisenssit
- examples/bin/Release/     k‰‰nnetty exe
- examples/bin/data/        3d-mallit ja texturet
+ Licenses/                    lisenssit
+ Libraries/                   tarvittavat kirjastot
+ csateng/Source/              csat l‰hdekoodit
+ csateng/Examples/src/        esimerkkien l‰hdekoodit
+ csateng/Examples/data/       3d-mallit ja texturet
+ csateng/Examples/bin/Debug/  k‰‰nnetty .exe
 
+K‰ynnist‰  csateng/Examples/bin/Debug/Examples.exe  testataksesi esimerkkej‰.
 
-Avaa csat.sln IDEen, projekti k‰‰nt‰‰ CSat.dll ja esimerkit.
+Avaa csateng.sln IDEen (luotu MSVC# 2010:ll‰, ei avaudu 2008:lla),
+projekti k‰‰nt‰‰ csateng.dll ja esimerkit.

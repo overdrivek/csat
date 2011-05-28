@@ -1,0 +1,133 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{B1C0CF5A-7DE8-4A9E-A021-ABFCC436A3E6}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Examples</RootNamespace>
+    <AssemblyName>Examples</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="OpenTK">
+      <HintPath>..\..\Libraries\OpenTK.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="src\Main.cs" />
+    <Compile Include="src\Test2D.cs" />
+    <Compile Include="src\TestMD5.cs" />
+    <Compile Include="src\TestParticles.cs" />
+    <Compile Include="src\TestPath.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CSatEng.csproj">
+      <Project>{BE7FBE03-6952-4987-9E49-343951B632BF}</Project>
+      <Name>CSatEng</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\model\scene1\scene1.material" />
+    <None Include="data\model\scene1\scene1.scene" />
+    <None Include="data\model\sky\sky.scene" />
+    <None Include="data\model\ugly\ukko.mesh" />
+    <None Include="data\model\ugly\ukko_action1.anim" />
+    <None Include="data\model\ugly\ukko_action2.anim" />
+    <None Include="data\model\ugly\ukko_action3.anim" />
+    <None Include="data\model\ugly\ukko_walk.anim" />
+    <None Include="data\shader\model.shader" />
+    <None Include="data\shader\shadow.shader" />
+    <None Include="OpenTK.dll.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="data\model\scene1\floor.mesh.xml" />
+    <Content Include="data\model\scene1\Path_camera.mesh.xml" />
+    <Content Include="data\model\scene1\rock01.mesh.xml" />
+    <Content Include="data\model\scene1\tree.mesh.xml" />
+    <Content Include="data\model\scene1\treeUpper.mesh.xml" />
+    <Content Include="data\model\sky\Back.mesh.xml" />
+    <Content Include="data\model\sky\Bottom.mesh.xml" />
+    <Content Include="data\model\sky\Box01.mesh.xml" />
+    <Content Include="data\model\sky\Front.mesh.xml" />
+    <Content Include="data\model\sky\Left.mesh.xml" />
+    <Content Include="data\model\sky\Right.mesh.xml" />
+    <Content Include="data\model\sky\Top.mesh.xml" />
+    <Content Include="data\texture\earth.png" />
+    <Content Include="data\texture\fire.png" />
+    <Content Include="data\texture\fonts\arial12.png" />
+    <Content Include="data\texture\fonts\arial_12.png" />
+    <Content Include="data\texture\fonts\comic12.png" />
+    <Content Include="data\texture\fonts\font.png" />
+    <Content Include="data\texture\fonts\georgia12.png" />
+    <Content Include="data\texture\fonts\kaggish12.png" />
+    <Content Include="data\texture\fonts\lucida14.png" />
+    <Content Include="data\texture\fonts\orig.png" />
+    <Content Include="data\texture\fonts\palatino14.png" />
+    <Content Include="data\texture\fonts\sylfaen14.png" />
+    <Content Include="data\texture\fonts\times14.png" />
+    <Content Include="data\texture\fonts\xirod14.png" />
+    <Content Include="data\texture\bush.jpg" />
+    <Content Include="data\texture\lightimg.png" />
+    <Content Include="data\texture\lightmask.png" />
+    <Content Include="data\texture\mousecursor.png" />
+    <Content Include="data\texture\photo.jpg" />
+    <Content Include="data\texture\rock.jpg" />
+    <Content Include="data\texture\sky\sky2_back.jpg" />
+    <Content Include="data\texture\sky\sky2_bottom.jpg" />
+    <Content Include="data\texture\sky\sky2_front.jpg" />
+    <Content Include="data\texture\sky\sky2_left.jpg" />
+    <Content Include="data\texture\sky\sky2_right.jpg" />
+    <Content Include="data\texture\sky\sky2_top.jpg" />
+    <Content Include="data\texture\sky\sky_back.jpg" />
+    <Content Include="data\texture\sky\sky_bottom.jpg" />
+    <Content Include="data\texture\sky\sky_front.jpg" />
+    <Content Include="data\texture\sky\sky_left.jpg" />
+    <Content Include="data\texture\sky\sky_right.jpg" />
+    <Content Include="data\texture\sky\sky_top.jpg" />
+    <Content Include="data\texture\sky\space.jpg" />
+    <Content Include="data\texture\smoke.png" />
+    <Content Include="data\texture\stone.jpg" />
+    <Content Include="data\texture\ukko_texture.jpg" />
+    <Content Include="data\texture\wood.jpg" />
+    <Content Include="settings.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
