@@ -1,0 +1,119 @@
+﻿#region --- MIT License ---
+/* Licensed under the MIT/X11 license.
+ * Copyright (c) 2011 mjt[matola@sci.fi]
+ * This notice may not be removed from any source distribution.
+ * See license.txt for licensing details.
+ */
+#endregion
+using System;
+using System.IO;
+using System.Collections.Generic;
+using OpenTK;
+using OpenTK.Graphics.OpenGL;
+
+namespace CSatEng
+{
+    public class ShadowMapping
+    {
+        public static bool UseShadowMapping = false;
+        public static bool ShadowPass = false;
+        FBO fbo;
+
+        public ShadowMapping(FBO fbo)
+        {
+            if (FBO.FboSupported == false)
+            {
+                Log.WriteLine("FBO not supported so no shadow mapping.");
+                return;
+            }
+            this.fbo = fbo;
+            UseShadowMapping = true;
+            lightMask = Texture.Load("lightmask.png");
+        }
+
+        static int _texUnit;
+        static Texture lightMask;
+        public static void BindLightMask(int texUnit)
+        {
+            _texUnit = texUnit;
+            lightMask.Bind(texUnit);
+        }
+        public static void UnBindLightMask()
+        {
+            lightMask.UnBind(_texUnit);
+        }
+
+        /// <summary>
+        /// aseta kuvakulma valosta päin
+        /// </summary>
+        void RenderFromLight(SceneNode light)
+        {
+            GL.LoadMatrix(ref light.OrigOrientationMatrix);
+            GL.Translate(-light.Position);
+        }
+
+        public void SetupShadows(SceneNode world)
+        {
+            if (Light.Lights.Count == 0)
+            {
+                Log.WriteLine("SetupShadows requires at least one light source!", true);
+                return;
+            }
+            GL.UseProgram(0);
+
+            fbo.BindFBO();
+            GL.Clear(fbo.ClearFlags);
+
+            GL.Disable(EnableCap.Lighting);
+            GL.Disable(EnableCap.Blend);
+
+            GL.ColorMask(false, false, false, false);
+            GL.Disable(EnableCap.CullFace);
+            //GL.CullFace(CullFaceMode.Front);
+
+            RenderFromLight(Light.Lights[0]);
+            SetTextureMatrix();
+            Frustum.CalculateFrustum();
+
+            ShadowPass = true;
+            world.Render();
+            ShadowPass = false;
+
+            //GL.CullFace(CullFaceMode.Back);
+            GL.Enable(EnableCap.CullFace);
+            GL.ColorMask(true, true, true, true);
+            fbo.UnBindFBO();
+
+            GL.Clear(fbo.ClearFlags);
+            //fbo.DEBUGRENDER();
+
+            Settings.NumOfObjects = 0;
+        }
+
+
+
+        /// <summary>
+        /// aseta texturematriisit shadowmapping shaderia varten
+        /// </summary>
+        public void SetTextureMatrix()
+        {
+            // ota projection ja Modelview matriisit
+            Matrix4 projMatrix, modelMatrix;
+            GL.GetFloat(GetPName.ProjectionMatrix, out projMatrix);
+            GL.GetFloat(GetPName.ModelviewMatrix, out modelMatrix);
+
+            fbo.BindDepth(BaseGame.SHADOW_TEXUNIT);
+            GL.MatrixMode(MatrixMode.Texture);
+            GL.LoadIdentity();
+            GL.Translate(0.5f, 0.5f, 0.5f); // remap from [-1,1]^2 to [0,1]^2
+            GL.Scale(0.5f, 0.5f, 0.5f);
+
+            GL.MultMatrix(ref projMatrix);
+            GL.MultMatrix(ref modelMatrix);
+
+            GL.MatrixMode(MatrixMode.Modelview);
+        }
+
+
+    }
+}

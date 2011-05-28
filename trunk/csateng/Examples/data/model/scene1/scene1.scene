@@ -1,0 +1,164 @@
+<scene formatVersion="1.0" upAxis="y" unitsPerMeter="1" minOgreVersion="1.7" author="OgreMax Scene Exporter (www.ogremax.com)">
+    <environment>
+        <colourAmbient r="0.333333" g="0.333333" b="0.333333" />
+        <colourBackground r="0" g="0" b="0" />
+        <clipping near="0" far="100000" />
+    </environment>
+    <nodes>
+        <node name="floor">
+            <position x="-14.8919" y="-4.14845e-007" z="-9.49054" />
+            <scale x="1" y="1" z="1" />
+            <rotation qx="0" qy="0.00872654" qz="-3.81449e-010" qw="0.999962" />
+            <entity name="floor" castShadows="true" receiveShadows="true" meshFile="floor.mesh">
+                <subentities>
+                    <subentity index="0" materialName="Material#43" />
+                </subentities>
+            </entity>
+        </node>
+        <node name="tree">
+            <position x="27.7628" y="-1.27246e-006" z="-29.1105" />
+            <scale x="1" y="1" z="1" />
+            <rotation qx="0" qy="0" qz="0" qw="1" />
+            <entity name="tree" castShadows="true" receiveShadows="true" meshFile="tree.mesh">
+                <subentities>
+                    <subentity index="0" materialName="Material#41" />
+                </subentities>
+            </entity>
+        </node>
+        <node name="rock01">
+            <position x="-68.1816" y="2.18934e-006" z="50.0863" />
+            <scale x="1.19208" y="1.19208" z="1.19208" />
+            <rotation qx="0" qy="-0.0697565" qz="3.04915e-009" qw="0.997564" />
+            <entity name="rock01" castShadows="true" receiveShadows="true" meshFile="rock01.mesh">
+                <subentities>
+                    <subentity index="0" materialName="Material#42" />
+                </subentities>
+            </entity>
+        </node>
+        <node name="Camera01">
+            <position x="-133.971" y="88.9262" z="172.619" />
+            <scale x="1" y="1" z="1" />
+            <rotation qx="-0.130462" qy="-0.323667" qz="-0.0451112" qw="0.936047" />
+            <camera name="Camera01" fov="0.602557">
+                <clipping near="1" far="1000" />
+            </camera>
+            <trackTarget nodeName="Camera01.Target">
+                <localDirection x="0" y="0" z="-1" />
+            </trackTarget>
+        </node>
+        <node name="Camera01.Target">
+            <position x="1.86126" y="26.4154" z="-0.309648" />
+            <scale x="1" y="1" z="1" />
+            <rotation qx="0" qy="0" qz="0" qw="1" />
+        </node>
+        <node name="Path_camera">
+            <position x="-24.2786" y="1.80125e-007" z="4.12078" />
+            <scale x="1" y="1" z="1" />
+            <rotation qx="0" qy="0" qz="0" qw="1" />
+            <entity name="Path_camera" castShadows="true" receiveShadows="true" meshFile="Path_camera.mesh">
+                <subentities>
+                    <subentity index="0" materialName="Material#39" />
+                </subentities>
+            </entity>
+        </node>
+        <node name="treeUpper">
+            <position x="27.2697" y="77.4019" z="-19.0111" />
+            <scale x="0.708196" y="0.708196" z="0.708196" />
+            <rotation qx="0.5" qy="-0.5" qz="0.5" qw="0.5" />
+            <entity name="treeUpper" castShadows="true" receiveShadows="true" meshFile="treeUpper.mesh">
+                <subentities>
+                    <subentity index="0" materialName="Material#44" />
+                </subentities>
+            </entity>
+        </node>
+        <node name="Spot01">
+            <position x="285.013" y="174.382" z="126.858" />
+            <scale x="1" y="1" z="1" />
+            <rotation qx="-0.826851" qy="-0.130472" qz="0.503346" qw="-0.214328" />
+            <light name="Spot01" visible="true" type="spot" castShadows="false" power="1">
+                <colourDiffuse r="1" g="1" b="1" />
+                <colourSpecular r="1" g="1" b="1" />
+                <lightAttenuation range="200" constant="1" linear="0" quadric="0" />
+                <lightRange inner="0.750492" outer="0.785398" />
+            </light>
+            <trackTarget nodeName="Spot01.Target">
+                <localDirection x="-0" y="-0" z="1" />
+            </trackTarget>
+        </node>
+        <node name="Spot01.Target">
+            <position x="15.2983" y="5.6381" z="-12.5791" />
+            <scale x="1" y="1" z="1" />
+            <rotation qx="0" qy="0" qz="0" qw="1" />
+        </node>
+        <node name="bush">
+            <position x="81.4197" y="7.58039" z="-32.9848" />
+            <scale x="1.58148" y="0.708196" z="0.708196" />
+            <rotation qx="0.523413" qy="-0.523413" qz="-0.475435" qw="-0.475435" />
+            <entity name="bush" castShadows="true" receiveShadows="true" meshFile="treeUpper.mesh">
+                <subentities>
+                    <subentity index="0" materialName="Material#45" />
+                </subentities>
+            </entity>
+        </node>
+        <node name="bush2">
+            <position x="81.9572" y="11.9449" z="62.1384" />
+            <scale x="0.481834" y="0.481834" z="0.481834" />
+            <rotation qx="0.5" qy="-0.5" qz="0.5" qw="0.5" />
+            <entity name="bush2" castShadows="true" receiveShadows="true" meshFile="treeUpper.mesh">
+                <subentities>
+                    <subentity index="0" materialName="Material#46" />
+                </subentities>
+            </entity>
+        </node>
+        <node name="rock02">
+            <position x="-57.7918" y="-1.01484e-006" z="-23.2169" />
+            <scale x="0.847642" y="0.847642" z="0.847642" />
+            <rotation qx="0" qy="-0.275637" qz="1.20485e-008" qw="0.961262" />
+            <entity name="rock02" castShadows="true" receiveShadows="true" meshFile="rock01.mesh">
+                <subentities>
+                    <subentity index="0" materialName="Material#48" />
+                </subentities>
+            </entity>
+        </node>
+        <node name="rock03">
+            <position x="10.4074" y="-9.75816e-007" z="-22.3241" />
+            <scale x="0.637828" y="0.637828" z="0.637828" />
+            <rotation qx="0" qy="-0.275637" qz="1.20485e-008" qw="0.961262" />
+            <entity name="rock03" castShadows="true" receiveShadows="true" meshFile="rock01.mesh">
+                <subentities>
+                    <subentity index="0" materialName="Material#49" />
+                </subentities>
+            </entity>
+        </node>
+        <node name="rock04">
+            <position x="40.0521" y="-7.73035e-007" z="-17.685" />
+            <scale x="0.637829" y="0.637828" z="0.637829" />
+            <rotation qx="0" qy="0.999048" qz="-4.36698e-008" qw="0.0436193" />
+            <entity name="rock04" castShadows="true" receiveShadows="true" meshFile="rock01.mesh">
+                <subentities>
+                    <subentity index="0" materialName="Material#50" />
+                </subentities>
+            </entity>
+        </node>
+        <node name="rock05">
+            <position x="51.7397" y="-2.151e-006" z="-49.209" />
+            <scale x="1.85968" y="1.85968" z="1.85968" />
+            <rotation qx="0" qy="0.990866" qz="-4.33121e-008" qw="0.134851" />
+            <entity name="rock05" castShadows="true" receiveShadows="true" meshFile="rock01.mesh">
+                <subentities>
+                    <subentity index="0" materialName="Material#47" />
+                </subentities>
+            </entity>
+        </node>
+        <node name="rock06">
+            <position x="66.5587" y="2.27245e-006" z="51.9875" />
+            <scale x="0.529826" y="0.529826" z="0.529826" />
+            <rotation qx="0" qy="-0.646124" qz="2.8243e-008" qw="0.763233" />
+            <entity name="rock06" castShadows="true" receiveShadows="true" meshFile="rock01.mesh">
+                <subentities>
+                    <subentity index="0" materialName="Material#51" />
+                </subentities>
+            </entity>
+        </node>
+    </nodes>
+</scene>

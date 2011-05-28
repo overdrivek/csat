@@ -1,0 +1,205 @@
+<mesh>
+    <submeshes>
+        <submesh material="Material#39" usesharedvertices="false" use32bitindexes="false" operationtype="line_list">
+            <faces count="46">
+                <face v1="0" v2="1" v3="2" />
+                <face v1="3" />
+                <face v1="4" />
+                <face v1="5" />
+                <face v1="6" />
+                <face v1="7" />
+                <face v1="8" />
+                <face v1="9" />
+                <face v1="10" />
+                <face v1="11" />
+                <face v1="12" />
+                <face v1="13" />
+                <face v1="14" />
+                <face v1="15" />
+                <face v1="16" />
+                <face v1="17" />
+                <face v1="18" />
+                <face v1="19" />
+                <face v1="20" />
+                <face v1="21" />
+                <face v1="22" />
+                <face v1="23" />
+                <face v1="24" />
+                <face v1="25" />
+                <face v1="26" />
+                <face v1="27" />
+                <face v1="28" />
+                <face v1="29" />
+                <face v1="30" />
+                <face v1="31" />
+                <face v1="32" />
+                <face v1="33" />
+                <face v1="34" />
+                <face v1="35" />
+                <face v1="36" />
+                <face v1="37" />
+                <face v1="38" />
+                <face v1="39" />
+                <face v1="40" />
+                <face v1="41" />
+                <face v1="42" />
+                <face v1="43" />
+                <face v1="44" />
+                <face v1="45" />
+                <face v1="46" />
+                <face v1="47" />
+            </faces>
+            <geometry vertexcount="48">
+                <vertexbuffer positions="true">
+                    <vertex>
+                        <position x="-50.3943" y="28.4727" z="74.5052" />
+                    </vertex>
+                    <vertex>
+                        <position x="-39.0118" y="35.8187" z="84.4517" />
+                    </vertex>
+                    <vertex>
+                        <position x="-39.0118" y="35.8187" z="84.4517" />
+                    </vertex>
+                    <vertex>
+                        <position x="20.1063" y="22.1846" z="61.2744" />
+                    </vertex>
+                    <vertex>
+                        <position x="20.1063" y="22.1846" z="61.2744" />
+                    </vertex>
+                    <vertex>
+                        <position x="40.3687" y="26.3824" z="25.2792" />
+                    </vertex>
+                    <vertex>
+                        <position x="40.3687" y="26.3824" z="25.2792" />
+                    </vertex>
+                    <vertex>
+                        <position x="78.9794" y="45.716" z="20.4092" />
+                    </vertex>
+                    <vertex>
+                        <position x="78.9794" y="45.716" z="20.4092" />
+                    </vertex>
+                    <vertex>
+                        <position x="137.653" y="85.6595" z="-15.6858" />
+                    </vertex>
+                    <vertex>
+                        <position x="137.653" y="85.6595" z="-15.6858" />
+                    </vertex>
+                    <vertex>
+                        <position x="139.528" y="105.111" z="-26.7528" />
+                    </vertex>
+                    <vertex>
+                        <position x="139.528" y="105.111" z="-26.7528" />
+                    </vertex>
+                    <vertex>
+                        <position x="117.707" y="108.932" z="-43.6266" />
+                    </vertex>
+                    <vertex>
+                        <position x="117.707" y="108.932" z="-43.6266" />
+                    </vertex>
+                    <vertex>
+                        <position x="44.7" y="57.589" z="-78.4731" />
+                    </vertex>
+                    <vertex>
+                        <position x="44.7" y="57.589" z="-78.4731" />
+                    </vertex>
+                    <vertex>
+                        <position x="4.38823" y="51.4954" z="-46.9813" />
+                    </vertex>
+                    <vertex>
+                        <position x="4.38823" y="51.4954" z="-46.9813" />
+                    </vertex>
+                    <vertex>
+                        <position x="-1.47961" y="37.3601" z="-3.49624" />
+                    </vertex>
+                    <vertex>
+                        <position x="-1.47961" y="37.3601" z="-3.49624" />
+                    </vertex>
+                    <vertex>
+                        <position x="28.099" y="47.0104" z="10.9648" />
+                    </vertex>
+                    <vertex>
+                        <position x="28.099" y="47.0104" z="10.9648" />
+                    </vertex>
+                    <vertex>
+                        <position x="62.6943" y="94.0431" z="2.49692" />
+                    </vertex>
+                    <vertex>
+                        <position x="62.6943" y="94.0431" z="2.49692" />
+                    </vertex>
+                    <vertex>
+                        <position x="91.369" y="119.22" z="-51.4939" />
+                    </vertex>
+                    <vertex>
+                        <position x="91.369" y="119.22" z="-51.4939" />
+                    </vertex>
+                    <vertex>
+                        <position x="108.434" y="123.93" z="-39.8153" />
+                    </vertex>
+                    <vertex>
+                        <position x="108.434" y="123.93" z="-39.8153" />
+                    </vertex>
+                    <vertex>
+                        <position x="106.268" y="112.957" z="-14.4432" />
+                    </vertex>
+                    <vertex>
+                        <position x="106.268" y="112.957" z="-14.4432" />
+                    </vertex>
+                    <vertex>
+                        <position x="37.1576" y="35.3026" z="-1.11248" />
+                    </vertex>
+                    <vertex>
+                        <position x="37.1576" y="35.3026" z="-1.11248" />
+                    </vertex>
+                    <vertex>
+                        <position x="-14.9133" y="29.9007" z="-25.2306" />
+                    </vertex>
+                    <vertex>
+                        <position x="-14.9133" y="29.9007" z="-25.2306" />
+                    </vertex>
+                    <vertex>
+                        <position x="-32.9614" y="29.9007" z="-13.6238" />
+                    </vertex>
+                    <vertex>
+                        <position x="-32.9614" y="29.9007" z="-13.6238" />
+                    </vertex>
+                    <vertex>
+                        <position x="-42.3358" y="27.5767" z="-1.38585" />
+                    </vertex>
+                    <vertex>
+                        <position x="-42.3358" y="27.5767" z="-1.38585" />
+                    </vertex>
+                    <vertex>
+                        <position x="-77.5398" y="44.3254" z="25.7077" />
+                    </vertex>
+                    <vertex>
+                        <position x="-77.5398" y="44.3254" z="25.7077" />
+                    </vertex>
+                    <vertex>
+                        <position x="-46.1205" y="36.3434" z="43.3287" />
+                    </vertex>
+                    <vertex>
+                        <position x="-46.1205" y="36.3434" z="43.3287" />
+                    </vertex>
+                    <vertex>
+                        <position x="-27.5029" y="29.9007" z="23.2474" />
+                    </vertex>
+                    <vertex>
+                        <position x="-27.5029" y="29.9007" z="23.2474" />
+                    </vertex>
+                    <vertex>
+                        <position x="-26.4815" y="28.9974" z="46.7841" />
+                    </vertex>
+                    <vertex>
+                        <position x="-26.4815" y="28.9974" z="46.7841" />
+                    </vertex>
+                    <vertex>
+                        <position x="-54.7497" y="29.6653" z="70.1549" />
+                    </vertex>
+                </vertexbuffer>
+            </geometry>
+        </submesh>
+    </submeshes>
+    <submeshnames>
+        <submeshname name="submesh0" index="0" />
+    </submeshnames>
+</mesh>
