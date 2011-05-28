@@ -18,6 +18,7 @@ namespace CSatEng
             Log.Open("log.txt");
             Settings.ReadXML("settings.xml");
             BaseGame game;
+
             using (GameLoop gameLoop = new GameLoop("Project XYZ", false))
             {
                 game = new Test2D();

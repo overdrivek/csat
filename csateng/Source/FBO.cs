@@ -173,13 +173,14 @@ namespace CSatEng
             }
         }
 
+        public static float ZNear = 100, ZFar = 1000;
         public void BindFBO()
         {
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, fboHandle);
             GL.Viewport(0, 0, Width, Height);
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadIdentity();
-            Matrix4 perpective = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(Camera.Fov), (float)Width / (float)Height, Camera.Near, Camera.Far);
+            Matrix4 perpective = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(Camera.Fov), (float)Width / (float)Height, ZNear, ZFar);
             GL.LoadMatrix(ref perpective);
             GL.MatrixMode(MatrixMode.Modelview);
             GL.LoadIdentity();
@@ -203,26 +204,6 @@ namespace CSatEng
             GL.ActiveTexture(TextureUnit.Texture0 + _texUnit);
             GL.BindTexture(TextureTarget.Texture2D, 0);
         }
-
-
-#if DEBUG
-        // DEBUG : renderoi color ja depth buffer ruudulle
-        Texture2D d = null, c;
-        public void DEBUGRENDER()
-        {
-            if (d == null)
-            {
-                d = new Texture2D();
-                c = new Texture2D();
-                d.CreateDrawableTexture(Width, Height, depthTexture);
-                c.CreateDrawableTexture(Width, Height, colorTexture);
-            }
-            Camera.Set2D();
-            c.Draw(0, 0);
-            d.Draw(800, 100);
-            Camera.Set3D();
-        }
-#endif
 
     }
 }
