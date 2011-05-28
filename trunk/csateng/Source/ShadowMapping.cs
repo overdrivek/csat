@@ -66,10 +66,9 @@ namespace CSatEng
 
             GL.Disable(EnableCap.Lighting);
             GL.Disable(EnableCap.Blend);
-
+            GL.ShadeModel(ShadingModel.Flat);
             GL.ColorMask(false, false, false, false);
-            GL.Disable(EnableCap.CullFace);
-            //GL.CullFace(CullFaceMode.Front);
+            GL.CullFace(CullFaceMode.Front);
 
             RenderFromLight(Light.Lights[0]);
             SetTextureMatrix();
@@ -79,23 +78,19 @@ namespace CSatEng
             world.Render();
             ShadowPass = false;
 
-            //GL.CullFace(CullFaceMode.Back);
-            GL.Enable(EnableCap.CullFace);
+            GL.CullFace(CullFaceMode.Back);
             GL.ColorMask(true, true, true, true);
+            GL.ShadeModel(ShadingModel.Smooth);
             fbo.UnBindFBO();
 
             GL.Clear(fbo.ClearFlags);
-            //fbo.DEBUGRENDER();
-
             Settings.NumOfObjects = 0;
         }
-
-
 
         /// <summary>
         /// aseta texturematriisit shadowmapping shaderia varten
         /// </summary>
-        public void SetTextureMatrix()
+        void SetTextureMatrix()
         {
             // ota projection ja Modelview matriisit
             Matrix4 projMatrix, modelMatrix;
@@ -113,7 +108,5 @@ namespace CSatEng
 
             GL.MatrixMode(MatrixMode.Modelview);
         }
-
-
     }
 }

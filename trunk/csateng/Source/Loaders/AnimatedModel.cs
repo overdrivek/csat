@@ -243,8 +243,6 @@ namespace CSatEng
 
             skeleton = baseSkel;
 
-            updateAnimCount = FramesBetweenAnimUpdate;
-
             // prepare model for rendering
             PrepareMesh();
 
@@ -263,11 +261,6 @@ namespace CSatEng
             for (int k = 0; k < numMesh; k++) MathExt.CalcNormals(ref finalVert, ref model[k].faces, ref normals, false);
 
             Log.WriteLine("Model: " + Name, true);
-        }
-
-        public void UpdateAnimation()
-        {
-            updateAnimCount = FramesBetweenAnimUpdate;
         }
 
         /// <summary>
@@ -356,12 +349,11 @@ namespace CSatEng
                     if (ShadowMapping.ShadowPass == false) model[i].texture.Bind(0);
 
                     // lasketaanko uusi asento (jos ei olla laskettu jo shadowpassis)
-                    if (updateAnimCount == FramesBetweenAnimUpdate && animCalculated == false)
+                    if (animCalculated == false)
                     {
                         // Interpolate skeletons between two frames
                         InterpolateSkeletons(ref curAnim.skelFrames, curAnim.curFrame, curAnim.nextFrame, curAnim.numJoints, curAnim.lastTime * curAnim.frameRate);
                         PrepareMesh();
-                        updateAnimCount = 0;
                         animCalculated = true;
                     }
                     model[i].vbo.Render();
@@ -373,8 +365,6 @@ namespace CSatEng
                     GL.ActiveTexture(TextureUnit.Texture0 + BaseGame.SHADOW_TEXUNIT);
                     GL.PopMatrix();
                     GL.MatrixMode(MatrixMode.Modelview);
-
-                    updateAnimCount++;
                     animCalculated = false;
                 }
             }
@@ -388,20 +378,8 @@ namespace CSatEng
         // animation code -------------------------------------------------------------------------
         ******************************************************************************************/
         List<Animation> animations = new List<Animation>();
-
         Animation curAnim;
-
         MD5Joint[] skeleton = null;
-
-        /// <summary>
-        /// monenko framen jälkeen lasketaan uusi asento
-        /// </summary>
-        public int FramesBetweenAnimUpdate = 1;
-        int updateAnimCount = 0;
-        /// <summary>
-        /// monenko framen välein päivitetään normaalit
-        /// </summary>
-        public int FramesBetweenNormalsUpdate = 10;
 
         /// <summary>
         /// aseta haluttu animaatio

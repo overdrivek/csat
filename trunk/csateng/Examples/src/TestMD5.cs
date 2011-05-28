@@ -129,6 +129,8 @@ namespace CSatEng
 
         public override void Render()
         {
+            FBO.ZNear = 100;
+            FBO.ZFar = 1000;
             shadows.SetupShadows(world);
 
             camera.SetFPSCamera();

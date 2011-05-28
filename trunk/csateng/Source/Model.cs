@@ -13,7 +13,7 @@ using OpenTK;
 
 namespace CSatEng
 {
-    public class Model : SceneNode, ICloneable
+    public class Model : SceneNode
     {
         public Vertex[] VertexBuffer;
         public int[] IndexBuffer; // tämä on 0,1,2,3,4,..
@@ -34,38 +34,5 @@ namespace CSatEng
         public virtual void LoadMD5Animation(string animName, string fileName) { }
         public virtual void SetAnimation(string animName) { }
         public virtual void Update(float time) { }
-
-        object ICloneable.Clone()
-        {
-            return this.Clone();
-        }
-
-        /// <summary>
-        /// Palauttaa objektin kloonin.
-        /// </summary>
-        /// <returns></returns>
-        public Model Clone()
-        {
-            Model clone = (Model)this.MemberwiseClone();
-
-            // eri grouppi eli kloonattuihin objekteihin voi lisäillä muita objekteja
-            // sen vaikuttamatta alkuperäiseen.
-            //clone.Childs = new List<SceneNode>(Childs);
-            //CloneTree(clone);
-
-            return clone;
-        }
-        /*
-        void CloneTree(Model clone)
-        {
-            for (int q = 1; q < Childs.Count; q++)
-            {
-                Model child = (Model)Childs[q];
-                clone.Childs[q] = child.Clone();
-
-                if (child.Childs.Count > 0) child.CloneTree(child);
-            }
-        }*/
-
     }
 }
