@@ -38,6 +38,27 @@ namespace CSatEng
             }
             else Log.WriteLine("NPOT not supported.");
 
+            // tarkista voidaanko shadereita käyttää.
+            if (GL.GetString(StringName.Extensions).Contains("vertex_shader") &&
+                GL.GetString(StringName.Extensions).Contains("fragment_shader"))
+            {
+                GLSLShader.IsSupported = true;
+                Log.WriteLine("Shaders supported.");
+            }
+            else
+            {
+                GLSLShader.IsSupported = false;
+                Log.WriteLine("Shaders not supported.");
+            }
+
+            if (GL.GetString(StringName.Extensions).Contains("EXT_framebuffer_object"))
+                FBO.IsSupported = true;
+            else
+            {
+                FBO.IsSupported = false;
+                Log.WriteLine("FBOs not supported! Your video card does not support Framebuffer Objects.");
+            }
+
             VSync = Settings.VSync ? VSyncMode.On : VSyncMode.Off;
             Settings.Device = DisplayDevice.Default;
             if (Settings.FullScreen)
@@ -46,9 +67,10 @@ namespace CSatEng
                 WindowState = OpenTK.WindowState.Fullscreen;
             }
 
-            GL.ClearColor(System.Drawing.Color.Black);
             GL.Enable(EnableCap.DepthTest);
+            GL.ClearDepth(1.0);
             GL.DepthFunc(DepthFunction.Lequal);
+            GL.ClearColor(System.Drawing.Color.Black);
             GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
             GL.Enable(EnableCap.PolygonSmooth);
             GL.Hint(HintTarget.PolygonSmoothHint, HintMode.Nicest);
@@ -56,6 +78,9 @@ namespace CSatEng
             GL.Enable(EnableCap.Lighting);
             GL.Enable(EnableCap.Texture2D);
             GL.Enable(EnableCap.CullFace);
+            GL.CullFace(CullFaceMode.Back);
+            GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill);
+            GL.FrontFace(FrontFaceDirection.Ccw);
             GL.Enable(EnableCap.ColorMaterial);
 
             BaseGame.Keyboard = Keyboard;

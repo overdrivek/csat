@@ -20,21 +20,16 @@ namespace CSatEng
         uint fboHandle = 0;
 
         public static int Width, Height;
-        public static bool FboSupported = false;
+        public static bool IsSupported = false;
         public ClearBufferMask ClearFlags = 0;
 
         public FBO(int width, int height, bool color, bool depth)
         {
+            if (IsSupported == false) return;
+
             if (fboHandle != 0) return;
             Width = width;
             Height = height;
-
-            if (!GL.GetString(StringName.Extensions).Contains("EXT_framebuffer_object"))
-            {
-                FboSupported = false;
-                Log.WriteLine("FBOs not supported! Your video card does not support Framebuffer Objects. Please update your drivers.");
-                return;
-            }
 
             if (color)
             {
@@ -53,11 +48,19 @@ namespace CSatEng
             if (depth)
             {
                 ClearFlags |= ClearBufferMask.DepthBufferBit;
+
+                PixelInternalFormat[] modes ={(PixelInternalFormat)All.DepthComponent32, (PixelInternalFormat)All.DepthComponent24,
+                                                (PixelInternalFormat)All.DepthComponent16, (PixelInternalFormat)All.DepthComponent };
+
                 // Create Depth Tex
-                GL.GenTextures(1, out depthTexture);
-                GL.BindTexture(TextureTarget.Texture2D, depthTexture);
-                GL.TexImage2D(TextureTarget.Texture2D, 0, (PixelInternalFormat)All.DepthComponent, Width, Height, 0, PixelFormat.DepthComponent, PixelType.UnsignedInt, IntPtr.Zero);
-                // things go horribly wrong if DepthComponent's Bitcount does not match the main Framebuffer's Depth
+                for (int q = 0; q < modes.Length; q++)
+                {
+                    GL.GenTextures(1, out depthTexture);
+                    GL.BindTexture(TextureTarget.Texture2D, depthTexture);
+                    GL.TexImage2D(TextureTarget.Texture2D, 0, modes[q], Width, Height, 0, PixelFormat.DepthComponent, PixelType.UnsignedInt, IntPtr.Zero);
+                    if (depthTexture > 0 && GL.GetError() == ErrorCode.NoError) break;
+                }
+
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToBorder);
@@ -67,7 +70,6 @@ namespace CSatEng
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureCompareMode, (int)TextureCompareMode.CompareRToTexture);
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureCompareFunc, (int)All.Lequal);
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.DepthTextureMode, (int)All.Intensity);
-
                 // GL.Ext.GenerateMipmap( GenerateMipmapTarget.Texture2D );
             }
 
@@ -90,6 +92,13 @@ namespace CSatEng
                 case FramebufferErrorCode.FramebufferCompleteExt:
                     {
                         Log.WriteLine("FBO: The framebuffer is complete and valid for rendering.");
+                        if (depth)
+                        {
+                            int bit;
+                            GL.GetInteger(GetPName.DepthBits, out bit);
+                            Log.WriteLine("Depthbits: " + bit);
+                        }
+
                         ok = true;
                         break;
                     }
@@ -144,12 +153,12 @@ namespace CSatEng
             GL.GetInteger(GetPName.Stereo, out queryinfo[3]);
             GL.GetInteger(GetPName.Samples, out queryinfo[4]);
             GL.GetInteger(GetPName.Doublebuffer, out queryinfo[5]);
-            Log.WriteLine("max ColorBuffers: " + queryinfo[0] + " max AuxBuffers: " + queryinfo[1] + " max DrawBuffers: " + queryinfo[2] +
-                               " Stereo: " + queryinfo[3] + " Samples: " + queryinfo[4] + " DoubleBuffer: " + queryinfo[5]);
+            Log.WriteLine("Max ColorBuffers: " + queryinfo[0] + "\nMax AuxBuffers: " + queryinfo[1] + "\nMax DrawBuffers: " + queryinfo[2] +
+                               "\nStereo: " + queryinfo[3] + "\nSamples: " + queryinfo[4] + "\nDoubleBuffer: " + queryinfo[5]);
 
             if (ok == false)
             {
-                FboSupported = false;
+                IsSupported = false;
                 Log.WriteLine("Last GL Error: " + GL.GetError());
             }
 
@@ -157,7 +166,7 @@ namespace CSatEng
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0); // disable rendering into the FBO
             GL.BindTexture(TextureTarget.Texture2D, 0);
 
-            FboSupported = true;
+            IsSupported = true;
         }
 
         public void Dispose()
@@ -176,6 +185,7 @@ namespace CSatEng
         public static float ZNear = 100, ZFar = 1000;
         public void BindFBO()
         {
+            if (IsSupported == false) return;
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, fboHandle);
             GL.Viewport(0, 0, Width, Height);
             GL.MatrixMode(MatrixMode.Projection);
@@ -188,6 +198,7 @@ namespace CSatEng
 
         public void UnBindFBO()
         {
+            if (IsSupported == false) return;
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0);
             Camera.Set3D();
         }
@@ -195,12 +206,14 @@ namespace CSatEng
         int _texUnit;
         public void BindDepth(int texUnit)
         {
+            if (IsSupported == false) return;
             _texUnit = texUnit;
             GL.ActiveTexture(TextureUnit.Texture0 + texUnit);
             GL.BindTexture(TextureTarget.Texture2D, depthTexture);
         }
         public void UnBindDepth()
         {
+            if (IsSupported == false) return;
             GL.ActiveTexture(TextureUnit.Texture0 + _texUnit);
             GL.BindTexture(TextureTarget.Texture2D, 0);
         }

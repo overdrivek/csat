@@ -21,14 +21,23 @@ namespace CSatEng
 
         public ShadowMapping(FBO fbo)
         {
-            if (FBO.FboSupported == false)
+            Create(fbo, "lightmask.png");
+        }
+        public ShadowMapping(FBO fbo, string lightMaskFileName)
+        {
+            Create(fbo, lightMaskFileName);
+        }
+        void Create(FBO fbo, string lightMaskFileName)
+        {
+            if (FBO.IsSupported == false)
             {
                 Log.WriteLine("FBO not supported so no shadow mapping.");
+                UseShadowMapping = false;
                 return;
             }
             this.fbo = fbo;
             UseShadowMapping = true;
-            lightMask = Texture.Load("lightmask.png");
+            lightMask = Texture.Load(lightMaskFileName);
         }
 
         static int _texUnit;
@@ -52,17 +61,18 @@ namespace CSatEng
             GL.Translate(-light.Position);
         }
 
-        public void SetupShadows(SceneNode world)
+        public void SetupShadows(SceneNode world, int lightNo)
         {
+            if (UseShadowMapping == false) return;
+
             if (Light.Lights.Count == 0)
             {
                 Log.WriteLine("SetupShadows requires at least one light source!", true);
                 return;
             }
-            GL.UseProgram(0);
-
             fbo.BindFBO();
             GL.Clear(fbo.ClearFlags);
+            GLSLShader.UseProgram(0);
 
             GL.Disable(EnableCap.Lighting);
             GL.Disable(EnableCap.Blend);
@@ -70,7 +80,7 @@ namespace CSatEng
             GL.ColorMask(false, false, false, false);
             GL.CullFace(CullFaceMode.Front);
 
-            RenderFromLight(Light.Lights[0]);
+            RenderFromLight(Light.Lights[lightNo]);
             SetTextureMatrix();
             Frustum.CalculateFrustum();
 

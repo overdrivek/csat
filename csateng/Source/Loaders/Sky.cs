@@ -14,6 +14,7 @@ namespace CSatEng
     {
         OgreMesh[] skyboxSides = new OgreMesh[6];
         public static bool IsSky = false;
+        static GLSLShader shader;
 
         public override void Dispose()
         {
@@ -39,6 +40,7 @@ namespace CSatEng
             SceneNode skyNode = new SceneNode();
             DotScene ds = DotScene.Load("sky/sky.scene", skyNode);
             skyNode.GetList(true);
+            shader = GLSLShader.Load("model.shader:SKY");
 
             int side = 0;
             TextureLoaderParameters.WrapModeS = TextureWrapMode.ClampToEdge;
@@ -58,8 +60,6 @@ namespace CSatEng
                     m.MaterialName = fileName;
                     m.Material = MaterialInfo.GetMaterial(fileName + "_material");
                     m.Material.DiffuseTex = Texture.Load(m.MaterialName);
-                    m.Shader = GLSLShader.Load("model.shader:SKY");
-
                     side++;
                 }
             }
@@ -89,6 +89,7 @@ namespace CSatEng
             GL.Disable(EnableCap.Lighting);
             GL.Disable(EnableCap.DepthTest);
             GL.DepthMask(false); // ei kirjoiteta z-bufferiin
+            shader.UseProgram();
 
             GL.Scale(10, 10, 10);
             for (int q = 0; q < 6; q++)
