@@ -1,6 +1,6 @@
 <settings>
   <resolution>1024x768x32</resolution>
-  <fsaa>4</fsaa>
+  <fsaa>0</fsaa>
   <fullscreen>false</fullscreen>
   <vsync>true</vsync>
 </settings>

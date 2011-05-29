@@ -48,7 +48,6 @@ namespace CSatEng
 
             GL.ClearColor(System.Drawing.Color.Black);
             GL.Enable(EnableCap.DepthTest);
-            GL.ClearDepth(1.0f);
             GL.DepthFunc(DepthFunction.Lequal);
             GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
             GL.Enable(EnableCap.PolygonSmooth);
