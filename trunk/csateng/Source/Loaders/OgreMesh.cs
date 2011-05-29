@@ -202,6 +202,7 @@ namespace CSatEng
             base.Render(); // renderoi objektin ja kaikki siihen liitetyt objektit
         }
 
+        
         public void RenderMesh()
         {
             if (Vbo == null) return;
@@ -215,6 +216,7 @@ namespace CSatEng
             {
                 Material.SetMaterial();
                 if (Shader != null) Shader.UseProgram();
+                else GLSLShader.UseProgram(0);
 
                 GL.MatrixMode(MatrixMode.Texture);
                 GL.ActiveTexture(TextureUnit.Texture0 + BaseGame.SHADOW_TEXUNIT);
@@ -229,12 +231,8 @@ namespace CSatEng
                 GL.PopMatrix();
                 GL.MatrixMode(MatrixMode.Modelview);
                 GL.ActiveTexture(TextureUnit.Texture0);
-
-                if (Shader != null) Shader.DontUseProgram();
             }
             if (DoubleSided) GL.Enable(EnableCap.CullFace);
         }
-
-
     }
 }

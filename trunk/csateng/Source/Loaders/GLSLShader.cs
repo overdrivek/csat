@@ -18,17 +18,12 @@ namespace CSatEng
         ShaderTypes shaderType = ShaderTypes.Texture;
 
         static Dictionary<string, GLSLShader> shaders = new Dictionary<string, GLSLShader>();
+        public static bool IsSupported = false;
+        static int currentShaderID = -1;
+
         int vertexObject, fragmentObject;
         public int ProgramID = 0;
-        public static bool IsSupported = false;
         string ShaderName = "";
-
-        public GLSLShader()
-        {
-            // tarkista voidaanko shadereita k‰ytt‰‰.
-            if (GL.GetString(StringName.Extensions).Contains("vertex_shader") &&
-                GL.GetString(StringName.Extensions).Contains("fragment_shader")) IsSupported = true;
-        }
 
         /// <summary>
         /// lataa glsl shader (vertex ja fragment shader samassa tiedostossa)
@@ -106,13 +101,6 @@ namespace CSatEng
                     vs = setup[q] + "\n" + vs;
                     fs = setup[q] + "\n" + fs;
                 }
-                else if (setup[q].StartsWith("CAMERA"))
-                {
-                    //...
-                    //todo
-                }
-
-
             }
 
             vertexObject = GL.CreateShader(ShaderType.VertexShader);
@@ -156,6 +144,8 @@ namespace CSatEng
         public void UseProgram()
         {
             if (IsSupported == false) return;
+            if (currentShaderID == ProgramID) return;
+            currentShaderID = ProgramID;
             GL.UseProgram(ProgramID);
 
             if (shaderType == ShaderTypes.Shadow)
@@ -163,30 +153,20 @@ namespace CSatEng
                 ShadowMapping.BindLightMask(BaseGame.LIGHTMASK_TEXUNIT);
                 GL.Uniform1(GL.GetUniformLocation(ProgramID, "shadowMap"), BaseGame.SHADOW_TEXUNIT);
                 GL.Uniform1(GL.GetUniformLocation(ProgramID, "lightmask"), BaseGame.LIGHTMASK_TEXUNIT);
-
-
-                //GL.Uniform1(GL.GetUniformLocation(ProgramID, "xPixelOffset"), (1.0f / (float)Settings.Width));
-                //GL.Uniform1(GL.GetUniformLocation(ProgramID, "yPixelOffset"), (1.0f / (float)Settings.Height));
-
                 GL.Uniform1(GL.GetUniformLocation(ProgramID, "diffuse"), 0);
                 GL.Uniform1(GL.GetUniformLocation(ProgramID, "lightEnergy"), 2f);
                 GL.Uniform1(GL.GetUniformLocation(ProgramID, "ambient"), 0.5f);
+                //GL.Uniform1(GL.GetUniformLocation(ProgramID, "xPixelOffset"), (1.0f / (float)Settings.Width));
+                //GL.Uniform1(GL.GetUniformLocation(ProgramID, "yPixelOffset"), (1.0f / (float)Settings.Height));
             }
-
         }
 
-        /// <summary>
-        /// lopeta shaderin k‰ytt‰minen
-        /// </summary>
-        public void DontUseProgram()
+        public static void UseProgram(int shaderID)
         {
             if (IsSupported == false) return;
-            GL.UseProgram(0);
-
-            if (shaderType == ShaderTypes.Shadow)
-            {
-                ShadowMapping.UnBindLightMask();
-            }
+            if (currentShaderID == shaderID) return;
+            currentShaderID = shaderID;
+            GL.UseProgram(shaderID);
         }
 
         public void Dispose()
@@ -210,7 +190,6 @@ namespace CSatEng
             shaders.Clear();
         }
 
-
         /// <summary>
         /// lataa shaderit.
         /// jos meshnamessa on * merkki, ladataan shaderi kaikkiin mesheihin
@@ -219,6 +198,7 @@ namespace CSatEng
         /// <param name="meshName"></param>
         public static void LoadShader(Model model, string meshName, string shaderFileName)
         {
+            if (GLSLShader.IsSupported == false) return;
             for (int q = 0; q < model.Childs.Count; q++)
             {
                 Model child = (Model)model.Childs[q];
@@ -245,6 +225,7 @@ namespace CSatEng
         /// </summary>
         public static void LoadShader(Model model, string shaderFileName)
         {
+            if (GLSLShader.IsSupported == false) return;
             bool use = true;
             if (shaderFileName == "")
             {

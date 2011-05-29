@@ -330,6 +330,8 @@ namespace CSatEng
             transparentObjects.Clear();
 
             GL.PopMatrix();
+
+            GLSLShader.UseProgram(0);
         }
 
         protected void Render(SceneNode obj)

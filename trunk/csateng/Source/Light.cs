@@ -39,6 +39,7 @@ namespace CSatEng
             for (int q = 0; q < Lights.Count; q++)
             {
                 Light light = Lights[q];
+                GL.Enable(EnableCap.Light0 + q);
                 GL.Light(LightName.Light0 + q, LightParameter.Position, new float[] { light.Position.X, light.Position.Y, light.Position.Z, 1 });
                 if (light.UpdateColors == true)
                 {

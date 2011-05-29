@@ -66,7 +66,7 @@ namespace CSatEng
 
             // ohjaus
             float spd = time * 20;
-            if (Keyboard[Key.ShiftLeft]) spd *= 4;
+            if (Keyboard[Key.ShiftLeft] || Keyboard[Key.ShiftRight]) spd *= 4;
             if (Keyboard[Key.W]) camera.Move(spd);
             if (Keyboard[Key.S]) camera.Move(-spd);
             if (Keyboard[Key.A]) camera.Strafe(-spd);
@@ -131,7 +131,7 @@ namespace CSatEng
         {
             FBO.ZNear = 100;
             FBO.ZFar = 1000;
-            shadows.SetupShadows(world);
+            shadows.SetupShadows(world, 0);
 
             camera.SetFPSCamera();
 

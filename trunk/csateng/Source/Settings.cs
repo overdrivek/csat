@@ -41,6 +41,9 @@ namespace CSatEng
             FSAA = int.Parse(fsaa.Value);
             FullScreen = fullscreen.Value == "true";
             VSync = vsync.Value == "true";
+
+            XmlNode mipmaps = doc.SelectSingleNode("//settings/mipmaps/text()");
+            if (mipmaps != null) TextureLoaderParameters.BuildMipmapsForUncompressed = mipmaps.Value == "true";
         }
     }
 }

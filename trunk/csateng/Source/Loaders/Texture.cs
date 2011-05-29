@@ -5,10 +5,6 @@
  * See license.txt for licensing details.
  */
 #endregion
-/* 
- * texturen lataus.
- * 
- */
 using System;
 using System.Collections.Generic;
 using OpenTK;

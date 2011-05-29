@@ -329,6 +329,7 @@ namespace CSatEng
             {
                 Material.SetMaterial();
                 if (Shader != null) Shader.UseProgram();
+                else GLSLShader.UseProgram(0);
 
                 GL.MatrixMode(MatrixMode.Texture);
                 GL.ActiveTexture(TextureUnit.Texture0 + BaseGame.SHADOW_TEXUNIT);
@@ -368,7 +369,6 @@ namespace CSatEng
                     animCalculated = false;
                 }
             }
-            if (Shader != null) Shader.DontUseProgram();
             if (DoubleSided) GL.Enable(EnableCap.CullFace);
         }
 

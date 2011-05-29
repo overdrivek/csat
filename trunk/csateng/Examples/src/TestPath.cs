@@ -64,7 +64,7 @@ namespace CSatEng
             {
                 camPath.LookAtNextPoint = false;
                 str = "Looking at random point";
-                lookAt = new Vector3((float)Rnd.NextDouble() * 100, (float)Rnd.NextDouble() * 50, (float)Rnd.NextDouble() * 100); 
+                lookAt = new Vector3((float)Rnd.NextDouble() * 100, (float)Rnd.NextDouble() * 50, (float)Rnd.NextDouble() * 100);
             }
             if (counter == 300)
             {
@@ -80,7 +80,7 @@ namespace CSatEng
 
         public override void Render()
         {
-            shadows.SetupShadows(world);
+            shadows.SetupShadows(world, 0);
 
             camera.SetCameraMatrix();
 
