@@ -16,6 +16,7 @@ namespace CSatEng
     public class GameLoop : GameWindow
     {
         public static bool Running = true;
+        public static ClearBufferMask ClearFlags = ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit;
         BaseGame game;
 
         public GameLoop(string projectName, bool hideMouseCursor)
@@ -70,7 +71,7 @@ namespace CSatEng
             GL.Enable(EnableCap.DepthTest);
             GL.ClearDepth(1.0);
             GL.DepthFunc(DepthFunction.Lequal);
-            GL.ClearColor(System.Drawing.Color.Black);
+            GL.ClearColor(0, 0, 0, 1);
             GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
             GL.Enable(EnableCap.PolygonSmooth);
             GL.Hint(HintTarget.PolygonSmoothHint, HintMode.Nicest);
@@ -139,8 +140,7 @@ namespace CSatEng
         {
             if (game == null) return;
 
-            if (Sky.IsSky) GL.Clear(ClearBufferMask.DepthBufferBit); // ei putsata colorbufferia kun skybox piirretään ekana
-            else GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            GL.Clear(ClearFlags);
 
             Settings.NumOfObjects = 0;
 

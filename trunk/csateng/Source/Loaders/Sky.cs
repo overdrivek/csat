@@ -13,7 +13,6 @@ namespace CSatEng
     public class Sky : SceneNode
     {
         OgreMesh[] skyboxSides = new OgreMesh[6];
-        public static bool IsSky = false;
         static GLSLShader shader;
 
         public override void Dispose()
@@ -23,7 +22,7 @@ namespace CSatEng
                 for (int q = 0; q < 6; q++) skyboxSides[q].Dispose();
                 Name = "";
             }
-            IsSky = false;
+            GameLoop.ClearFlags |= ClearBufferMask.DepthBufferBit;
         }
 
         /// <summary>
@@ -35,7 +34,6 @@ namespace CSatEng
         public static Sky Load(string skyName, string ext)
         {
             Sky sky = new Sky();
-            IsSky = true;
             string[] sideStr = { "top", "bottom", "left", "right", "front", "back" };
             SceneNode skyNode = new SceneNode();
             DotScene ds = DotScene.Load("sky/sky.scene", skyNode);
@@ -102,8 +100,8 @@ namespace CSatEng
             GL.DepthMask(true);
             GL.Enable(EnableCap.DepthTest);
             GL.Enable(EnableCap.Lighting);
-
             GL.PopMatrix();
+            GameLoop.ClearFlags &= ~ClearBufferMask.DepthBufferBit;
         }
     }
 }

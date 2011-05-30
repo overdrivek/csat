@@ -34,6 +34,10 @@ namespace CSatEng
 
             font = BitmapFont.Load("fonts/comic12.png");
 
+            // skenekohtaset (vaikuttaa varjostukseen)
+            FBO.ZNear = 500;
+            FBO.ZFar = 800;
+
             Camera.Set3D();
             base.Init();
         }
