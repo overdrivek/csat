@@ -47,8 +47,11 @@ namespace CSatEng
 
             lightImg = Billboard.Load("lightimg.png");
 
-            Camera.Set3D();
+            // skenekohtaset (vaikuttaa varjostukseen)
+            FBO.ZNear = 500;
+            FBO.ZFar = 800;
 
+            Camera.Set3D();
             base.Init();
         }
 
@@ -129,8 +132,6 @@ namespace CSatEng
 
         public override void Render()
         {
-            FBO.ZNear = 100;
-            FBO.ZFar = 1000;
             shadows.SetupShadows(world, 0);
 
             camera.SetFPSCamera();
