@@ -28,20 +28,10 @@ namespace CSatEng
             billBoard.Bind(texUnit);
         }
 
-        /// <summary>
-        /// k‰yt‰ jos renderoit paljon billboardeja samoilla asetuksilla
-        /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="z"></param>
-        /// <param name="size"></param>
-        public void BillboardBegin(float x, float y, float z, float size)
+        public void BillboardBegin(float x, float y, float z, float zrot, float size)
         {
-            GL.PushAttrib(AttribMask.ColorBufferBit | AttribMask.EnableBit | AttribMask.PolygonBit);
-
             int i, j;
-            size *= 0.01f;
-
+            GL.PushAttrib(AttribMask.ColorBufferBit | AttribMask.EnableBit | AttribMask.PolygonBit);
             billBoard.Bind(0);
             GL.Disable(EnableCap.CullFace);
             GL.Disable(EnableCap.Lighting);
@@ -49,7 +39,6 @@ namespace CSatEng
             GL.Translate(x, y, z);
             float[] modelMatrix = new float[16];
             GL.GetFloat(GetPName.ModelviewMatrix, modelMatrix);
-
             for (i = 0; i < 3; i++)
             {
                 for (j = 0; j < 3; j++)
@@ -59,7 +48,9 @@ namespace CSatEng
                 }
             }
             GL.LoadMatrix(modelMatrix);
+            size *= 0.01f;
             GL.Scale(size, size, size);
+            GL.Rotate(zrot, 0, 0, 1);
         }
 
         /// <summary>
@@ -72,8 +63,7 @@ namespace CSatEng
         }
 
         /// <summary>
-        /// renderoi billboard.
-        /// pit‰‰ olla BillboardBegin & BillboardEnd v‰liss‰.
+        /// renderoi billboard. pit‰‰ olla BillboardBegin ja BillboardEnd v‰liss‰.
         /// </summary>
         public void BillboardRender()
         {
@@ -83,13 +73,9 @@ namespace CSatEng
         /// <summary>
         /// renderoi yhden billboardin.
         /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="z"></param>
-        /// <param name="size"></param>
-        public void RenderBillboard(float x, float y, float z, float size)
+        public void RenderBillboard(float x, float y, float z, float zrot, float size)
         {
-            BillboardBegin(x, y, z, size);
+            BillboardBegin(x, y, z, zrot, size);
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
             GL.Enable(EnableCap.AlphaTest);
@@ -97,9 +83,9 @@ namespace CSatEng
             billBoard.Vbo.Render();
             BillboardEnd();
         }
-        public void RenderBillboard(Vector3 pos, float size)
+        public void RenderBillboard(Vector3 pos, float zrot, float size)
         {
-            RenderBillboard(pos.X, pos.Y, pos.Z, size);
+            RenderBillboard(pos.X, pos.Y, pos.Z, zrot, size);
         }
 
         public void Dispose()

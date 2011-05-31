@@ -189,7 +189,6 @@ namespace CSatEng
             {
                 charDisplayLists[ch] = GL.GenLists(1);
                 GL.NewList(charDisplayLists[ch], ListMode.Compile);
-
                 float u = uv[ch].x;
                 float v = uv[ch].y;
                 float w = uv[ch].w;
@@ -197,22 +196,16 @@ namespace CSatEng
                 float wm = w * Size;
                 float hm = h * Size;
                 float xp = 0, yp = 0;
-
                 GL.Begin(BeginMode.Quads);
                 GL.TexCoord2(u, v);
                 GL.Vertex2(xp, yp);
-
                 GL.TexCoord2(u + w, v);
                 GL.Vertex2(xp + wm, yp);
-
                 GL.TexCoord2(u + w, v + h);
                 GL.Vertex2(xp + wm, yp + hm);
-
                 GL.TexCoord2(u, v + h);
                 GL.Vertex2(xp, yp + hm);
-
                 GL.End();
-
                 GL.EndList();
             }
             GL.PopMatrix();
@@ -224,9 +217,10 @@ namespace CSatEng
         }
         public void Write(string str, float x, float y)
         {
+            GL.PushAttrib(AttribMask.AllAttribBits);
+            GL.PushMatrix();
             curX = x;
             curY = y;
-
             texture.Bind(0);
             GL.Disable(EnableCap.CullFace);
             GL.Disable(EnableCap.Lighting);
@@ -234,12 +228,8 @@ namespace CSatEng
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
             GL.Enable(EnableCap.AlphaTest);
             GL.AlphaFunc(AlphaFunction.Greater, 0.1f);
-            GL.PushMatrix();
-
             GL.Translate(x, (float)Settings.Height - y, 0);
-
             float xp = 0;
-
             for (int q = 0; q < str.Length; q++)
             {
                 int ch;
@@ -268,9 +258,7 @@ namespace CSatEng
             }
 
             GL.PopMatrix();
-            GL.Disable(EnableCap.Blend);
-            GL.Disable(EnableCap.AlphaTest);
+            GL.PopAttrib();
         }
-
     }
 }

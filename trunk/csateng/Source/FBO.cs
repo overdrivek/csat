@@ -203,19 +203,24 @@ namespace CSatEng
             Camera.Set3D();
         }
 
-        int _texUnit;
-        public void BindDepth(int texUnit)
+        public void BindDepth()
         {
             if (IsSupported == false) return;
-            _texUnit = texUnit;
-            GL.ActiveTexture(TextureUnit.Texture0 + texUnit);
-            GL.BindTexture(TextureTarget.Texture2D, depthTexture);
+            Texture.Bind(BaseGame.SHADOW_TEXUNIT, depthTexture);
         }
         public void UnBindDepth()
         {
             if (IsSupported == false) return;
-            GL.ActiveTexture(TextureUnit.Texture0 + _texUnit);
-            GL.BindTexture(TextureTarget.Texture2D, 0);
+            Texture.UnBind(BaseGame.SHADOW_TEXUNIT);
+        }
+
+        public Texture2D CreateDrawableColorTexture()
+        {
+            return Texture2D.CreateDrawableTexture(Width, Height, colorTexture);
+        }
+        public Texture2D CreateDrawableDepthTexture()
+        {
+            return Texture2D.CreateDrawableTexture(Width, Height, depthTexture);
         }
 
     }

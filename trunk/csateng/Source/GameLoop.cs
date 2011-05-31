@@ -22,7 +22,7 @@ namespace CSatEng
         public GameLoop(string projectName, bool hideMouseCursor)
             : base(Settings.Width, Settings.Height, new GraphicsMode(Settings.Bpp, 0, 0, Settings.FSAA), projectName)
         {
-            Log.WriteLine("CSatEng 0.8 log   // (c) mjt, 2011 [build " + DateTime.Now.Year + DateTime.Now.Month + DateTime.Now.Day + "]");
+            Log.WriteLine("CSatEng 0.8.11531 log   // (c) mjt, 2011");
             Log.WriteLine("OS: " + System.Environment.OSVersion.ToString());
             Log.WriteLine("Renderer: " + GL.GetString(StringName.Renderer));
             Log.WriteLine("Vendor: " + GL.GetString(StringName.Vendor));
@@ -71,7 +71,7 @@ namespace CSatEng
             GL.Enable(EnableCap.DepthTest);
             GL.ClearDepth(1.0);
             GL.DepthFunc(DepthFunction.Lequal);
-            GL.ClearColor(0, 0, 0, 1);
+            GL.ClearColor(0.0f, 0.0f, 0.2f, 1);
             GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
             GL.Enable(EnableCap.PolygonSmooth);
             GL.Hint(HintTarget.PolygonSmoothHint, HintMode.Nicest);
@@ -83,6 +83,7 @@ namespace CSatEng
             GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill);
             GL.FrontFace(FrontFaceDirection.Ccw);
             GL.Enable(EnableCap.ColorMaterial);
+            ClearFlags = ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit;
 
             BaseGame.Keyboard = Keyboard;
             BaseGame.Mouse = Mouse;
@@ -139,7 +140,7 @@ namespace CSatEng
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             if (game == null) return;
-
+            
             GL.Clear(ClearFlags);
 
             Settings.NumOfObjects = 0;

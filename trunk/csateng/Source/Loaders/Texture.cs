@@ -21,7 +21,7 @@ namespace CSatEng
         /// texture taulukko jossa kaikki ladatut texturet
         /// </summary>
         public static Dictionary<string, Texture> textures = new Dictionary<string, Texture>();
-
+        public static uint[] BindedTextures = new uint[128];
         public static bool IsNPOTSupported = false;
 
         protected string textureName;
@@ -34,18 +34,29 @@ namespace CSatEng
         /// <param name="textureUnit"></param>
         public void Bind(int textureUnit)
         {
+            //if (BindedTextures[textureUnit] == TextureID) return; // on jo bindattu
+            BindedTextures[textureUnit] = TextureID;
             GL.ActiveTexture(TextureUnit.Texture0 + textureUnit);
             GL.BindTexture(TextureTarget.Texture2D, TextureID);
+        }
+
+
+        public static void Bind(int textureUnit, uint textureID)
+        {
+            //if (BindedTextures[textureUnit] == textureID) return; // on jo bindattu
+            BindedTextures[textureUnit] = textureID;
+            GL.ActiveTexture(TextureUnit.Texture0 + textureUnit);
+            GL.BindTexture(TextureTarget.Texture2D, textureID);
         }
 
         /// <summary>
         /// poista texture käytöstä tietystä textureunitista
         /// </summary>
-        /// <param name="textureUnit"></param>
-        public void UnBind(int textureUnit)
+        public static void UnBind(int textureUnit)
         {
             GL.ActiveTexture(TextureUnit.Texture0 + textureUnit);
             GL.BindTexture(TextureTarget.Texture2D, 0);
+            BindedTextures[textureUnit] = 0;
         }
 
         public virtual void Dispose()
@@ -68,16 +79,14 @@ namespace CSatEng
             textures.Clear();
         }
 
-        /// <summary>
-        /// lataa texture
-        /// </summary>
-        /// <param name="fileName"></param>
-        /// <returns></returns>
         public static Texture Load(string fileName)
         {
             return Load(fileName, true);
         }
 
+        /// <summary>
+        /// lataa texture
+        /// </summary>
         public static Texture Load(string fileName, bool useTexDir)
         {
             Texture tex;
@@ -111,7 +120,7 @@ namespace CSatEng
 
             float[] pwidth = new float[1];
             float[] pheight = new float[1];
-            GL.BindTexture(TextureTarget.Texture2D, tex.TextureID);
+            tex.Bind(0);
             GL.GetTexLevelParameter(TextureTarget.Texture2D, 0, GetTextureParameter.TextureWidth, pwidth);
             GL.GetTexLevelParameter(TextureTarget.Texture2D, 0, GetTextureParameter.TextureHeight, pheight);
             tex.Width = (int)pwidth[0];
@@ -135,7 +144,7 @@ namespace CSatEng
 
     }
     /// <summary>
-    /// texture2d luokka renderoi 2d-kuvat ja billboardit
+    /// texture2d luokka renderoi 2d-kuvat
     /// </summary>
     public class Texture2D : Texture
     {
@@ -195,14 +204,16 @@ namespace CSatEng
             return tex;
         }
 
-        public void CreateDrawableTexture(int width, int height, uint textureID)
+        public static Texture2D CreateDrawableTexture(int width, int height, uint textureID)
         {
-            Width = width;
-            Height = height;
-            RealWidth = width;
-            RealHeight = height;
-            CreateVBO();
-            TextureID = textureID;
+            Texture2D tex = new Texture2D();
+            tex.Width = width;
+            tex.Height = height;
+            tex.RealWidth = width;
+            tex.RealHeight = height;
+            tex.CreateVBO();
+            tex.TextureID = textureID;
+            return tex;
         }
 
         public void Draw(int x, int y, float rotate, float sx, float sy, bool blend)
@@ -221,7 +232,7 @@ namespace CSatEng
                 GL.Enable(EnableCap.AlphaTest);
                 GL.AlphaFunc(AlphaFunction.Greater, AlphaMin);
             }
-            GL.BindTexture(TextureTarget.Texture2D, TextureID);
+            Bind(0);
             Vbo.Render();
             GL.PopAttrib();
             GL.PopMatrix();
@@ -237,7 +248,7 @@ namespace CSatEng
             GL.Scale(sx, sy, 1);
             GL.PushAttrib(AttribMask.ColorBufferBit | AttribMask.EnableBit | AttribMask.PolygonBit);
             GL.Disable(EnableCap.Lighting);
-            GL.BindTexture(TextureTarget.Texture2D, TextureID);
+            Bind(0);
             Vbo.Render();
             GL.PopAttrib();
             GL.PopMatrix();

@@ -24,12 +24,13 @@ namespace CSatEng
             img = Texture2D.Load("mousecursor.png");
             font = BitmapFont.Load("fonts/comic12.png");
 
+            Camera.Set2D();
             base.Init();
         }
 
         public override void Dispose()
         {
-            Util.ClearArrays();
+            ClearArrays();
             base.Dispose();
         }
 

@@ -78,12 +78,12 @@
     <Compile Include="Source\GameLoop.cs" />
     <Compile Include="Source\Loaders\GLSLShader.cs" />
     <Compile Include="Source\Light.cs" />
+    <Compile Include="Source\Loaders\Particles.cs" />
     <Compile Include="Source\Log.cs" />
     <Compile Include="Source\Loaders\Material.cs" />
     <Compile Include="Source\MathExt.cs" />
     <Compile Include="Source\Model.cs" />
     <Compile Include="Source\SceneNode.cs" />
-    <Compile Include="Source\Particles.cs" />
     <Compile Include="Source\Path.cs" />
     <Compile Include="Source\Loaders\Script.cs" />
     <Compile Include="Source\Settings.cs" />

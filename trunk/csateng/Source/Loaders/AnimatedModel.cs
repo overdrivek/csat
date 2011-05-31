@@ -372,7 +372,39 @@ namespace CSatEng
             if (DoubleSided) GL.Enable(EnableCap.CullFace);
         }
 
-
+        public void RenderSkeleton()
+        {
+            GL.Disable(EnableCap.Texture2D);
+            GL.PushMatrix();
+            GL.Translate(Position);
+            GL.Rotate(Rotation.X, 1, 0, 0);
+            GL.Rotate(Rotation.Y, 0, 1, 0);
+            GL.Rotate(Rotation.Z, 0, 0, 1);
+            GL.Rotate(-90, 1, 0, 0);
+            GL.Scale(Scale);
+            GL.Disable(EnableCap.DepthTest);
+            GL.PointSize(5);
+            GL.Color3(1f, 0, 0);
+            GL.Begin(BeginMode.Points);
+            for (int q = 0; q < numJoints; q++) GL.Vertex3(skeleton[q].pos);
+            GL.End();
+            GL.PointSize(1);
+            GL.Color3(0, 1f, 0);
+            GL.Begin(BeginMode.Lines);
+            for (int q = 0; q < numJoints; q++)
+            {
+                if (skeleton[q].parent != -1)
+                {
+                    GL.Vertex3(skeleton[skeleton[q].parent].pos);
+                    GL.Vertex3(skeleton[q].pos);
+                }
+            }
+            GL.End();
+            GL.Enable(EnableCap.DepthTest);
+            GL.PopMatrix();
+            GL.Color4(1f, 1, 1, 1);
+            GL.Enable(EnableCap.Texture2D);
+        }
 
         /******************************************************************************************
         // animation code -------------------------------------------------------------------------
