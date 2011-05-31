@@ -61,7 +61,7 @@ namespace CSatEng
         /// <summary>
         /// mitä textureunittei käytetään. bitti0 niin ykköstä, bitti1 niin kakkosta
         /// </summary>
-        static int useTexUnits = 1;
+        int useTexUnits = 1;
 
         /// <summary>
         /// mitä dataa käytetään (normal, uv, uv2)
@@ -227,14 +227,12 @@ namespace CSatEng
                     GL.EnableClientState(ArrayCap.TextureCoordArray);
                     GL.TexCoordPointer(2, TexCoordPointerType.Float, vertexSize, (IntPtr)(8 * sizeof(float)));
                 }
-
             }
-
             GL.EnableClientState(ArrayCap.VertexArray);
             GL.VertexPointer(3, VertexPointerType.Float, vertexSize, (IntPtr)(0));
         }
 
-        public static void UseTexUnits(bool tu1, bool tu2)
+        public void UseTexUnits(bool tu1, bool tu2)
         {
             useTexUnits = 0;
             if (tu1) useTexUnits = 1;
@@ -267,15 +265,6 @@ namespace CSatEng
 
             GL.ClientActiveTexture(TextureUnit.Texture0);
             GL.DisableClientState(ArrayCap.TextureCoordArray);
-        }
-
-        /// <summary>
-        /// aseta aktiivinen textureunitti
-        /// </summary>
-        /// <param name="textureUnit"></param>
-        public static void UseTextureUnit(int textureUnit)
-        {
-            GL.ActiveTexture(TextureUnit.Texture0 + textureUnit);
         }
 
     }

@@ -25,7 +25,7 @@ namespace CSatEng
 
             font = BitmapFont.Load("fonts/comic12.png");
 
-            Sky skybox = Sky.Load("sky/sky_", "jpg");
+            skybox = Sky.Load("sky/sky_", "jpg");
             world.Add(skybox); // lisää ekana jolloin edellinen ruutu häviää tämän 'alle' (ruutua kun ei putsata)
 
             DotScene ds = DotScene.Load("scene1/scene1.scene", scene);
@@ -57,7 +57,7 @@ namespace CSatEng
 
         public override void Dispose()
         {
-            Util.ClearArrays();
+            ClearArrays();
             fbo.Dispose();
 
             base.Dispose();
@@ -140,15 +140,18 @@ namespace CSatEng
             Frustum.CalculateFrustum();
             world.Render();
 
-            lightImg.RenderBillboard(Light.Lights[0].Position, 50);
+            if (Keyboard[Key.Space])
+            {
+                AnimatedModelMD5 self = actors[0] as AnimatedModelMD5;
+                self.RenderSkeleton();
+            }
 
-
+            lightImg.RenderBillboard(Light.Lights[0].Position, 0, 50);
             Camera.Set2D();
-            font.Write("Arrow keys: move the ugly.\nA,D,W,S: move the camera.\nHold left mouse button to rotate the camera.\n\nNo collision detection.", 0, 0);
+            font.Write("Arrow keys: move the ugly.\nSpace: show skeleton.\nA,D,W,S: move the camera.\nHold left mouse button to rotate the camera.", 0, 0);
             Camera.Set3D();
 
             base.Render();
         }
-
     }
 }

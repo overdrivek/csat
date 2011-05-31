@@ -1,3 +1,14 @@
+#region --- MIT License ---
+/* Licensed under the MIT/X11 license.
+ * Copyright (c) 2011 mjt[matola@sci.fi]
+ * This notice may not be removed from any source distribution.
+ * See license.txt for licensing details.
+ */
+#endregion
+
+// note: SceneNode this == Childs[0]
+//
+
 using System;
 using OpenTK.Graphics.OpenGL;
 using OpenTK;
@@ -18,7 +29,14 @@ namespace CSatEng
 
     public class SceneNode
     {
-        static uint objectCount = 0;
+        /// <summary>
+        /// scenenodeen liitetyt toiset scenenodet
+        /// </summary>
+        public List<SceneNode> Childs = new List<SceneNode>();
+        static protected List<SceneNode> visibleObjects = new List<SceneNode>();
+        static protected List<SortedList_Models> transparentObjects = new List<SortedList_Models>();
+        public static uint ObjectCount = 0;
+
         public string Name;
         public string UserDataID;
 
@@ -42,31 +60,14 @@ namespace CSatEng
         /// </summary>
         public Matrix4 WorldMatrix;
 
-        /// <summary>
-        /// scenenodeen liitetyt toiset scenenodet
-        /// </summary>
-        public List<SceneNode> Childs = new List<SceneNode>();
-
-        static protected List<SceneNode> visibleObjects = new List<SceneNode>();
-        static protected List<SortedList_Models> transparentObjects = new List<SortedList_Models>();
-
-        /// <summary>
-        /// kaikki objektit menee tähän,joten saadaan helposti poistettua kaikki datat
-        /// </summary>
-        static protected List<SceneNode> allObjects = new List<SceneNode>();
-
         public SceneNode()
         {
-            Name = "node" + objectCount++;
-            allObjects.Add(this);
-
+            Name = "node" + ObjectCount++;
             Childs.Add(this);
         }
         public SceneNode(string name)
         {
             Name = name;
-            allObjects.Add(this);
-
             Childs.Add(this);
         }
 
@@ -78,15 +79,6 @@ namespace CSatEng
                 if (node.Name == name) return node;
             }
             return null;
-        }
-
-        static public void DisposeAll()
-        {
-            for (int q = 0; q < allObjects.Count; q++)
-            {
-                //allObjects[q].Dispose();
-                
-            }
         }
 
         public virtual void Dispose()
@@ -332,6 +324,7 @@ namespace CSatEng
             GL.PopMatrix();
 
             GLSLShader.UseProgram(0);
+            Texture.UnBind(BaseGame.DIFFUSE_TEXUNIT);
         }
 
         protected void Render(SceneNode obj)

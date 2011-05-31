@@ -16,8 +16,6 @@ namespace CSatEng
         /// <summary>
         /// palauttaa str:stä float luvun. jos pisteen kanssa ei onnistu, kokeillaan pilkun kanssa.
         /// </summary>
-        /// <param name="str"></param>
-        /// <returns></returns>
         public static float GetFloat(string str)
         {
             float n;
@@ -52,24 +50,5 @@ namespace CSatEng
             Log.WriteLine(str);
             throw new Exception(str);
         }
-
-        /// <summary>
-        /// putsaa listat ja poista gl-datat
-        /// </summary>
-        public static void ClearArrays()
-        {
-            Texture.DisposeAll();
-            GLSLShader.DisposeAll();
-            MaterialInfo.DisposeAll();
-            SceneNode.DisposeAll();
-
-            Light.Lights.Clear();
-            Path.Paths.Clear();
-
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-        }
-
     }
-
 }

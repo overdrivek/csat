@@ -150,7 +150,7 @@ namespace CSatEng
 
             if (shaderType == ShaderTypes.Shadow)
             {
-                ShadowMapping.BindLightMask(BaseGame.LIGHTMASK_TEXUNIT);
+                ShadowMapping.BindLightMask();
                 GL.Uniform1(GL.GetUniformLocation(ProgramID, "shadowMap"), BaseGame.SHADOW_TEXUNIT);
                 GL.Uniform1(GL.GetUniformLocation(ProgramID, "lightmask"), BaseGame.LIGHTMASK_TEXUNIT);
                 GL.Uniform1(GL.GetUniformLocation(ProgramID, "diffuse"), 0);

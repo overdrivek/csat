@@ -23,6 +23,7 @@ namespace CSatEng
         public static KeyboardDevice Keyboard;
         public static MouseDevice Mouse; //public static OpenTK.Input.Mouse mouse;
 
+        protected Sky skybox;
         protected static ShadowMapping shadows;
         protected FBO fbo;
         protected SceneNode world = new SceneNode("World");
@@ -40,9 +41,30 @@ namespace CSatEng
         {
             if (font != null) font.Dispose();
             if (fbo != null) fbo.Dispose();
-
+            if (skybox != null) skybox.Dispose();
+            skybox = null;
             fbo = null;
             font = null;
+            world = null;
+            SceneNode.ObjectCount = 0;
+        }
+
+        /// <summary>
+        /// putsaa listat ja poista gl-datat
+        /// </summary>
+        public void ClearArrays()
+        {
+            Texture.DisposeAll();
+            GLSLShader.DisposeAll();
+            MaterialInfo.DisposeAll();
+            Light.Lights.Clear();
+            Path.Paths.Clear();
+            world = null;
+            world = new SceneNode("World");
+            SceneNode.ObjectCount = 0;
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
         }
 
         public virtual void Init()

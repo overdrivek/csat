@@ -15,36 +15,50 @@ namespace CSatEng
     class TestParticles : BaseGame
     {
         const int PART = 100;
-        Particles test = new Particles("planets");
-        Particles explosion = new Particles("explosion");
-        Particles smoke = new Particles("smoke");
-        ParticleEngine particles = new ParticleEngine(); // engine huolehtii että partikkelit renderoidaan oikeassa järjestyksessä
+        Particles test = new Particles();
+        Particles explosion = new Particles();
+        Particles smoke = new Particles();
 
         public override void Init()
         {
-            test.SetObject(Billboard.Load("earth.png"), false); // ei läpinäkyvä
-            explosion.SetObject(Billboard.Load("fire.png"), true); // läpinäkyvä
-            smoke.SetObject(Billboard.Load("smoke.png"), true); // kuten tämäkin
-
-            particles.Add(test, null);
-            particles.Add(explosion, new ParticleCallback(RenderParticleCallback));
-            particles.Add(smoke, null);
+            test.SetParticle(Billboard.Load("earth.png"), false, null); // ei läpikuultava
+            explosion.SetParticle(Billboard.Load("fire.png"), true, new ParticleCallback(RenderParticleCallback)); // läpikuultava
+            smoke.SetParticle(Billboard.Load("smoke.png"), true, null); // kuten tämäkin
+            world.Add(test);
+            world.Add(explosion);
+            world.Add(smoke);
             SetupParticles(true, true, true);
 
-            Camera.Set3D();
+            font = BitmapFont.Load("fonts/comic12.png");
 
+            camera.Position = new Vector3(0, 0, 150);
+            Camera.Set3D();
             base.Init();
         }
 
         public override void Dispose()
         {
-            Util.ClearArrays();
+            ClearArrays();
             base.Dispose();
         }
 
         public override void Update(float time)
         {
             if (Keyboard[Key.Escape]) GameLoop.Running = false;
+
+            // ohjaus
+            float spd = time * 20;
+            if (Keyboard[Key.ShiftLeft] || Keyboard[Key.ShiftRight]) spd *= 4;
+            if (Keyboard[Key.W]) camera.Move(spd);
+            if (Keyboard[Key.S]) camera.Move(-spd);
+            if (Keyboard[Key.A]) camera.Strafe(-spd);
+            if (Keyboard[Key.D]) camera.Strafe(spd);
+            if (Mouse[MouseButton.Left])
+            {
+                camera.Rotation.Y -= Mouse.X - oldMouseX;
+                camera.Rotation.X -= Mouse.Y - oldMouseY;
+            }
+
             UpdateParticles(time);
 
             base.Update(time);
@@ -52,14 +66,12 @@ namespace CSatEng
 
         public override void Render()
         {
-            GL.Disable(EnableCap.Lighting);
-            GL.LoadIdentity();
-            GL.Translate(0, 0, -150);
+            camera.SetFPSCamera();
+            world.Render();
 
-            // particles -partikkeliengine hoitaa sinne lisättyjen partikkelien renderoinnin. 
-            // se sorttaa ne, hoitaa takaisinkutsut ym.
-            particles.Render();
-
+            Camera.Set2D();
+            font.Write("Particles");
+            Camera.Set3D();
             base.Render();
         }
 
@@ -74,8 +86,7 @@ namespace CSatEng
                     Vector3 grav = new Vector3(0, -0.01f, 0);
                     float life = (float)(Rnd.NextDouble() * 1000 + 5000);
                     float size = 2;
-
-                    this.test.AddParticle(ref pos, ref dir, ref grav, life, size, new Vector4(1, 1, 1, 1));
+                    this.test.AddParticle(ref pos, ref dir, ref grav, life, 0, 0, size, new Vector4(1, 1, 1, 1));
                 }
             }
             if (explosion)
@@ -87,8 +98,9 @@ namespace CSatEng
                     Vector3 grav = new Vector3(0, 0, 0);
                     float life = 2;
                     float size = (float)(Rnd.NextDouble() * 10 + 6);
-
-                    this.explosion.AddParticle(ref pos, ref dir, ref grav, life, size, new Vector4(0.3f, 0, 0, 0.5f));
+                    float zrot = (float)(Rnd.NextDouble() * 360);
+                    float zrotAdder = 0;
+                    this.explosion.AddParticle(ref pos, ref dir, ref grav, life, zrot, zrotAdder, size, new Vector4(0.3f, 0, 0, 0.5f));
                 }
             }
             if (smoke)
@@ -100,7 +112,9 @@ namespace CSatEng
                     Vector3 grav = new Vector3(0, 0, 0);
                     float life = 1 + (float)(Rnd.NextDouble() * 4);
                     float size = 10;
-                    this.smoke.AddParticle(ref pos, ref dir, ref grav, life, size, new Vector4(0.4f, 0.4f, 0.4f, 0.2f));
+                    float zrot = (float)(Rnd.NextDouble() * 360);
+                    float zrotAdder = (float)(Rnd.NextDouble());
+                    this.smoke.AddParticle(ref pos, ref dir, ref grav, life, zrot, zrotAdder, size, new Vector4(0.4f, 0.4f, 0.4f, 0.1f));
                 }
             }
         }
@@ -117,7 +131,6 @@ namespace CSatEng
         {
             if (test.NumOfParticles == 0) SetupParticles(true, false, false);
             if (explosion.NumOfParticles == 0) SetupParticles(false, true, false);
-
             test.Update(time * 1000);
             explosion.Update(time);
 
@@ -128,7 +141,9 @@ namespace CSatEng
                 Vector3 grav = new Vector3(0, 0, 0);
                 float life = 3;
                 float size = 15;
-                smoke.AddParticle(ref pos, ref dir, ref grav, life, size, new Vector4(0.5f, 0.5f, 0.5f, 0.1f));
+                float zrot = (float)(Rnd.NextDouble() * 360);
+                float zrotAdder = (float)(Rnd.NextDouble());
+                smoke.AddParticle(ref pos, ref dir, ref grav, life, zrot, zrotAdder, size, new Vector4(0.5f, 0.5f, 0.5f, 0.1f));
             }
             smoke.Update(time);
         }

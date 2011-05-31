@@ -17,6 +17,7 @@ namespace CSatEng
     {
         public static bool UseShadowMapping = false;
         public static bool ShadowPass = false;
+        static Texture lightMask;
         FBO fbo;
 
         public ShadowMapping(FBO fbo)
@@ -40,16 +41,13 @@ namespace CSatEng
             lightMask = Texture.Load(lightMaskFileName);
         }
 
-        static int _texUnit;
-        static Texture lightMask;
-        public static void BindLightMask(int texUnit)
+        public static void BindLightMask()
         {
-            _texUnit = texUnit;
-            lightMask.Bind(texUnit);
+            lightMask.Bind(BaseGame.LIGHTMASK_TEXUNIT);
         }
         public static void UnBindLightMask()
         {
-            lightMask.UnBind(_texUnit);
+            Texture.UnBind(BaseGame.LIGHTMASK_TEXUNIT);
         }
 
         /// <summary>
@@ -107,7 +105,7 @@ namespace CSatEng
             GL.GetFloat(GetPName.ProjectionMatrix, out projMatrix);
             GL.GetFloat(GetPName.ModelviewMatrix, out modelMatrix);
 
-            fbo.BindDepth(BaseGame.SHADOW_TEXUNIT);
+            fbo.BindDepth();
             GL.MatrixMode(MatrixMode.Texture);
             GL.LoadIdentity();
             GL.Translate(0.5f, 0.5f, 0.5f); // remap from [-1,1]^2 to [0,1]^2

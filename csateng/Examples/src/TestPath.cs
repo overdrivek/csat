@@ -21,7 +21,7 @@ namespace CSatEng
             fbo = new FBO(512, 512, false, true);
             shadows = new ShadowMapping(fbo);
 
-            Sky skybox = Sky.Load("sky/sky2_", "jpg");
+            skybox = Sky.Load("sky/sky2_", "jpg");
             world.Add(skybox); // lisää ekana jolloin edellinen ruutu häviää tämän 'alle' (ruutua kun ei putsata)
 
             Model scene = new Model();
@@ -44,7 +44,7 @@ namespace CSatEng
 
         public override void Dispose()
         {
-            Util.ClearArrays();
+            ClearArrays();
             fbo.Dispose();
 
             base.Dispose();
