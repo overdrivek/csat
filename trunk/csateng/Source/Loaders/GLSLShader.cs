@@ -42,7 +42,7 @@ namespace CSatEng
 
             string file = shaderFileName;
             if (shaderFileName.Contains(":")) file = shaderFileName.Substring(0, shaderFileName.IndexOf(':'));
-            ShaderName = file;
+            ShaderName = shaderFileName;
 
             using (StreamReader shd = new StreamReader(Settings.ShaderDir + file))
             {
@@ -74,6 +74,7 @@ namespace CSatEng
                 fragmentObject = shaders[shaderFileName].fragmentObject;
                 return;
             }
+
             shaders.Add(shaderFileName, this);
 
             int s = shaderStr.IndexOf("[SETUP]") + 8;

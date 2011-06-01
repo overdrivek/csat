@@ -22,7 +22,6 @@ namespace CSatEng
                 for (int q = 0; q < 6; q++) skyboxSides[q].Dispose();
                 Name = "";
             }
-            GameLoop.ClearFlags |= ClearBufferMask.DepthBufferBit;
         }
 
         /// <summary>
@@ -101,7 +100,6 @@ namespace CSatEng
             GL.Enable(EnableCap.DepthTest);
             GL.Enable(EnableCap.Lighting);
             GL.PopMatrix();
-            GameLoop.ClearFlags &= ~ClearBufferMask.DepthBufferBit;
         }
     }
 }
