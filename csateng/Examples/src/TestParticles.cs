@@ -66,6 +66,8 @@ namespace CSatEng
 
         public override void Render()
         {
+            GL.Clear(GameLoop.ClearFlags);
+
             camera.SetFPSCamera();
             world.Render();
 

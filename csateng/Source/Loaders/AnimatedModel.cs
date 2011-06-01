@@ -566,23 +566,42 @@ namespace CSatEng
         void Animate(ref Animation anim, float dt)
         {
             int maxFrames = anim.numFrames - 1;
-
             anim.lastTime += dt;
 
-            /* move to next frame */
-            if (anim.lastTime >= anim.maxTime)
+            if (dt > 0)
             {
-                anim.curFrame++;
-                anim.nextFrame++;
-                anim.lastTime = 0.0f;
+                /* move to next frame */
+                if (anim.lastTime >= anim.maxTime)
+                {
+                    anim.curFrame++;
+                    anim.nextFrame++;
+                    anim.lastTime = 0.0f;
 
-                if (anim.curFrame > maxFrames)
-                    anim.curFrame = 0;
+                    if (anim.curFrame > maxFrames)
+                        anim.curFrame = 0;
 
-                if (anim.nextFrame > maxFrames)
-                    anim.nextFrame = 0;
+                    if (anim.nextFrame > maxFrames)
+                        anim.nextFrame = 0;
 
+                }
             }
+            else if (dt < 0)
+            {
+                /* move to prev frame */
+                if (anim.lastTime < 0)
+                {
+                    anim.curFrame--;
+                    anim.nextFrame--;
+                    anim.lastTime = anim.maxTime;
+
+                    if (anim.curFrame < 0)
+                        anim.curFrame = maxFrames - 1;
+
+                    if (anim.nextFrame < 0)
+                        anim.nextFrame = maxFrames - 1;
+                }
+            }
+
         }
 
 

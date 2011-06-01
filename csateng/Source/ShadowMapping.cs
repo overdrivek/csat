@@ -90,8 +90,6 @@ namespace CSatEng
             GL.ColorMask(true, true, true, true);
             GL.ShadeModel(ShadingModel.Smooth);
             fbo.UnBindFBO();
-
-            GL.Clear(fbo.ClearFlags);
             Settings.NumOfObjects = 0;
         }
 

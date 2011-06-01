@@ -85,6 +85,7 @@ namespace CSatEng
         public override void Render()
         {
             shadows.SetupShadows(world, 0);
+            GL.Clear(GameLoop.ClearFlags);
 
             camera.SetCameraMatrix();
 

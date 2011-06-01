@@ -94,8 +94,36 @@ namespace CSatEng
                 self.SetAnimation("walk");
                 self.MoveXZ(spd);
                 moving = true;
-                self.Update(time * 5);
+                self.Update(-time * 5);
             }
+            if (Keyboard[Key.Left])
+            {
+                if (moving == false)
+                {
+                    self.SetAnimation("act1");
+                    self.Update(time);
+                }
+                self.Rotation.Y += spd * 15;
+                turning = true;
+                
+            }
+            else if (Keyboard[Key.Right])
+            {
+                if (moving == false)
+                {
+                    self.SetAnimation("act3");
+                    self.Update(time);
+                }
+                self.Rotation.Y -= spd * 15;
+                turning = true;
+                
+            }
+            if (moving == false && turning == false) // idle
+            {
+                self.SetAnimation("act2");
+                self.Update(time);
+            }
+
 
             // tiputaanko
             Vector3 end = new Vector3(self.Position.X, self.Position.Y - 10, self.Position.Z);
@@ -106,33 +134,13 @@ namespace CSatEng
             }
 
 
-            if (Keyboard[Key.Left])
-            {
-                if (moving == false) self.SetAnimation("act1");
-                self.Rotation.Y += spd * 15;
-                turning = true;
-                self.Update(time);
-            }
-            else if (Keyboard[Key.Right])
-            {
-                if (moving == false) self.SetAnimation("act3");
-                self.Rotation.Y -= spd * 15;
-                turning = true;
-                self.Update(time);
-            }
-
-            if (moving == false && turning == false) // idle
-            {
-                self.SetAnimation("act2");
-                self.Update(time);
-            }
-
             base.Update(time);
         }
 
         public override void Render()
         {
             shadows.SetupShadows(world, 0);
+            GL.Clear(GameLoop.ClearFlags);
 
             camera.SetFPSCamera();
 
