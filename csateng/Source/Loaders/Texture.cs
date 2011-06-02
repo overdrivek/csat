@@ -17,11 +17,12 @@ namespace CSatEng
     /// </summary>
     public class Texture
     {
+        public static uint MaxTextures = 32;
         /// <summary>
         /// texture taulukko jossa kaikki ladatut texturet
         /// </summary>
         public static Dictionary<string, Texture> textures = new Dictionary<string, Texture>();
-        public static uint[] BindedTextures = new uint[128];
+        public static uint[] BindedTextures = new uint[MaxTextures];
         public static bool IsNPOTSupported = false;
 
         protected string textureName;
@@ -34,18 +35,17 @@ namespace CSatEng
         /// <param name="textureUnit"></param>
         public void Bind(int textureUnit)
         {
-            //if (BindedTextures[textureUnit] == TextureID) return; // on jo bindattu
-            BindedTextures[textureUnit] = TextureID;
             GL.ActiveTexture(TextureUnit.Texture0 + textureUnit);
+            if (Texture.BindedTextures[textureUnit] == TextureID) return; // on jo bindattu
+            Texture.BindedTextures[textureUnit] = TextureID;
             GL.BindTexture(TextureTarget.Texture2D, TextureID);
         }
 
-
         public static void Bind(int textureUnit, uint textureID)
         {
-            //if (BindedTextures[textureUnit] == textureID) return; // on jo bindattu
-            BindedTextures[textureUnit] = textureID;
             GL.ActiveTexture(TextureUnit.Texture0 + textureUnit);
+            if (BindedTextures[textureUnit] == textureID) return; // on jo bindattu
+            BindedTextures[textureUnit] = textureID;
             GL.BindTexture(TextureTarget.Texture2D, textureID);
         }
 
@@ -154,40 +154,20 @@ namespace CSatEng
 
         void CreateVBO()
         {
-            int[] ind = new int[] { 0, 1, 3, 1, 2, 3 };
+            if (Vbo != null) Vbo.Dispose();
+
+            ushort[] ind = new ushort[] { 0, 1, 3, 1, 2, 3 };
             int w = RealWidth / 2;
             int h = RealHeight / 2;
-
-            Vector3[] vs = new Vector3[]
-			{
-				new Vector3(-w, -h, 0),
-				new Vector3(-w, h, 0),
-				new Vector3(w, h, 0),
-				new Vector3(w, -h, 0)
-			};
-
-            Vector2[] uv = new Vector2[]
-			{
-				new Vector2(0,0),
-				new Vector2(0,1),
-				new Vector2(1,1),
-				new Vector2(1,0)
-			};
-
-            Vector3[] norm = new Vector3[]
-			{
-				new Vector3(0, 0, 1),
-				new Vector3(0, 0, 1),
-				new Vector3(0, 0, 1),
-				new Vector3(0, 0, 1)
-			};
-
+            Vertex[] vert =
+            {
+                new Vertex(new Vector3(-w, -h, 0), new Vector3(0, 0, 1), new Vector2(0,0)),
+                new Vertex(new Vector3(-w, h, 0), new Vector3(0, 0, 1), new Vector2(0,1)),
+                new Vertex(new Vector3(w, h, 0), new Vector3(0, 0, 1), new Vector2(1,1)),
+                new Vertex(new Vector3(w, -h, 0), new Vector3(0, 0, 1), new Vector2(1,0))
+            };
             Vbo = new VBO();
-            Vbo.DataToVBO(vs, ind, norm, uv);
-
-            // scale
-            Scale.X = 1;
-            Scale.Y = 1;
+            Vbo.DataToVBO(vert, ind, VBO.VertexMode.UV1);
         }
 
         public static new Texture2D Load(string fileName)
@@ -219,11 +199,12 @@ namespace CSatEng
         public void Draw(int x, int y, float rotate, float sx, float sy, bool blend)
         {
             if (Vbo == null) CreateVBO();
+            Bind(0);
+            GL.PushAttrib(AttribMask.ColorBufferBit | AttribMask.EnableBit | AttribMask.PolygonBit);
             GL.PushMatrix();
             GL.Translate(x + RealWidth / 2, Settings.Height - y - RealHeight / 2, 0);
             GL.Rotate(rotate, 0, 0, 1);
             GL.Scale(sx, sy, 1);
-            GL.PushAttrib(AttribMask.ColorBufferBit | AttribMask.EnableBit | AttribMask.PolygonBit);
             GL.Disable(EnableCap.Lighting);
             if (blend)
             {
@@ -232,26 +213,25 @@ namespace CSatEng
                 GL.Enable(EnableCap.AlphaTest);
                 GL.AlphaFunc(AlphaFunction.Greater, AlphaMin);
             }
-            Bind(0);
             Vbo.Render();
-            GL.PopAttrib();
             GL.PopMatrix();
+            GL.PopAttrib();
         }
 
         public void DrawFullScreen(int x, int y, float rotate)
         {
             float sx = (float)Settings.Width / (float)RealWidth, sy = (float)Settings.Height / (float)RealHeight;
             if (Vbo == null) CreateVBO();
+            Bind(0);
+            GL.PushAttrib(AttribMask.ColorBufferBit | AttribMask.EnableBit | AttribMask.PolygonBit);
             GL.PushMatrix();
             GL.Translate(sx * (x + RealWidth / 2), Settings.Height + sy * (y - RealHeight / 2), 0);
             GL.Rotate(rotate, 0, 0, 1);
             GL.Scale(sx, sy, 1);
-            GL.PushAttrib(AttribMask.ColorBufferBit | AttribMask.EnableBit | AttribMask.PolygonBit);
             GL.Disable(EnableCap.Lighting);
-            Bind(0);
             Vbo.Render();
-            GL.PopAttrib();
             GL.PopMatrix();
+            GL.PopAttrib();
         }
 
         public void DrawFullScreen(int x, int y)

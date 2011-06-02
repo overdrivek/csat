@@ -76,7 +76,9 @@ namespace CSatEng
             GL.Disable(EnableCap.Blend);
             GL.ShadeModel(ShadingModel.Flat);
             GL.ColorMask(false, false, false, false);
-            GL.CullFace(CullFaceMode.Front);
+            GL.Disable(EnableCap.CullFace);
+            GL.PolygonOffset(1, 1);
+            GL.Enable(EnableCap.PolygonOffsetFill);
 
             RenderFromLight(Light.Lights[lightNo]);
             SetTextureMatrix();
@@ -86,7 +88,9 @@ namespace CSatEng
             world.Render();
             ShadowPass = false;
 
+            GL.Disable(EnableCap.PolygonOffsetFill);
             GL.CullFace(CullFaceMode.Back);
+            GL.Enable(EnableCap.CullFace);
             GL.ColorMask(true, true, true, true);
             GL.ShadeModel(ShadingModel.Smooth);
             fbo.UnBindFBO();

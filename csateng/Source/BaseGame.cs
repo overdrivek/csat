@@ -18,6 +18,7 @@ namespace CSatEng
         public static readonly int BUMP_TEXUNIT = 2;
         public static readonly int LIGHTMASK_TEXUNIT = 6;
         public static readonly int SHADOW_TEXUNIT = 7;
+        public static readonly int DEPTH_TEXUNIT = SHADOW_TEXUNIT;
 
         public static Random Rnd = new Random();
         public static KeyboardDevice Keyboard;
@@ -62,6 +63,7 @@ namespace CSatEng
             world = null;
             world = new SceneNode("World");
             SceneNode.ObjectCount = 0;
+            for (int q = 0; q < Texture.MaxTextures; q++) Texture.UnBind(q);
 
             GC.Collect();
             GC.WaitForPendingFinalizers();

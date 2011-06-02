@@ -117,7 +117,7 @@ namespace CSatEng
                 Util.Error("GLSL: " + info);
             }
 
-            Log.WriteLine(info);
+            if (info.IndexOf('.') > 0) Log.WriteLine(info.Substring(0, info.IndexOf('.')));
 
             // Compile vertex Shader
             GL.ShaderSource(fragmentObject, fs);
@@ -129,7 +129,7 @@ namespace CSatEng
                 Util.Error("GLSL: " + info);
             }
 
-            Log.WriteLine(info);
+            if (info.IndexOf('.') > 0) Log.WriteLine(info.Substring(0, info.IndexOf('.')));
 
             ProgramID = GL.CreateProgram();
             GL.AttachShader(ProgramID, fragmentObject);

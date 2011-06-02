@@ -130,12 +130,12 @@ namespace CSatEng
             return outq;
         }
 
-        public static float DotProduct(ref Quaternion qa, ref Quaternion qb)
+        public static float DotProduct(Quaternion qa, Quaternion qb)
         {
             return ((qa.Xyz.X * qb.Xyz.X) + (qa.Xyz.Y * qb.Xyz.Y) + (qa.Xyz.Z * qb.Xyz.Z) + (qa.W * qb.W));
         }
 
-        public static Quaternion Slerp(ref Quaternion qa, ref Quaternion qb, float t)
+        public static Quaternion Slerp(Quaternion qa, Quaternion qb, float t)
         {
             Quaternion outr = new Quaternion();
 
@@ -151,7 +151,7 @@ namespace CSatEng
             }
 
             // compute "cosine of angle between quaternions" using dot product
-            float cosOmega = DotProduct(ref qa, ref qb);
+            float cosOmega = DotProduct(qa, qb);
 
             // if negative dot, use -q1. two quaternions q and -q
             // represent the same Rotation, but may produce
@@ -175,7 +175,11 @@ namespace CSatEng
             // assert( cosOmega < 1.1f );
             if (cosOmega >= 1.1f)
             {
-                Log.WriteLine("Quaternion error: Slerp");
+                //return Slerp(Quaternion.Normalize(qa), Quaternion.Normalize(qb), t);
+
+                qa = Quaternion.Multiply(qa, 0.0001f);
+                qb = Quaternion.Multiply(qb, 0.0001f);
+                return Slerp(qa, qb, t);
             }
 
             // compute interpolation fraction, checking for quaternions
@@ -219,7 +223,7 @@ namespace CSatEng
 
             return outr;
         }
-        
+
         public static Vector3 QuatToEuler(Quaternion q1)
         {
             double heading, attitude, bank;

@@ -3,8 +3,36 @@
  * Copyright (c) 2011 mjt[matola@sci.fi]
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
+ * 
+ * based on "MD5Mesh Loader" found at http://www.bokebb.com/dev/english/2004/posts/2004105894.shtml
+ * and
+ * "md5mesh model loader + animation" found at http://tfc.duke.free.fr/coding/md5-specs-en.html
+ *
+ * Copyright (c) 2005-2007 David HENRY
+ *
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated documentation
+ * files (the "Software"), to deal in the Software without
+ * restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * 
  */
 #endregion
+
 using System;
 using System.Collections.Generic;
 using OpenTK.Graphics.OpenGL;
@@ -89,16 +117,6 @@ namespace CSatEng
                 Log.WriteLine("Disposed: " + Name, true);
                 Name = "";
             }
-        }
-
-        private string ext = "";
-        /// <summary>
-        /// jos shaderin päätettä ei ole md5 tiedostoissa, voi pistää tässä, eli esim .jpg, .tga, .dds ..
-        /// </summary>
-        /// <param name="ext"></param>
-        public void UseExt(string ext)
-        {
-            this.ext = ext;
         }
 
         /// <summary>
@@ -249,8 +267,8 @@ namespace CSatEng
             for (int q = 0; q < numMesh; q++)
             {
                 Vertex[] v = meshes[q];
-                int[] ind = new int[v.Length];
-                for (int w = 0; w < ind.Length; w++) ind[w] = w;
+                ushort[] ind = new ushort[v.Length];
+                for (ushort w = 0; w < ind.Length; w++) ind[w] = w;
 
                 // luo vbo ja datat sinne
                 model[q].vbo = new VBO(BufferUsageHint.DynamicDraw);
@@ -416,7 +434,6 @@ namespace CSatEng
         /// <summary>
         /// aseta haluttu animaatio
         /// </summary>
-        /// <param name="animName"></param>
         public override void SetAnimation(string animName)
         {
             bool found = false;
@@ -438,21 +455,13 @@ namespace CSatEng
         /// <summary>
         /// luo luuranko.
         /// </summary>
-        /// <param name="jointInfos"></param>
-        /// <param name="baseFrame"></param>
-        /// <param name="animFrameData"></param>
-        /// <param name="frameIndex"></param>
-        /// <param name="num_joints"></param>
-        /// <param name="md5anim"></param>
         void BuildFrameSkeleton(ref MD5JointInfo[] jointInfos,
                                 ref MD5BaseFrameJoint[] baseFrame,
                                 ref float[] animFrameData,
                                 int frameIndex,
                                 int num_joints, ref Animation md5anim)
         {
-            int i;
-
-            for (i = 0; i < num_joints; ++i)
+            for (int i = 0; i < num_joints; ++i)
             {
                 MD5BaseFrameJoint baseJoint = baseFrame[i];
                 Vector3 animatedPos;
@@ -534,16 +543,9 @@ namespace CSatEng
         /// <summary>
         /// laske luurangolle asento.
         /// </summary>
-        /// <param name="skel"></param>
-        /// <param name="curFrame"></param>
-        /// <param name="nextFrame"></param>
-        /// <param name="num_joints"></param>
-        /// <param name="interp"></param>
         void InterpolateSkeletons(ref MD5Joint[,] skel, int curFrame, int nextFrame, int num_joints, float interp)
         {
-            int i;
-
-            for (i = 0; i < num_joints; ++i)
+            for (int i = 0; i < num_joints; ++i)
             {
                 /* Copy parent index */
                 skeleton[i].parent = skel[curFrame, i].parent;
@@ -554,15 +556,13 @@ namespace CSatEng
                 skeleton[i].pos.Z = skel[curFrame, i].pos.Z + interp * (skel[nextFrame, i].pos.Z - skel[curFrame, i].pos.Z);
 
                 /* Spherical linear interpolation for orientation */
-                skeleton[i].orient = QuaternionExt.Slerp(ref skel[curFrame, i].orient, ref skel[nextFrame, i].orient, interp);
+                skeleton[i].orient = QuaternionExt.Slerp(skel[curFrame, i].orient, skel[nextFrame, i].orient, interp);
             }
         }
 
         /// <summary>
         /// lasketaan frame
         /// </summary>
-        /// <param name="anim"></param>
-        /// <param name="dt"></param>
         void Animate(ref Animation anim, float dt)
         {
             int maxFrames = anim.numFrames - 1;

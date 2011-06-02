@@ -31,8 +31,8 @@ namespace CSatEng
         public void BillboardBegin(float x, float y, float z, float zrot, float size)
         {
             int i, j;
-            GL.PushAttrib(AttribMask.ColorBufferBit | AttribMask.EnableBit | AttribMask.PolygonBit);
             billBoard.Bind(0);
+            GL.PushAttrib(AttribMask.ColorBufferBit | AttribMask.EnableBit | AttribMask.PolygonBit);
             GL.Disable(EnableCap.CullFace);
             GL.Disable(EnableCap.Lighting);
             GL.PushMatrix();

@@ -57,6 +57,13 @@ namespace CSatEng
     {
         public static List<Particles> ParticleGroups = new List<Particles>();
         public static float AlphaMin = 0.1f;
+        
+        /// <summary>
+        /// jos t‰m‰ true, particles.shader ladataan kun luodaan partikkelit.
+        /// softparticles vaatii fbo:n & depth texturen jotka pit‰‰ bindata
+        /// ennen skenen renderointia. sen j‰lkeen renderoidaan partikkelit.
+        /// </summary>
+        public static bool SoftParticles = false;
 
         public bool IsTransparent = false;
         Billboard particleTex = null;
@@ -64,8 +71,12 @@ namespace CSatEng
         public float Size = 10;
 
         List<Particle> particles = new List<Particle>();
+        static GLSLShader softParticles;
 
-        public Particles() { }
+        public Particles()
+        {
+            //if (softParticles == null) softParticles = GLSLShader.Load("particles.shader");
+        }
 
         /// <summary>
         ///  TODO
@@ -73,8 +84,9 @@ namespace CSatEng
         public static Particles Load(string particleFileName)
         {
             Particles part = new Particles();
-            
-            
+
+
+
             // TODO
 
             part.Name = particleFileName;
@@ -94,7 +106,9 @@ namespace CSatEng
         public override void Dispose()
         {
             if (particleTex != null) particleTex.Dispose();
+            if (softParticles != null) softParticles.Dispose();
             particleTex = null;
+            softParticles = null;
             particles.Clear();
 
             Log.WriteLine("Disposed: Particles", true);
@@ -145,7 +159,6 @@ namespace CSatEng
                     particles.RemoveAt(q); // poista se
                     continue;
                 }
-
                 p.pos += p.dir;
                 p.dir += p.gravity;
                 p.zrot += p.zrotAdder;
@@ -179,6 +192,10 @@ namespace CSatEng
         public void RenderGroups()
         {
             List<SortedList_Particles> slist = new List<SortedList_Particles>();
+            if (SoftParticles == true && softParticles != null)
+            {
+                softParticles.UseProgram();
+            }
             GL.PushAttrib(AttribMask.AllAttribBits);
             GL.Disable(EnableCap.Lighting);
             GL.Enable(EnableCap.AlphaTest);
