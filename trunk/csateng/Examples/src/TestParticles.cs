@@ -30,7 +30,7 @@ namespace CSatEng
             SetupParticles(true, true, true);
 
             font = BitmapFont.Load("fonts/comic12.png");
-
+            
             camera.Position = new Vector3(0, 0, 150);
             Camera.Set3D();
             base.Init();
@@ -44,6 +44,8 @@ namespace CSatEng
 
         public override void Update(float time)
         {
+            Util.CheckGLError("virhe jossain");
+
             if (Keyboard[Key.Escape]) GameLoop.Running = false;
 
             // ohjaus

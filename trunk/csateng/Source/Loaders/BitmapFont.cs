@@ -49,7 +49,6 @@ namespace CSatEng
         static string chars = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_'abcdefghijklmnopqrstuvwxyz{|}                                                                      Ä                 Ö             ä                 ö";
         Texture texture = new Texture();
         Rect[] uv = new Rect[chars.Length];
-        int[] charDisplayLists = new int[chars.Length];
         float charHeight = 0;
 
         float curX = 0, curY = 0;
@@ -82,8 +81,6 @@ namespace CSatEng
             {
                 Util.Error("Font: error loading file " + fileName + "\n" + e.ToString());
             }
-            font.CreateDisplayLists();
-
             return font;
         }
 
@@ -118,9 +115,7 @@ namespace CSatEng
                 }
                 this.charHeight = (float)height / (float)data.Height;
 
-
                 // etsi kirjainten koot
-
                 ptr = (byte*)(data.Scan0);
                 while (true) // kunnes joka rivi käyty läpi
                 {
@@ -130,12 +125,10 @@ namespace CSatEng
                         if (curcol == color1) // ylänurkka
                         {
                             long b = 0;
-
                             // haetaan alanurkka
                             ptr += data.Width * bpp * (height - 1);
                             b += data.Width * bpp * (height - 1);
                             width = 0;
-
                             while (true)
                             {
                                 curcol = GetColor(*ptr, *(ptr + 1), *(ptr + 2));
@@ -146,14 +139,11 @@ namespace CSatEng
                                         (float)(y - 2.5f) / (float)data.Height,
                                         (float)width / (float)data.Width,
                                         (float)(height - 4f) / (float)data.Height);
-
                                     break;
                                 }
                                 ptr += bpp;
                                 b += bpp;
                                 width++;
-
-
                             }
                             ptr -= b;
                             ch++;
@@ -162,9 +152,7 @@ namespace CSatEng
                         x++;
                         if (x >= data.Width) break;
                         ptr += bpp;
-
                     }
-
                     x = 0;
                     y -= height;
                     if (y >= data.Height) break;
@@ -179,37 +167,27 @@ namespace CSatEng
             }
         }
 
-        /// <summary>
-        /// luo display listit
-        /// </summary>
-        void CreateDisplayLists()
+        void DrawChar(int ch)
         {
-            GL.PushMatrix();
-            for (int ch = 0; ch < chars.Length; ch++)
-            {
-                charDisplayLists[ch] = GL.GenLists(1);
-                GL.NewList(charDisplayLists[ch], ListMode.Compile);
-                float u = uv[ch].x;
-                float v = uv[ch].y;
-                float w = uv[ch].w;
-                float h = uv[ch].h;
-                float wm = w * Size;
-                float hm = h * Size;
-                float xp = 0, yp = 0;
-                GL.Begin(BeginMode.Quads);
-                GL.TexCoord2(u, v);
-                GL.Vertex2(xp, yp);
-                GL.TexCoord2(u + w, v);
-                GL.Vertex2(xp + wm, yp);
-                GL.TexCoord2(u + w, v + h);
-                GL.Vertex2(xp + wm, yp + hm);
-                GL.TexCoord2(u, v + h);
-                GL.Vertex2(xp, yp + hm);
-                GL.End();
-                GL.EndList();
-            }
-            GL.PopMatrix();
+            float u = uv[ch].x;
+            float v = uv[ch].y;
+            float w = uv[ch].w;
+            float h = uv[ch].h;
+            float wm = w * Size;
+            float hm = h * Size;
+            float xp = 0, yp = 0;
+            GL.Begin(BeginMode.Quads);
+            GL.TexCoord2(u, v);
+            GL.Vertex2(xp, yp);
+            GL.TexCoord2(u + w, v);
+            GL.Vertex2(xp + wm, yp);
+            GL.TexCoord2(u + w, v + h);
+            GL.Vertex2(xp + wm, yp + hm);
+            GL.TexCoord2(u, v + h);
+            GL.Vertex2(xp, yp + hm);
+            GL.End();
         }
+
 
         public void Write(string str)
         {
@@ -217,11 +195,11 @@ namespace CSatEng
         }
         public void Write(string str, float x, float y)
         {
+            texture.Bind(0);
             GL.PushAttrib(AttribMask.AllAttribBits);
             GL.PushMatrix();
             curX = x;
             curY = y;
-            texture.Bind(0);
             GL.Disable(EnableCap.CullFace);
             GL.Disable(EnableCap.Lighting);
             GL.Enable(EnableCap.Blend);
@@ -230,10 +208,8 @@ namespace CSatEng
             GL.AlphaFunc(AlphaFunction.Greater, 0.1f);
             GL.Translate(x, (float)Settings.Height - y, 0);
             float xp = 0;
-            for (int q = 0; q < str.Length; q++)
+            for (int q = 0, ch; q < str.Length; q++)
             {
-                int ch;
-
                 // etsi kirjain
                 for (ch = 0; ch < chars.Length; ch++)
                 {
@@ -249,14 +225,12 @@ namespace CSatEng
                     xp = 0;
                     continue;
                 }
-
                 float w = uv[ch].w;
                 float wm = w * Size;
                 xp += wm;
-                GL.CallList(charDisplayLists[ch]);
+                DrawChar(ch);
                 GL.Translate(wm, 0, 0);
             }
-
             GL.PopMatrix();
             GL.PopAttrib();
         }

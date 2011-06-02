@@ -32,17 +32,11 @@ namespace CSatEng
             return 0;
         }
 
-        public static void CheckGLError(string className)
+        public static void CheckGLError(string methodName)
         {
-            ErrorCode error = ErrorCode.NoError;
-
             GL.Finish();
-
-            error = GL.GetError();
-            if (error != ErrorCode.NoError)
-            {
-                Util.Error("Error " + error + " in " + className);
-            }
+            ErrorCode error = error = GL.GetError();
+            if (error != ErrorCode.NoError) Util.Error("Error " + error + " in " + methodName);
         }
 
         public static void Error(string str)

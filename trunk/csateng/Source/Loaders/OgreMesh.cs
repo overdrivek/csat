@@ -136,14 +136,14 @@ namespace CSatEng
         void processFaces(XmlElement XMLNode)
         {
             int numOfFaces = (int)XML.GetAttribReal(XMLNode, "count");
-            IndexBuffer = new int[numOfFaces * 3];
+            IndexBuffer = new ushort[numOfFaces * 3];
             XmlElement pElement = (XmlElement)XMLNode.SelectSingleNode("face");
             for (int q = 0; q < numOfFaces; q++)
             {
                 Vector3 f = XML.ParseFace(pElement);
-                IndexBuffer[q * 3] = (int)f.X;
-                IndexBuffer[q * 3 + 1] = (int)f.Y;
-                IndexBuffer[q * 3 + 2] = (int)f.Z;
+                IndexBuffer[q * 3] = (ushort)f.X;
+                IndexBuffer[q * 3 + 1] = (ushort)f.Y;
+                IndexBuffer[q * 3 + 2] = (ushort)f.Z;
                 pElement = (XmlElement)pElement.NextSibling;
             }
         }

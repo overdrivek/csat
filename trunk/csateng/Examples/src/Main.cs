@@ -18,7 +18,7 @@ namespace CSatEng
             Log.Open("log.txt");
             Settings.ReadXML("settings.xml");
             BaseGame game;
-           
+            
             using (GameLoop gameLoop = new GameLoop("Project XYZ", false))
             {
                 game = new Test2D();
@@ -43,7 +43,7 @@ namespace CSatEng
                 gameLoop.SetGame(game);
                 gameLoop.Run(60.0);
             }
-
+            
             Log.WriteLine("Exiting..");
 #if DEBUG
             Console.ReadKey();

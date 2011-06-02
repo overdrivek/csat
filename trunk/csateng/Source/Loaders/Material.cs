@@ -12,8 +12,18 @@ using OpenTK;
 
 namespace CSatEng
 {
+    public struct TextureInfo
+    {
+        public enum EnvMaps { None, Spherical, CubicReflection };
+        public Texture Tex;
+        public uint TexCoordSet;
+        public EnvMaps EnvMap;
+    }
+
     public class MaterialInfo
     {
+        static readonly int MaxTextures = 8;
+
         static Dictionary<string, MaterialInfo> materials = new Dictionary<string, MaterialInfo>();
 
         string materialName = "";
@@ -28,9 +38,7 @@ namespace CSatEng
         /*
         /// texturet
          */
-        public Texture DiffuseTex = null; // texunit 0
-        public Texture LightmapTex = null;   // texunit 1
-        public Texture BumpTex = null;    // texunit 2
+        public TextureInfo[] Textures = new TextureInfo[MaxTextures];
 
         /*
         /// väriarvot
@@ -58,11 +66,9 @@ namespace CSatEng
             {
                 return materials[materialName];
             }
-
             MaterialInfo mat = new MaterialInfo();
             mat.materialName = materialName;
             materials.Add(materialName, mat);
-
             return mat;
         }
 
@@ -73,9 +79,11 @@ namespace CSatEng
                 Log.WriteLine("Disposed: " + materialName, true);
                 materials.Remove(materialName);
                 materialName = "";
-                if (DiffuseTex != null) DiffuseTex.Dispose();
-                if (LightmapTex != null) LightmapTex.Dispose();
-                if (BumpTex != null) BumpTex.Dispose();
+                for (int q = 0; q < MaxTextures; q++)
+                {
+                    if (Textures[q].Tex != null)
+                        Textures[q].Tex.Dispose();
+                }
             }
         }
         public static void DisposeAll()
@@ -106,7 +114,7 @@ namespace CSatEng
                 string[] lines = data.Split('\n');
 
                 MaterialInfo mat = new MaterialInfo();
-                int tex = 0;
+                int curTexture = -1;
 
                 for (int q = 0; q < lines.Length; q++)
                 {
@@ -117,7 +125,7 @@ namespace CSatEng
 
                     if (ln[0] == "material")
                     {
-                        tex = 0;
+                        curTexture = -1;
                         mat = MaterialInfo.CreateMaterial(ln[1]);
                         Log.WriteLine("MaterialName: " + mat.materialName, true);
                         continue;
@@ -126,31 +134,32 @@ namespace CSatEng
                     if (ln[0] == "shader")
                     {
                         mat.ShaderName = ln[1]; // ota shaderin nimi
-                    }
-
-                    // Diffuse color texture map
-                    if (ln[0] == "texture" && tex == 0)
-                    {
-                        tex++;
-                        if (ln[1] == "none") continue;
-                        mat.DiffuseTex = Texture.Load(ln[1].ToLower());
                         continue;
                     }
 
-                    // Ambient color texture map (lightmap)
-                    if (ln[0] == "texture" && tex == 1)
+                    // lataa texture
+                    if (ln[0] == "texture")
                     {
-                        tex++;
+                        curTexture++;
                         if (ln[1] == "none") continue;
-                        mat.LightmapTex = Texture.Load(ln[1].ToLower());
+                        mat.Textures[curTexture].Tex = Texture.Load(ln[1]);
                         continue;
                     }
-                    // Bump color texture map
-                    if (ln[0] == "texture" && tex == 2)
+
+                    if (ln[0] == "tex_coord_set")
                     {
-                        tex++;
-                        if (ln[1] == "none") continue;
-                        mat.BumpTex = Texture.Load(ln[1].ToLower());
+                        mat.Textures[curTexture].TexCoordSet = uint.Parse(ln[1]);
+                        continue;
+                    }
+
+                    if (ln[0] == "env_map")
+                    {
+                        if (ln[1] == "spherical")
+                            mat.Textures[curTexture].EnvMap = TextureInfo.EnvMaps.Spherical;
+                        else if (ln[1] == "cubic_reflection")
+                            mat.Textures[curTexture].EnvMap = TextureInfo.EnvMaps.CubicReflection;
+                        else
+                            mat.Textures[curTexture].EnvMap = TextureInfo.EnvMaps.None;
                         continue;
                     }
 
@@ -198,10 +207,9 @@ namespace CSatEng
         {
             if (curMaterial == materialName) return;
             curMaterial = materialName;
-
-            if (DiffuseTex != null) DiffuseTex.Bind(BaseGame.DIFFUSE_TEXUNIT);
-            if (LightmapTex != null) LightmapTex.Bind(BaseGame.LIGHTMAP_TEXUNIT);
-            if (BumpTex != null) BumpTex.Bind(BaseGame.BUMP_TEXUNIT);
+            for (int q = 0; q < MaxTextures; q++)
+                if (Textures[q].Tex != null)
+                    Textures[q].Tex.Bind(q);
 
             GL.Material(MaterialFace.Front, MaterialParameter.Ambient, AmbientColor);
             GL.Material(MaterialFace.Front, MaterialParameter.Diffuse, DiffuseColor);

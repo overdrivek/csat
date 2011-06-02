@@ -153,20 +153,20 @@ namespace CSatEng
             GL.GetInteger(GetPName.Stereo, out queryinfo[3]);
             GL.GetInteger(GetPName.Samples, out queryinfo[4]);
             GL.GetInteger(GetPName.Doublebuffer, out queryinfo[5]);
-            Log.WriteLine("Max ColorBuffers: " + queryinfo[0] + "\nMax AuxBuffers: " + queryinfo[1] + "\nMax DrawBuffers: " + queryinfo[2] +
-                               "\nStereo: " + queryinfo[3] + "\nSamples: " + queryinfo[4] + "\nDoubleBuffer: " + queryinfo[5]);
+            Log.WriteLine("Max ColorBuffers: " + queryinfo[0] + " / Max AuxBuffers: " + queryinfo[1] + " / Max DrawBuffers: " + queryinfo[2] +
+                               " / Stereo: " + queryinfo[3] + " / Samples: " + queryinfo[4] + " / DoubleBuffer: " + queryinfo[5]);
 
             if (ok == false)
             {
                 IsSupported = false;
                 Log.WriteLine("Last GL Error: " + GL.GetError());
+                return;
             }
+            else IsSupported = true;
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0); // disable rendering into the FBO
             GL.BindTexture(TextureTarget.Texture2D, 0);
-
-            IsSupported = true;
         }
 
         public void Dispose()
@@ -206,12 +206,12 @@ namespace CSatEng
         public void BindDepth()
         {
             if (IsSupported == false) return;
-            Texture.Bind(BaseGame.SHADOW_TEXUNIT, depthTexture);
+            Texture.Bind(BaseGame.DEPTH_TEXUNIT, depthTexture);
         }
         public void UnBindDepth()
         {
             if (IsSupported == false) return;
-            Texture.UnBind(BaseGame.SHADOW_TEXUNIT);
+            Texture.UnBind(BaseGame.DEPTH_TEXUNIT);
         }
 
         public Texture2D CreateDrawableColorTexture()

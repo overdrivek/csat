@@ -56,7 +56,7 @@ namespace CSatEng
                     string fileName = skyName + sideStr[side] + "." + ext;
                     m.MaterialName = fileName;
                     m.Material = MaterialInfo.GetMaterial(fileName + "_material");
-                    m.Material.DiffuseTex = Texture.Load(m.MaterialName);
+                    m.Material.Textures[BaseGame.DIFFUSE_TEXUNIT].Tex = Texture.Load(m.MaterialName);
                     side++;
                 }
             }

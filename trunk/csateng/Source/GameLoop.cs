@@ -20,7 +20,7 @@ namespace CSatEng
         BaseGame game;
 
         public GameLoop(string projectName, bool hideMouseCursor)
-            : base(Settings.Width, Settings.Height, new GraphicsMode(Settings.Bpp, 0, 0, Settings.FSAA), projectName)
+            : base(Settings.Width, Settings.Height, new GraphicsMode(Settings.Bpp, 0, 0, Settings.FSAA, 0, 2, false), projectName)
         {
             Log.WriteLine("CSatEng 0.8 log // (c) mjt, 2011");
             Log.WriteLine("OS: " + System.Environment.OSVersion.ToString());
