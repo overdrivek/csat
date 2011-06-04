@@ -10,7 +10,7 @@ Hakemistot:
  csateng/Source/              csat l‰hdekoodit
  csateng/Examples/src/        esimerkkien l‰hdekoodit
  csateng/Examples/data/       3d-mallit ja texturet
- csateng/Examples/bin/Debug/  k‰‰nnetty .exe
+ csateng/Examples/bin/Debug/  k‰‰nnetty .exe (ja otk release dll)
 
 K‰ynnist‰  csateng/Examples/bin/Debug/Examples.exe  testataksesi esimerkkej‰.
 

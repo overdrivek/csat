@@ -1,6 +1,8 @@
 <settings>
-  <resolution>1024x768x32</resolution>
+  <resolution>800x600x32</resolution>
+  <depth>16</depth>
   <fsaa>0</fsaa>
   <fullscreen>false</fullscreen>
   <vsync>true</vsync>
+  <mipmaps>false</mipmaps>
 </settings>

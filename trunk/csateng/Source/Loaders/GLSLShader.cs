@@ -152,11 +152,11 @@ namespace CSatEng
             if (shaderType == ShaderTypes.Shadow)
             {
                 ShadowMapping.BindLightMask();
+                GL.Uniform1(GL.GetUniformLocation(ProgramID, "diffuse"), BaseGame.DIFFUSE_TEXUNIT);
                 GL.Uniform1(GL.GetUniformLocation(ProgramID, "shadowMap"), BaseGame.SHADOW_TEXUNIT);
                 GL.Uniform1(GL.GetUniformLocation(ProgramID, "lightmask"), BaseGame.LIGHTMASK_TEXUNIT);
-                GL.Uniform1(GL.GetUniformLocation(ProgramID, "diffuse"), 0);
                 GL.Uniform1(GL.GetUniformLocation(ProgramID, "lightEnergy"), 2f);
-                GL.Uniform1(GL.GetUniformLocation(ProgramID, "ambient"), 0.5f);
+                GL.Uniform1(GL.GetUniformLocation(ProgramID, "ambient"), 0.8f);
                 //GL.Uniform1(GL.GetUniformLocation(ProgramID, "xPixelOffset"), (1.0f / (float)Settings.Width));
                 //GL.Uniform1(GL.GetUniformLocation(ProgramID, "yPixelOffset"), (1.0f / (float)Settings.Height));
             }

@@ -44,9 +44,7 @@ namespace CSatEng
 
         public override void Update(float time)
         {
-            Util.CheckGLError("virhe jossain");
-
-            if (Keyboard[Key.Escape]) GameLoop.Running = false;
+            if (Keyboard[Key.Escape]) Tests.NextTest = true;
 
             // ohjaus
             float spd = time * 20;

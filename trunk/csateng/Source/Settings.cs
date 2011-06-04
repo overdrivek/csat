@@ -17,7 +17,7 @@ namespace CSatEng
         public static string ShaderDir = "../../data/shader/";
 
         public static DisplayDevice Device;
-        public static int Width, Height, Bpp, FSAA;
+        public static int Width, Height, Bpp, FSAA, DepthBpp;
         public static bool FullScreen;
         public static bool VSync;
 
@@ -42,8 +42,11 @@ namespace CSatEng
             FullScreen = fullscreen.Value == "true";
             VSync = vsync.Value == "true";
 
+            XmlNode depth = doc.SelectSingleNode("//settings/depth/text()");
+            DepthBpp = int.Parse(depth.Value);
+
             XmlNode mipmaps = doc.SelectSingleNode("//settings/mipmaps/text()");
-            if (mipmaps != null) TextureLoaderParameters.BuildMipmapsForUncompressed = mipmaps.Value == "true";
+            TextureLoaderParameters.BuildMipmapsForUncompressed = mipmaps.Value == "true";
         }
     }
 }

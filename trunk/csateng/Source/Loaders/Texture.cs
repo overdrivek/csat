@@ -17,13 +17,13 @@ namespace CSatEng
     /// </summary>
     public class Texture
     {
-        public static uint MaxTextures = 32;
         /// <summary>
         /// texture taulukko jossa kaikki ladatut texturet
         /// </summary>
         public static Dictionary<string, Texture> textures = new Dictionary<string, Texture>();
-        public static uint[] BindedTextures = new uint[MaxTextures];
+        public static uint[] BindedTextures;
         public static bool IsNPOTSupported = false;
+        public static int MaxTextures;
 
         protected string textureName;
         public uint TextureID;
@@ -89,6 +89,8 @@ namespace CSatEng
         /// </summary>
         public static Texture Load(string fileName, bool useTexDir)
         {
+            if (BindedTextures == null) BindedTextures = new uint[MaxTextures];
+
             Texture tex;
             // jos texture on jo ladattu, palauta se
             textures.TryGetValue(fileName, out tex);

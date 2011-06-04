@@ -98,12 +98,12 @@ namespace CSatEng
     {
         public static void ComputeW(ref Quaternion q)
         {
-            float t = 1.0f - (q.Xyz.X * q.Xyz.X) - (q.Xyz.Y * q.Xyz.Y) - (q.Xyz.Z * q.Xyz.Z);
+            float t = 1.0f - (q.X * q.X) - (q.Y * q.Y) - (q.Z * q.Z);
             if (t < 0.0f) q.W = 0.0f;
             else q.W = (float)-Math.Sqrt(t);
         }
 
-        public static Vector3 RotatePoint(ref Quaternion q, ref Vector3 v)
+        public static Vector3 RotatePoint(Quaternion q, Vector3 v)
         {
             Vector3 outv;
             Quaternion inv = new Quaternion();
@@ -112,43 +112,34 @@ namespace CSatEng
             inv.Z = -q.Z;
             inv.W = q.W;
             Quaternion norminv = Quaternion.Normalize(inv);
-            Quaternion m = MultVec(ref q, ref v);
+            Quaternion m = MultVec(q, v);
             Quaternion qm = Quaternion.Multiply(m, norminv);
-            outv.X = qm.Xyz.X;
-            outv.Y = qm.Xyz.Y;
-            outv.Z = qm.Xyz.Z;
+            outv.X = qm.X;
+            outv.Y = qm.Y;
+            outv.Z = qm.Z;
             return outv;
         }
 
-        public static Quaternion MultVec(ref Quaternion q, ref Vector3 v)
+        public static Quaternion MultVec(Quaternion q, Vector3 v)
         {
             Quaternion outq = new Quaternion();
-            outq.W = -(q.Xyz.X * v.X) - (q.Xyz.Y * v.Y) - (q.Xyz.Z * v.Z);
-            outq.X = ((q.W * v.X) + (q.Xyz.Y * v.Z)) - (q.Xyz.Z * v.Y);
-            outq.Y = ((q.W * v.Y) + (q.Xyz.Z * v.X)) - (q.Xyz.X * v.Z);
-            outq.Z = ((q.W * v.Z) + (q.Xyz.X * v.Y)) - (q.Xyz.Y * v.X);
+            outq.W = -(q.X * v.X) - (q.Y * v.Y) - (q.Z * v.Z);
+            outq.X = ((q.W * v.X) + (q.Y * v.Z)) - (q.Z * v.Y);
+            outq.Y = ((q.W * v.Y) + (q.Z * v.X)) - (q.X * v.Z);
+            outq.Z = ((q.W * v.Z) + (q.X * v.Y)) - (q.Y * v.X);
             return outq;
         }
 
         public static float DotProduct(Quaternion qa, Quaternion qb)
         {
-            return ((qa.Xyz.X * qb.Xyz.X) + (qa.Xyz.Y * qb.Xyz.Y) + (qa.Xyz.Z * qb.Xyz.Z) + (qa.W * qb.W));
+            return ((qa.W * qb.W) + (qa.X * qb.X) + (qa.Y * qb.Y) + (qa.Z * qb.Z));
         }
 
         public static Quaternion Slerp(Quaternion qa, Quaternion qb, float t)
         {
-            Quaternion outr = new Quaternion();
-
             // check for out-of range parameter and return edge points if so
-            if (t <= 0.0)
-            {
-                return qa;
-            }
-
-            if (t >= 1.0)
-            {
-                return qb;
-            }
+            if (t <= 0.0) return qa;
+            if (t >= 1.0) return qb;
 
             // compute "cosine of angle between quaternions" using dot product
             float cosOmega = DotProduct(qa, qb);
@@ -158,9 +149,9 @@ namespace CSatEng
             // different slerp. we chose q or -q to rotate using
             // the acute angle.
             float q1w = qb.W;
-            float q1x = qb.Xyz.X;
-            float q1y = qb.Xyz.Y;
-            float q1z = qb.Xyz.Z;
+            float q1x = qb.X;
+            float q1y = qb.Y;
+            float q1z = qb.Z;
 
             if (cosOmega < 0.0f)
             {
@@ -175,11 +166,8 @@ namespace CSatEng
             // assert( cosOmega < 1.1f );
             if (cosOmega >= 1.1f)
             {
-                //return Slerp(Quaternion.Normalize(qa), Quaternion.Normalize(qb), t);
-
-                qa = Quaternion.Multiply(qa, 0.0001f);
-                qb = Quaternion.Multiply(qb, 0.0001f);
-                return Slerp(qa, qb, t);
+                Log.WriteLine("Slerp error (cosOmega " + cosOmega);
+                return Quaternion.Identity;
             }
 
             // compute interpolation fraction, checking for quaternions
@@ -216,12 +204,11 @@ namespace CSatEng
             }
 
             // interpolate and return new quaternion
-            outr.W = (k0 * qa.W) + (k1 * q1w);
-            outr.X = (k0 * qa.Xyz.X) + (k1 * q1x);
-            outr.Y = (k0 * qa.Xyz.Y) + (k1 * q1y);
-            outr.Z = (k0 * qa.Xyz.Z) + (k1 * q1z);
-
-            return outr;
+            return new Quaternion(
+                (k0 * qa.X) + (k1 * q1x),
+                (k0 * qa.Y) + (k1 * q1y),
+                (k0 * qa.Z) + (k1 * q1z),
+                (k0 * qa.W) + (k1 * q1w));
         }
 
         public static Vector3 QuatToEuler(Quaternion q1)

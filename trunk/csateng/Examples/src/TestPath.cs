@@ -22,7 +22,7 @@ namespace CSatEng
             shadows = new ShadowMapping(fbo);
 
             skybox = Sky.Load("sky/sky2_", "jpg");
-            world.Add(skybox); // lisää ekana jolloin edellinen ruutu häviää tämän 'alle' (ruutua kun ei putsata)
+            world.Add(skybox);
 
             Model scene = new Model();
             DotScene ds = DotScene.Load("scene1/scene1.scene", scene);
@@ -45,8 +45,6 @@ namespace CSatEng
         public override void Dispose()
         {
             ClearArrays();
-            fbo.Dispose();
-
             base.Dispose();
         }
 
@@ -55,7 +53,7 @@ namespace CSatEng
         Vector3 lookAt = Vector3.Zero;
         public override void Update(float time)
         {
-            if (Keyboard[Key.Escape]) GameLoop.Running = false;
+            if (Keyboard[Key.Escape]) Tests.NextTest = true;
 
             counter++;
             if (counter == 100)

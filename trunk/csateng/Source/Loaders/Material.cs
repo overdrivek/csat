@@ -22,7 +22,7 @@ namespace CSatEng
 
     public class MaterialInfo
     {
-        static readonly int MaxTextures = 8;
+        static int MaxTextures = Texture.MaxTextures;
 
         static Dictionary<string, MaterialInfo> materials = new Dictionary<string, MaterialInfo>();
 
