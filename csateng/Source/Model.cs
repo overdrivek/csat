@@ -35,7 +35,6 @@ namespace CSatEng
         public virtual void SetAnimation(string animName) { }
         public virtual void Update(float time) { }
 
-
         object ICloneable.Clone()
         {
             return this.Clone();

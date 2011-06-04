@@ -112,7 +112,6 @@ namespace CSatEng
             {
                 GL.BindBuffer(BufferTarget.ArrayBuffer, vertexID);
                 GL.BufferSubData(BufferTarget.ArrayBuffer, (IntPtr)0, (IntPtr)(vertexSize * numOfIndices), verts);
-                Util.CheckGLError("Update");
             }
         }
 

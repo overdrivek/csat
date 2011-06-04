@@ -19,29 +19,24 @@ namespace CSatEng
         public static float GetFloat(string str)
         {
             float n;
-            if (float.TryParse(str, out n) == true)
-            {
-                return n;
-            }
+            if (float.TryParse(str, out n) == true) return n;
             str = str.Replace('.', ','); // pisteet pilkuiksi
-            if (float.TryParse(str, out n) == true)
-            {
-                return n;
-            }
+            if (float.TryParse(str, out n) == true) return n;
             Util.Error("GetFloat failed: " + str);
             return 0;
         }
 
-        public static void CheckGLError(string methodName)
+        public static void CheckGLError(string str)
         {
             GL.Finish();
             ErrorCode error = error = GL.GetError();
-            if (error != ErrorCode.NoError) Util.Error("Error " + error + " in " + methodName);
+            if (error != ErrorCode.NoError) Util.Error(str + "Error: " + error);
         }
 
         public static void Error(string str)
         {
             Log.WriteLine(str);
+            System.Windows.Forms.MessageBox.Show(str, "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Exclamation);
             throw new Exception(str);
         }
     }

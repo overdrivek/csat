@@ -303,7 +303,7 @@ namespace CSatEng
                         MD5Weight wt = model[k].weights[model[k].verts[i].startw + j];
                         MD5Joint joint = skeleton[wt.joint];
 
-                        Vector3 wv = QuaternionExt.RotatePoint(ref joint.orient, ref wt.pos);
+                        Vector3 wv = QuaternionExt.RotatePoint(joint.orient, wt.pos);
                         finalVertex.X += (joint.pos.X + wv.X) * wt.bias;
                         finalVertex.Y += (joint.pos.Y + wv.Y) * wt.bias;
                         finalVertex.Z += (joint.pos.Z + wv.Z) * wt.bias;
@@ -526,7 +526,7 @@ namespace CSatEng
                     Vector3 rpos; /* Rotated Position */
 
                     /* Add positions */
-                    rpos = QuaternionExt.RotatePoint(ref parentJoint.orient, ref animatedPos);
+                    rpos = QuaternionExt.RotatePoint(parentJoint.orient, animatedPos);
 
                     md5anim.skelFrames[frameIndex, i].pos.X = rpos.X + parentJoint.pos.X;
                     md5anim.skelFrames[frameIndex, i].pos.Y = rpos.Y + parentJoint.pos.Y;
@@ -759,13 +759,8 @@ namespace CSatEng
                             if (line[0] == '}') break;
                             Cleanstring(ref line);
                             string[] splt = line.Split(' ');
-
-                            for (int ww = 0; ww < splt.Length; ww++)
-                            {
-                                animFrameData[i++] = float.Parse(splt[ww]);
-                            }
+                            for (int ww = 0; ww < splt.Length; ww++) animFrameData[i++] = Util.GetFloat(splt[ww]);
                         }
-
                         /* Build frame skeleton from the collected data */
                         BuildFrameSkeleton(ref jointInfos, ref baseFrame, ref animFrameData, frame_index, anim.numJoints, ref anim);
                     }
@@ -817,14 +812,13 @@ namespace CSatEng
 
         public static void Cleanstring(ref string str)
         {
-            str = str.Replace(".", ",");
             str = str.Replace("\t", " ");
             str = str.Replace("\"", " ");
-            str = str.Trim();
             str = str.Replace("     ", " ");
             str = str.Replace("    ", " ");
             str = str.Replace("   ", " ");
             str = str.Replace("  ", " ");
+            str = str.Trim();
         }
 
         public static bool ParseLine(ref Buffer t, string ln, string str)
@@ -850,12 +844,12 @@ namespace CSatEng
             {
                 if (string.Equals(splitstr[i], "%d")) //integer
                 {
-                    t.ibuffer[typed] = int.Parse(splitln[ii]);
+                    t.ibuffer[typed] = (int)Util.GetFloat(splitln[ii]);
                     typed++;
                 }
                 else if (string.Equals(splitstr[i], "%f")) //double
                 {
-                    t.fbuffer[typef] = float.Parse(splitln[ii]);
+                    t.fbuffer[typef] = Util.GetFloat(splitln[ii]);
                     typef++;
                 }
                 else if (string.Equals(splitstr[i], "%s")) //string

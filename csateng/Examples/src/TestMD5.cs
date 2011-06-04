@@ -26,7 +26,7 @@ namespace CSatEng
             font = BitmapFont.Load("fonts/comic12.png");
 
             skybox = Sky.Load("sky/sky_", "jpg");
-            world.Add(skybox); // lisää ekana jolloin edellinen ruutu häviää tämän 'alle' (ruutua kun ei putsata)
+            world.Add(skybox);
 
             DotScene ds = DotScene.Load("scene1/scene1.scene", scene);
             GLSLShader.LoadShader(scene, "shadow.shader");
@@ -58,14 +58,12 @@ namespace CSatEng
         public override void Dispose()
         {
             ClearArrays();
-            fbo.Dispose();
-
             base.Dispose();
         }
 
         public override void Update(float time)
         {
-            if (Keyboard[Key.Escape]) GameLoop.Running = false;
+            if (Keyboard[Key.Escape]) Tests.NextTest = true;
 
             // ohjaus
             float spd = time * 20;

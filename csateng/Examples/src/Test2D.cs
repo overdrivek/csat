@@ -18,8 +18,6 @@ namespace CSatEng
 
         public override void Init()
         {
-            fbo = new FBO(512, 512, true, true);
-
             back = Texture2D.Load("photo.jpg");
             img = Texture2D.Load("mousecursor.png");
             font = BitmapFont.Load("fonts/comic12.png");
@@ -36,7 +34,7 @@ namespace CSatEng
 
         public override void Update(float time)
         {
-            if (Keyboard[Key.Escape]) GameLoop.Running = false;
+            if (Keyboard[Key.Escape]) Tests.NextTest = true;
 
 
             base.Update(time);

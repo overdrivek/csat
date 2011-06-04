@@ -17,10 +17,10 @@ namespace CSatEng
     {
         public static bool Running = true;
         public static ClearBufferMask ClearFlags = ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit;
-        BaseGame game;
+        public static BaseGame Game;
 
         public GameLoop(string projectName, bool hideMouseCursor)
-            : base(Settings.Width, Settings.Height, new GraphicsMode(Settings.Bpp, 0, 0, Settings.FSAA, 0, 2, false), projectName)
+            : base(Settings.Width, Settings.Height, new GraphicsMode(Settings.Bpp, Settings.DepthBpp, 0, Settings.FSAA, 0, 2, false), projectName)
         {
             Log.WriteLine("CSatEng 0.8 log // (c) mjt, 2011");
             Log.WriteLine("OS: " + System.Environment.OSVersion.ToString());
@@ -28,6 +28,12 @@ namespace CSatEng
             Log.WriteLine("Vendor: " + GL.GetString(StringName.Vendor));
             Log.WriteLine("Version: " + GL.GetString(StringName.Version));
             Log.WriteLine(".Net: " + Environment.Version);
+
+            string version = GL.GetString(StringName.Version);
+            int major = (int)version[0];
+            int minor = (int)version[2];
+            if (major <= 1 && minor < 5) Util.Error("VBOs not supported. You need at least OpenGL 1.5.");
+
             Log.WriteLine("--------------------------------------------");
             Log.WriteLine("Extensions:\n" + GL.GetString(StringName.Extensions));
             Log.WriteLine("--------------------------------------------");
@@ -57,12 +63,18 @@ namespace CSatEng
             }
 
             if (GL.GetString(StringName.Extensions).Contains("EXT_framebuffer_object"))
+            {
                 FBO.IsSupported = true;
+                Log.WriteLine("FBOs supported.");
+            }
             else
             {
                 FBO.IsSupported = false;
-                Log.WriteLine("FBOs not supported! Your video card does not support Framebuffer Objects.");
+                Log.WriteLine("FBOs not supported.");
             }
+
+            GL.GetInteger(GetPName.MaxCombinedTextureImageUnits, out Texture.MaxTextures);
+            Log.WriteLine("Max textureUnits: " + Texture.MaxTextures);
 
             VSync = Settings.VSync ? VSyncMode.On : VSyncMode.Off;
             Settings.Device = DisplayDevice.Default;
@@ -99,23 +111,23 @@ namespace CSatEng
             }
         }
 
-        public void SetGame(BaseGame game)
+        public static void SetGame(BaseGame game)
         {
-            this.game = game;
+            Game = game;
             game.Init();
         }
 
         public override void Dispose()
         {
             if (Settings.FullScreen) Settings.Device.RestoreResolution();
-            if (game != null) game.Dispose();
-            game = null;
+            if (Game != null) Game.Dispose();
+            Game = null;
             base.Dispose();
         }
 
         protected override void OnResize(EventArgs e)
         {
-            if (game == null) return;
+            if (Game == null) return;
             Settings.Width = Width;
             Settings.Height = Height;
             Camera.Resize();
@@ -128,9 +140,9 @@ namespace CSatEng
                 this.Exit();
                 return;
             }
-            if (game == null) return;
+            if (Game == null) return;
 
-            game.Update((float)e.Time);
+            Game.Update((float)e.Time);
 
             if (Keyboard[Key.AltLeft] && Keyboard[Key.Enter])
             {
@@ -143,9 +155,9 @@ namespace CSatEng
 
         protected override void OnRenderFrame(FrameEventArgs e)
         {
-            if (game == null) return;
+            if (Game == null) return;
             Settings.NumOfObjects = 0;
-            game.Render();
+            Game.Render();
             SwapBuffers();
 
 #if DEBUG

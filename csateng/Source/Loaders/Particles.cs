@@ -205,7 +205,7 @@ namespace CSatEng
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusDstAlpha);
 
             // j‰rjestet‰‰n taulukko kauimmaisesta l‰himp‰‰n. pit‰‰ rendata siin‰ j‰rjestyksess‰.
-            // vain l‰pikuultavat pit‰‰ j‰rjest‰‰. l‰pikuultamattomat renderoidaan samantien.
+            // vain l‰pikuultavat pit‰‰ j‰rjest‰‰. t‰ysin n‰kyv‰t renderoidaan samantien.
             for (int q = 0; q < ParticleGroups.Count; q++)
             {
                 GL.PushMatrix();
