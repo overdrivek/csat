@@ -127,7 +127,7 @@ namespace CSatEng
                     {
                         curTexture = -1;
                         mat = MaterialInfo.CreateMaterial(ln[1]);
-                        Log.WriteLine("MaterialName: " + mat.materialName, true);
+                        Log.WriteLine("Material: " + mat.materialName, true);
                         continue;
                     }
 

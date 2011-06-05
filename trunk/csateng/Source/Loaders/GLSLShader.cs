@@ -38,7 +38,6 @@ namespace CSatEng
         void LoadShader(string shaderFileName)
         {
             if (IsSupported == false) return;
-            Log.WriteLine("Shader: " + shaderFileName, true);
 
             string file = shaderFileName;
             if (shaderFileName.Contains(":")) file = shaderFileName.Substring(0, shaderFileName.IndexOf(':'));
@@ -75,6 +74,7 @@ namespace CSatEng
                 return;
             }
 
+            Log.WriteLine("Shader: " + shaderFileName, true);
             shaders.Add(shaderFileName, this);
 
             int s = shaderStr.IndexOf("[SETUP]") + 8;

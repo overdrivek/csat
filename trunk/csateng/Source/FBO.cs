@@ -206,7 +206,7 @@ namespace CSatEng
         public void BindDepth()
         {
             if (IsSupported == false) return;
-            Texture.Bind(BaseGame.DEPTH_TEXUNIT, depthTexture);
+            Texture.Bind(BaseGame.DEPTH_TEXUNIT, TextureTarget.Texture2D, depthTexture);
         }
         public void UnBindDepth()
         {
