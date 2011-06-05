@@ -35,6 +35,7 @@ namespace CSatEng
 
         public BaseGame()
         {
+            Particles.SoftParticles = false;
             GameLoop.Running = true;
         }
 
@@ -64,6 +65,7 @@ namespace CSatEng
             world = new SceneNode("World");
             SceneNode.ObjectCount = 0;
             for (int q = 0; q < Texture.MaxTextures; q++) Texture.UnBind(q);
+            Texture.UnBind(0);
 
             GC.Collect();
             GC.WaitForPendingFinalizers();

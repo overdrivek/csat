@@ -24,13 +24,10 @@ namespace CSatEng
             test.SetParticle(Billboard.Load("earth.png"), false, null); // ei läpikuultava
             explosion.SetParticle(Billboard.Load("fire.png"), true, new ParticleCallback(RenderParticleCallback)); // läpikuultava
             smoke.SetParticle(Billboard.Load("smoke.png"), true, null); // kuten tämäkin
-            world.Add(test);
-            world.Add(explosion);
-            world.Add(smoke);
             SetupParticles(true, true, true);
 
             font = BitmapFont.Load("fonts/comic12.png");
-            
+
             camera.Position = new Vector3(0, 0, 150);
             Camera.Set3D();
             base.Init();
@@ -71,6 +68,8 @@ namespace CSatEng
             camera.SetFPSCamera();
             world.Render();
 
+            Particles.Render();
+
             Camera.Set2D();
             font.Write("Particles");
             Camera.Set3D();
@@ -86,8 +85,8 @@ namespace CSatEng
                     Vector3 pos = new Vector3(-50 + (float)(Rnd.NextDouble() * 3), 5 + (float)(Rnd.NextDouble() * 3), 0);
                     Vector3 dir = new Vector3(0.4f + (float)(Rnd.NextDouble() * 0.1f), 0.4f + (float)(Rnd.NextDouble() * 0.1f), 0.4f + (float)(Rnd.NextDouble() * 0.1f));
                     Vector3 grav = new Vector3(0, -0.01f, 0);
-                    float life = (float)(Rnd.NextDouble() * 1000 + 5000);
-                    float size = 2;
+                    float life = (float)(Rnd.NextDouble() * 1000 + 2000);
+                    float size = 0.5f;
                     this.test.AddParticle(ref pos, ref dir, ref grav, life, 0, 0, size, new Vector4(1, 1, 1, 1));
                 }
             }
@@ -99,7 +98,7 @@ namespace CSatEng
                     Vector3 dir = new Vector3(0.5f * (0.5f - (float)(Rnd.NextDouble())), 0.5f * (0.5f - (float)(Rnd.NextDouble())), 0.5f * (0.5f - (float)(Rnd.NextDouble())));
                     Vector3 grav = new Vector3(0, 0, 0);
                     float life = 2;
-                    float size = (float)(Rnd.NextDouble() * 10 + 6);
+                    float size = (float)(Rnd.NextDouble() * 2 + 1);
                     float zrot = (float)(Rnd.NextDouble() * 360);
                     float zrotAdder = 0;
                     this.explosion.AddParticle(ref pos, ref dir, ref grav, life, zrot, zrotAdder, size, new Vector4(0.3f, 0, 0, 0.5f));
@@ -112,8 +111,8 @@ namespace CSatEng
                     Vector3 pos = new Vector3(0, 5 + (float)(Rnd.NextDouble() * 10), 0);
                     Vector3 dir = new Vector3(-0.05f + (float)(Rnd.NextDouble() * 0.1f), 0.1f, -0.05f + (float)(Rnd.NextDouble() * 0.1f));
                     Vector3 grav = new Vector3(0, 0, 0);
-                    float life = 1 + (float)(Rnd.NextDouble() * 4);
-                    float size = 10;
+                    float life = (float)(Rnd.NextDouble() * 2);
+                    float size = 1;
                     float zrot = (float)(Rnd.NextDouble() * 360);
                     float zrotAdder = (float)(Rnd.NextDouble());
                     this.smoke.AddParticle(ref pos, ref dir, ref grav, life, zrot, zrotAdder, size, new Vector4(0.4f, 0.4f, 0.4f, 0.1f));
@@ -136,13 +135,13 @@ namespace CSatEng
             test.Update(time * 1000);
             explosion.Update(time);
 
-            if (smoke.NumOfParticles < PART)
+            if (smoke.NumOfParticles < PART + 100)
             {
                 Vector3 pos = new Vector3(0, 5 + (float)(Rnd.NextDouble() * 5), 0);
                 Vector3 dir = new Vector3(-0.05f + (float)(Rnd.NextDouble() * 0.1f), 0.2f, -0.05f + (float)(Rnd.NextDouble() * 0.1f));
                 Vector3 grav = new Vector3(0, 0, 0);
                 float life = 3;
-                float size = 15;
+                float size = (float)Rnd.NextDouble() + 0.5f;
                 float zrot = (float)(Rnd.NextDouble() * 360);
                 float zrotAdder = (float)(Rnd.NextDouble());
                 smoke.AddParticle(ref pos, ref dir, ref grav, life, zrot, zrotAdder, size, new Vector4(0.5f, 0.5f, 0.5f, 0.1f));

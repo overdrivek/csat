@@ -75,6 +75,7 @@ namespace CSatEng
 
             GL.GetInteger(GetPName.MaxCombinedTextureImageUnits, out Texture.MaxTextures);
             Log.WriteLine("Max textureUnits: " + Texture.MaxTextures);
+            Texture.BindedTextures = new uint[Texture.MaxTextures];
 
             VSync = Settings.VSync ? VSyncMode.On : VSyncMode.Off;
             Settings.Device = DisplayDevice.Default;
@@ -100,7 +101,6 @@ namespace CSatEng
             GL.FrontFace(FrontFaceDirection.Ccw);
             GL.Enable(EnableCap.ColorMaterial);
             GL.Enable(EnableCap.Normalize);
-
             BaseGame.Keyboard = Keyboard;
             BaseGame.Mouse = Mouse;
 
@@ -110,6 +110,22 @@ namespace CSatEng
                 System.Windows.Forms.Cursor.Hide();
             }
         }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            try
+            {
+                BitmapFont font = BitmapFont.Load("fonts/comic12.png");
+                Texture.UnBind(0);
+                Camera.Set2D();
+                font.Write("Loading...", 0, 0);
+                font.Dispose();
+            }
+            catch (Exception) { }
+            SwapBuffers();
+        }
+
 
         public static void SetGame(BaseGame game)
         {

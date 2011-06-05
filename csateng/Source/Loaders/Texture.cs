@@ -28,6 +28,7 @@ namespace CSatEng
         protected string textureName;
         public uint TextureID;
         public int Width, Height, RealWidth, RealHeight;
+        public TextureTarget Target = TextureTarget.Texture2D;
 
         /// <summary>
         /// aseta texture haluttuun textureunittiin
@@ -38,15 +39,15 @@ namespace CSatEng
             GL.ActiveTexture(TextureUnit.Texture0 + textureUnit);
             if (Texture.BindedTextures[textureUnit] == TextureID) return; // on jo bindattu
             Texture.BindedTextures[textureUnit] = TextureID;
-            GL.BindTexture(TextureTarget.Texture2D, TextureID);
+            GL.BindTexture(Target, TextureID);
         }
 
-        public static void Bind(int textureUnit, uint textureID)
+        public static void Bind(int textureUnit, TextureTarget target, uint textureID)
         {
             GL.ActiveTexture(TextureUnit.Texture0 + textureUnit);
             if (BindedTextures[textureUnit] == textureID) return; // on jo bindattu
             BindedTextures[textureUnit] = textureID;
-            GL.BindTexture(TextureTarget.Texture2D, textureID);
+            GL.BindTexture(target, textureID);
         }
 
         /// <summary>
@@ -89,8 +90,6 @@ namespace CSatEng
         /// </summary>
         public static Texture Load(string fileName, bool useTexDir)
         {
-            if (BindedTextures == null) BindedTextures = new uint[MaxTextures];
-
             Texture tex;
             // jos texture on jo ladattu, palauta se
             textures.TryGetValue(fileName, out tex);
@@ -102,10 +101,11 @@ namespace CSatEng
             Log.WriteLine("Texture: " + tex.textureName, true);
 
             if (useTexDir) fileName = Settings.TextureDir + fileName;
+            TextureTarget target = TextureTarget.Texture2D;
 
             try
             {
-                TextureTarget target;
+
                 if (fileName.Contains(".dds")) // jos dds texture
                 {
                     ImageDDS.LoadFromDisk(fileName, out tex.TextureID, out target);
@@ -120,15 +120,15 @@ namespace CSatEng
                 Util.Error(e.ToString());
             }
 
-            float[] pwidth = new float[1];
-            float[] pheight = new float[1];
+            int pwidth, pheight;
             tex.Bind(0);
-            GL.GetTexLevelParameter(TextureTarget.Texture2D, 0, GetTextureParameter.TextureWidth, pwidth);
-            GL.GetTexLevelParameter(TextureTarget.Texture2D, 0, GetTextureParameter.TextureHeight, pheight);
-            tex.Width = (int)pwidth[0];
-            tex.Height = (int)pheight[0];
+            GL.GetTexLevelParameter(TextureTarget.Texture2D, 0, GetTextureParameter.TextureWidth, out pwidth);
+            GL.GetTexLevelParameter(TextureTarget.Texture2D, 0, GetTextureParameter.TextureHeight, out pheight);
+            tex.Width = pwidth;
+            tex.Height = pheight;
+            tex.Target = target;
 
-            if (fileName.Contains(".dds"))
+            if (fileName.Contains(".dds")) // dds tiedostoja ei skaalata ^2 kokoon
             {
                 tex.RealWidth = tex.Width;
                 tex.RealHeight = tex.Height;
@@ -138,9 +138,8 @@ namespace CSatEng
                 tex.RealWidth = ImageGDI.RealWidth;
                 tex.RealHeight = ImageGDI.RealHeight;
             }
-
             textures.Add(tex.textureName, tex);
-
+            UnBind(0);
             return tex;
         }
 
@@ -182,6 +181,7 @@ namespace CSatEng
             tex.Height = t.Height;
             tex.RealWidth = t.RealWidth;
             tex.RealHeight = t.RealHeight;
+            tex.Target = t.Target;
             tex.CreateVBO();
             return tex;
         }

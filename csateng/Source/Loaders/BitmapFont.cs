@@ -204,8 +204,6 @@ namespace CSatEng
             GL.Disable(EnableCap.Lighting);
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-            GL.Enable(EnableCap.AlphaTest);
-            GL.AlphaFunc(AlphaFunction.Greater, 0.1f);
             GL.Translate(x, (float)Settings.Height - y, 0);
             float xp = 0;
             for (int q = 0, ch; q < str.Length; q++)
