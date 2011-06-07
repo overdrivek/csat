@@ -22,16 +22,8 @@ namespace CSatEng
 
         public static void LoadFromDisk(string filename, out uint texturehandle, out TextureTarget dimension)
         {
-            LoadFromDisk(filename, out texturehandle, out dimension,
-                         TextureLoaderParameters.MinificationFilter, TextureLoaderParameters.MagnificationFilter,
-                         TextureLoaderParameters.WrapModeS, TextureLoaderParameters.WrapModeT);
-        }
-
-        public static void LoadFromDisk(string filename, out uint texturehandle, out TextureTarget dimension, TextureMinFilter minFilter, TextureMagFilter magFilter, TextureWrapMode wrapS, TextureWrapMode wrapT)
-        {
             dimension = (TextureTarget)0;
             texturehandle = TextureLoaderParameters.OpenGLDefaultTexture;
-            ErrorCode GLError = ErrorCode.NoError;
 
             Bitmap CurrentBitmap = null;
 
@@ -41,13 +33,10 @@ namespace CSatEng
                 if (TextureLoaderParameters.FlipImages)
                     CurrentBitmap.RotateFlip(RotateFlipType.RotateNoneFlipY);
 
-                if (CurrentBitmap.Height > 1)
-                    dimension = TextureTarget.Texture2D;
-                else
-                    dimension = TextureTarget.Texture1D;
+                dimension = TextureTarget.Texture2D;
 
                 GL.GenTextures(1, out texturehandle);
-                GL.BindTexture(dimension, texturehandle);
+                Texture.Bind(0, dimension, texturehandle);
 
                 #region Load Texture
                 OpenTK.Graphics.OpenGL.PixelInternalFormat pif;
@@ -95,7 +84,7 @@ namespace CSatEng
 
                 if (Texture.IsNPOTSupported == false)
                 {
-                    // tarkista onko texturen koko oikeanlainen (64, 128, 256, jne)
+                    // tarkista onko texturen koko ^2
                     int test = 1, w = 0, h = 0;
                     bool wOK = false, hOK = false;
                     for (int q = 0; q < 20; q++)
@@ -122,42 +111,20 @@ namespace CSatEng
                 }
 
                 BitmapData Data = CurrentBitmap.LockBits(new Rectangle(0, 0, CurrentBitmap.Width, CurrentBitmap.Height), ImageLockMode.ReadOnly, CurrentBitmap.PixelFormat);
-                if (Data.Height > 1) // image is 2D
+                if (TextureLoaderParameters.BuildMipmapsForUncompressed)
                 {
-                    if (TextureLoaderParameters.BuildMipmapsForUncompressed)
-                        GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
-
-                    GL.TexImage2D(dimension, 0, pif, Data.Width, Data.Height, TextureLoaderParameters.Border, pf, pt, Data.Scan0);
+                    if (FBO.IsSupported) GL.Ext.GenerateMipmap(GenerateMipmapTarget.Texture2D);
                 }
-                else // image is 1D
-                {
-                    GL.TexImage1D(dimension, 0, pif, Data.Width, TextureLoaderParameters.Border, pf, pt, Data.Scan0);
-                }
-
-                GL.Finish();
-                GLError = GL.GetError();
-                if (GLError != ErrorCode.NoError)
-                {
-                    Util.Error("Error building TexImage. GL Error: " + GLError);
-                }
-
+                GL.TexImage2D(dimension, 0, pif, Data.Width, Data.Height, TextureLoaderParameters.Border, pf, pt, Data.Scan0);
                 CurrentBitmap.UnlockBits(Data);
                 #endregion Load Texture
 
                 #region Set Texture Parameters
-                GL.TexParameter(dimension, TextureParameterName.TextureMinFilter, (int)minFilter); //(int)TextureLoaderParameters.MinificationFilter);
-                GL.TexParameter(dimension, TextureParameterName.TextureMagFilter, (int)magFilter); //(int)TextureLoaderParameters.MagnificationFilter);
-
-                GL.TexParameter(dimension, TextureParameterName.TextureWrapS, (int)wrapS); //(int)TextureLoaderParameters.WrapModeS);
-                GL.TexParameter(dimension, TextureParameterName.TextureWrapT, (int)wrapT); //(int)TextureLoaderParameters.WrapModeT);
-
+                GL.TexParameter(dimension, TextureParameterName.TextureMinFilter, (int)TextureLoaderParameters.MinificationFilter);
+                GL.TexParameter(dimension, TextureParameterName.TextureMagFilter, (int)TextureLoaderParameters.MagnificationFilter);
+                GL.TexParameter(dimension, TextureParameterName.TextureWrapS, (int)TextureLoaderParameters.WrapModeS);
+                GL.TexParameter(dimension, TextureParameterName.TextureWrapT, (int)TextureLoaderParameters.WrapModeT);
                 GL.TexEnv(TextureEnvTarget.TextureEnv, TextureEnvParameter.TextureEnvMode, (int)TextureLoaderParameters.EnvMode);
-
-                GLError = GL.GetError();
-                if (GLError != ErrorCode.NoError)
-                {
-                    Util.Error("Error setting Texture Parameters. GL Error: " + GLError);
-                }
                 #endregion Set Texture Parameters
 
                 return; // success

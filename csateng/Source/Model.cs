@@ -18,12 +18,11 @@ namespace CSatEng
         public Vertex[] VertexBuffer;
         public ushort[] IndexBuffer; // tämä on 0,1,2,3,4,..
         public VBO Vbo;
-        public BoundingVolume Boundings;
+        public BoundingSphere Boundings;
         public GLSLShader Shader = null;
         public MaterialInfo Material = new MaterialInfo();
         public string MaterialName = "";
 
-        public bool IsRenderable = true;
         public bool DoubleSided = false;
         public bool IsTransparent = false;
         public bool CastShadow = true;

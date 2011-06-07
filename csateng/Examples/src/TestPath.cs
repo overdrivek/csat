@@ -18,25 +18,21 @@ namespace CSatEng
 
         public override void Init()
         {
-            fbo = new FBO(512, 512, false, true);
-            shadows = new ShadowMapping(fbo);
+            depthFBO = new FBO(512, 512, 1, true);
+            shadows = new ShadowMapping(depthFBO);
 
             skybox = Sky.Load("sky/sky2_", "jpg");
             world.Add(skybox);
 
             Model scene = new Model();
             DotScene ds = DotScene.Load("scene1/scene1.scene", scene);
-            GLSLShader.LoadShader(scene, "shadow.shader");
+            GLSLShader.LoadShader(scene, "shadow.shader", new ShaderCallback(CallBacks.ShadowShaderCallBack));
             world.Add(scene);
 
             camPath = Path.GetPath("Path_camera");
             camPath.Attach(camera, true, true);
 
             font = BitmapFont.Load("fonts/comic12.png");
-
-            // skenekohtaset (vaikuttaa varjostukseen)
-            FBO.ZNear = 500;
-            FBO.ZFar = 800;
 
             Camera.Set3D();
             base.Init();
@@ -82,7 +78,7 @@ namespace CSatEng
 
         public override void Render()
         {
-            shadows.SetupShadows(world, 0);
+            shadows.SetupShadows(world, 0, false);
             GL.Clear(GameLoop.ClearFlags);
 
             camera.SetCameraMatrix();

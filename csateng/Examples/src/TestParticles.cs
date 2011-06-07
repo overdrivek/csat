@@ -15,15 +15,15 @@ namespace CSatEng
     class TestParticles : BaseGame
     {
         const int PART = 100;
-        Particles test = new Particles();
+        Particles earth = new Particles();
         Particles explosion = new Particles();
         Particles smoke = new Particles();
 
         public override void Init()
         {
-            test.SetParticle(Billboard.Load("earth.png"), false, null); // ei läpikuultava
-            explosion.SetParticle(Billboard.Load("fire.png"), true, new ParticleCallback(RenderParticleCallback)); // läpikuultava
-            smoke.SetParticle(Billboard.Load("smoke.png"), true, null); // kuten tämäkin
+            earth.SetParticle(Billboard.Load("earth.png"), false, true, null); // ei läpikuultava, varjostaa
+            explosion.SetParticle(Billboard.Load("fire.png"), true, false, new ParticleCallback(RenderParticleCallback)); // läpikuultava, ei varjosta
+            smoke.SetParticle(Billboard.Load("smoke.png"), true, true, null); // läpikuultava, varjostaa
             SetupParticles(true, true, true);
 
             font = BitmapFont.Load("fonts/comic12.png");
@@ -66,6 +66,7 @@ namespace CSatEng
             GL.Clear(GameLoop.ClearFlags);
 
             camera.SetFPSCamera();
+            Frustum.CalculateFrustum();
             world.Render();
 
             Particles.Render();
@@ -76,18 +77,18 @@ namespace CSatEng
             base.Render();
         }
 
-        void SetupParticles(bool test, bool explosion, bool smoke)
+        void SetupParticles(bool earth, bool explosion, bool smoke)
         {
-            if (test)
+            if (earth)
             {
-                for (int q = 0; q < PART; q++)
+                for (int q = 0; q < 10; q++)
                 {
                     Vector3 pos = new Vector3(-50 + (float)(Rnd.NextDouble() * 3), 5 + (float)(Rnd.NextDouble() * 3), 0);
                     Vector3 dir = new Vector3(0.4f + (float)(Rnd.NextDouble() * 0.1f), 0.4f + (float)(Rnd.NextDouble() * 0.1f), 0.4f + (float)(Rnd.NextDouble() * 0.1f));
                     Vector3 grav = new Vector3(0, -0.01f, 0);
-                    float life = (float)(Rnd.NextDouble() * 1000 + 2000);
+                    float life = 4;
                     float size = 0.5f;
-                    this.test.AddParticle(ref pos, ref dir, ref grav, life, 0, 0, size, new Vector4(1, 1, 1, 1));
+                    this.earth.AddParticle(ref pos, ref dir, ref grav, life, 0, 0, size, new Vector4(1, 1, 1, 1));
                 }
             }
             if (explosion)
@@ -130,9 +131,9 @@ namespace CSatEng
 
         void UpdateParticles(float time)
         {
-            if (test.NumOfParticles == 0) SetupParticles(true, false, false);
+            if (earth.NumOfParticles == 0) SetupParticles(true, false, false);
             if (explosion.NumOfParticles == 0) SetupParticles(false, true, false);
-            test.Update(time * 1000);
+            earth.Update(time);
             explosion.Update(time);
 
             if (smoke.NumOfParticles < PART + 100)

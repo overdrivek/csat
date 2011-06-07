@@ -49,6 +49,18 @@ namespace CSatEng
                 Texture.IsNPOTSupported = false;
             }
 
+            // löytyykö float texture extension
+            if (GL.GetString(StringName.Extensions).Contains("texture_float") && GL.GetString(StringName.Extensions).Contains("color_buffer_float"))
+            {
+                Log.WriteLine("Float textures supported.");
+                Texture.IsFloatTextureSupported = true;
+            }
+            else
+            {
+                Log.WriteLine("Float textures not supported.");
+                Texture.IsFloatTextureSupported = false;
+            }
+
             // tarkista voidaanko shadereita käyttää.
             if (GL.GetString(StringName.Extensions).Contains("vertex_shader") &&
                 GL.GetString(StringName.Extensions).Contains("fragment_shader"))
@@ -121,6 +133,7 @@ namespace CSatEng
                 Camera.Set2D();
                 font.Write("Loading...", 0, 0);
                 font.Dispose();
+                Texture.UnBind(0);
             }
             catch (Exception) { }
             SwapBuffers();
@@ -179,7 +192,6 @@ namespace CSatEng
 #if DEBUG
             this.Title = "Test project [objs: " + Settings.NumOfObjects + "]   FPS: " + (1 / e.Time).ToString("0.");
 #endif
-
         }
     }
 }

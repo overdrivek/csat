@@ -143,37 +143,63 @@ namespace CSatEng
             float d = 0;
             for (int p = 0; p < 6; p++)
             {
-                // jos pallo ei ole ruudulla
                 d = frustum[p, 0] * x + frustum[p, 1] * y + frustum[p, 2] * z + frustum[p, 3];
-                if (d <= -radius)
+                if (d <= -radius) // jos pallo ei ole ruudulla
                 {
                     return 0;
                 }
             }
-            // kaikkien tasojen edessä eli näkyvissä
-            // palauta matka kameraan
-            return d + radius;
+            // kaikkien tasojen edessä eli näkyvissä.
+            return d + radius; // palauta matka kameraan
         }
 
-        public static bool ObjectInFrustum(Vector3 position, BoundingVolume bound, Vector3 scale)
+        public static bool ObjectInFrustum(Vector3 position, BoundingSphere bound, Vector3 scale)
         {
             return ObjectInFrustum(position.X, position.Y, position.Z, bound, scale);
         }
 
-        public static bool ObjectInFrustum(float x, float y, float z, BoundingVolume bound, Vector3 scale)
+        public static bool ObjectInFrustum(float x, float y, float z, BoundingSphere bound, Vector3 scale)
         {
             if (bound == null) return true;
             float max = scale.X;
             if (scale.Y > max) max = scale.Y;
             if (scale.Z > max) max = scale.Z;
-
-            switch (bound.Mode)
-            {
-                case BoundingVolume.TestMode.Sphere:
-                    if (SphereInFrustum(x, y, z, bound.R * max) == 0) return false;
-                    break;
-            }
+            if (SphereInFrustum(x, y, z, bound.R * max) == 0) return false;
             return true;
+        }
+    }
+
+    public class BoundingSphere
+    {
+        public Vector3 Min = new Vector3(99999, 99999, 99999);
+        public Vector3 Max = new Vector3(-99999, -99999, -99999);
+        public float R = 0;
+
+        public void CreateBoundingVolume(Model mesh)
+        {
+            for (int q = 0; q < mesh.VertexBuffer.Length; q++)
+            {
+                if (mesh.VertexBuffer[q].Position.X < Min.X) Min.X = mesh.VertexBuffer[q].Position.X;
+                if (mesh.VertexBuffer[q].Position.Y < Min.Y) Min.Y = mesh.VertexBuffer[q].Position.Y;
+                if (mesh.VertexBuffer[q].Position.Z < Min.Z) Min.Z = mesh.VertexBuffer[q].Position.Z;
+
+                if (mesh.VertexBuffer[q].Position.X > Max.X) Max.X = mesh.VertexBuffer[q].Position.X;
+                if (mesh.VertexBuffer[q].Position.Y > Max.Y) Max.Y = mesh.VertexBuffer[q].Position.Y;
+                if (mesh.VertexBuffer[q].Position.Z > Max.Z) Max.Z = mesh.VertexBuffer[q].Position.Z;
+            }
+
+            Vector3 dist = Max - Min;
+            R = dist.Length;
+            mesh.ObjCenter = Min + (dist / 2); // objektin keskikohta
+        }
+
+        public void CreateBoundingVolume(Model mesh, Vector3 min, Vector3 max)
+        {
+            Min = min;
+            Max = max;
+            Vector3 dist = Max - Min;
+            R = dist.Length;
+            mesh.ObjCenter = Min + (dist / 2); // objektin keskikohta
         }
     }
 }

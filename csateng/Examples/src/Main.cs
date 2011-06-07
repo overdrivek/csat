@@ -68,8 +68,12 @@ namespace CSatEng
                         game = new TestMD5();
                         game.Init();
                         break;
-
                     case 5:
+                        game = new TestSoftParticles();
+                        game.Init();
+                        break;
+
+                    case 6:
                         GameLoop.Running = false;
                         game.Dispose();
                         game = null;

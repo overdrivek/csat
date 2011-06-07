@@ -20,8 +20,8 @@ namespace CSatEng
 
         public override void Init()
         {
-            fbo = new FBO(512, 512, false, true);
-            shadows = new ShadowMapping(fbo);
+            depthFBO = new FBO(512, 512, 1, true);
+            shadows = new ShadowMapping(depthFBO);
 
             font = BitmapFont.Load("fonts/comic12.png");
 
@@ -29,7 +29,7 @@ namespace CSatEng
             world.Add(skybox);
 
             DotScene ds = DotScene.Load("scene1/scene1.scene", scene);
-            GLSLShader.LoadShader(scene, "shadow.shader");
+            GLSLShader.LoadShader(scene, "shadow.shader", new ShaderCallback(CallBacks.ShadowShaderCallBack));
             world.Add(scene);
 
             actors[0] = AnimatedModelMD5.Load("ugly/ukko.mesh");
@@ -39,17 +39,13 @@ namespace CSatEng
             actors[0].LoadMD5Animation("walk", "ugly/ukko_walk.anim");
             actors[0].SetAnimation("act2"); // idle anim
             actors[0].Scale = new Vector3(5, 5, 5);
-            GLSLShader.LoadShader(actors[0], "shadow.shader");
+            GLSLShader.LoadShader(actors[0], "shadow.shader", new ShaderCallback(CallBacks.ShadowShaderCallBack));
             // "model.shader");
             // "model.shader:TEXTURE");
             // "shadow.shader:NO_NORMALS");
             world.Add(actors[0]);
 
             lightImg = Billboard.Load("lightimg.png");
-
-            // skenekohtaset (vaikuttaa varjostukseen)
-            FBO.ZNear = 500;
-            FBO.ZFar = 800;
 
             Camera.Set3D();
             base.Init();
@@ -103,7 +99,7 @@ namespace CSatEng
                 }
                 self.Rotation.Y += spd * 15;
                 turning = true;
-                
+
             }
             else if (Keyboard[Key.Right])
             {
@@ -114,7 +110,7 @@ namespace CSatEng
                 }
                 self.Rotation.Y -= spd * 15;
                 turning = true;
-                
+
             }
             if (moving == false && turning == false) // idle
             {
@@ -137,7 +133,7 @@ namespace CSatEng
 
         public override void Render()
         {
-            shadows.SetupShadows(world, 0);
+            shadows.SetupShadows(world, 0, false);
             GL.Clear(GameLoop.ClearFlags);
 
             camera.SetFPSCamera();
@@ -152,7 +148,7 @@ namespace CSatEng
                 self.RenderSkeleton();
             }
 
-            lightImg.RenderBillboard(Light.Lights[0].Position, 0, 50);
+            lightImg.RenderBillboard(Light.Lights[0].Position, 0, 50, true);
             Camera.Set2D();
             font.Write("Arrow keys: move the ugly.\nSpace: show skeleton.\nA,D,W,S: move the camera.\nHold left mouse button to rotate the camera.", 0, 0);
             Camera.Set3D();

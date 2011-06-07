@@ -67,7 +67,6 @@
     <Compile Include="Source\Loaders\AnimatedModel.cs" />
     <Compile Include="Source\BaseGame.cs" />
     <Compile Include="Source\Loaders\BitmapFont.cs" />
-    <Compile Include="Source\BoundingVolume.cs" />
     <Compile Include="Source\Camera.cs" />
     <Compile Include="Source\Loaders\Billboard.cs" />
     <Compile Include="Source\Loaders\OgreMesh.cs" />

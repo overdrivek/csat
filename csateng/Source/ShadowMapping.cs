@@ -38,28 +38,29 @@ namespace CSatEng
             }
             this.fbo = fbo;
             UseShadowMapping = true;
-            lightMask = Texture.Load(lightMaskFileName);
+            try
+            {
+                TextureLoaderParameters.WrapModeS = TextureWrapMode.ClampToEdge;
+                TextureLoaderParameters.WrapModeT = TextureWrapMode.ClampToEdge;
+                lightMask = Texture.Load(lightMaskFileName);
+                TextureLoaderParameters.WrapModeS = TextureWrapMode.Repeat;
+                TextureLoaderParameters.WrapModeT = TextureWrapMode.Repeat;
+            }
+            catch (Exception)
+            { }
         }
 
         public static void BindLightMask()
         {
-            lightMask.Bind(BaseGame.LIGHTMASK_TEXUNIT);
+            if (lightMask != null)
+                lightMask.Bind(Settings.LIGHTMASK_TEXUNIT);
         }
         public static void UnBindLightMask()
         {
-            Texture.UnBind(BaseGame.LIGHTMASK_TEXUNIT);
+            Texture.UnBind(Settings.LIGHTMASK_TEXUNIT);
         }
 
-        /// <summary>
-        /// aseta kuvakulma valosta päin
-        /// </summary>
-        void RenderFromLight(SceneNode light)
-        {
-            GL.LoadMatrix(ref light.OrigOrientationMatrix);
-            GL.Translate(-light.Position);
-        }
-
-        public void SetupShadows(SceneNode world, int lightNo)
+        public void SetupShadows(SceneNode world, int lightNo, bool withParticles)
         {
             if (UseShadowMapping == false) return;
 
@@ -68,10 +69,6 @@ namespace CSatEng
                 Log.WriteLine("SetupShadows requires at least one light source!", true);
                 return;
             }
-            fbo.BindFBO();
-            GL.Clear(fbo.ClearFlags);
-            GLSLShader.UseProgram(0);
-
             GL.Disable(EnableCap.Lighting);
             GL.Disable(EnableCap.Blend);
             GL.ShadeModel(ShadingModel.Flat);
@@ -79,13 +76,21 @@ namespace CSatEng
             GL.Disable(EnableCap.CullFace);
             GL.PolygonOffset(1, 1);
             GL.Enable(EnableCap.PolygonOffsetFill);
+            
+            fbo.BindDepth();
+            fbo.BeginDrawing(true);
+            fbo.Clear();
 
-            RenderFromLight(Light.Lights[lightNo]);
+            // kuvakulma kamerasta päin
+            GL.LoadMatrix(ref Light.Lights[lightNo].OrigOrientationMatrix);
+            GL.Translate(-Light.Lights[lightNo].Position);
+
             SetTextureMatrix();
             Frustum.CalculateFrustum();
 
             ShadowPass = true;
             world.Render();
+            if (withParticles) Particles.Render();
             ShadowPass = false;
 
             GL.Disable(EnableCap.PolygonOffsetFill);
@@ -93,7 +98,8 @@ namespace CSatEng
             GL.Enable(EnableCap.CullFace);
             GL.ColorMask(true, true, true, true);
             GL.ShadeModel(ShadingModel.Smooth);
-            fbo.UnBindFBO();
+            fbo.EndDrawing();
+
             Settings.NumOfObjects = 0;
         }
 
@@ -107,7 +113,6 @@ namespace CSatEng
             GL.GetFloat(GetPName.ProjectionMatrix, out projMatrix);
             GL.GetFloat(GetPName.ModelviewMatrix, out modelMatrix);
 
-            fbo.BindDepth();
             GL.MatrixMode(MatrixMode.Texture);
             GL.LoadIdentity();
             GL.Translate(0.5f, 0.5f, 0.5f); // remap from [-1,1]^2 to [0,1]^2

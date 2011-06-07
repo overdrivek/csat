@@ -58,7 +58,7 @@ namespace CSatEng
         /// <summary>
         /// objektin paikka ja asento world coordinaateissa (frustum culling vaatii t‰m‰n)
         /// </summary>
-        public Matrix4 WorldMatrix;
+        public Matrix4 WorldMatrix = Matrix4.Identity;
 
         public SceneNode()
         {
@@ -185,7 +185,6 @@ namespace CSatEng
 
         /// <summary>
         /// luo visible ja transparent listat n‰kyvist‰ objekteista.
-        /// listoista renderoitavat obut ovat Modelit, partikkelit ja skybox.
         /// </summary>
         public void MakeLists()
         {
@@ -220,8 +219,7 @@ namespace CSatEng
                 }
                 else
                 {
-                    if (o is Sky || o is Particles)
-                        visibleObjects.Add(o);
+                    if (o is Sky) visibleObjects.Add(o);
                 }
 
                 if (o.Childs.Count > 0) o.MakeLists();
@@ -298,8 +296,14 @@ namespace CSatEng
         {
         }
 
+        /// <summary>
+        /// lasketaan objektien paikka ja lis‰t‰‰n n‰kyv‰t objektit listoihin, sitten renderoidaan n‰kyv‰t.
+        /// </summary>
         public virtual void Render()
         {
+            visibleObjects.Clear();
+            transparentObjects.Clear();
+
             GL.PushMatrix();
 
             // lasketaan kaikkien objektien paikat valmiiksi. 
@@ -311,20 +315,36 @@ namespace CSatEng
             {
                 o.RenderModel();
             }
-
             foreach (SortedList_Models o in transparentObjects)
             {
                 Model m = o.model;
                 m.RenderModel();
             }
-
-            visibleObjects.Clear();
-            transparentObjects.Clear();
-
-            GL.PopMatrix();
-
             GLSLShader.UseProgram(0);
-            Texture.UnBind(BaseGame.DIFFUSE_TEXUNIT);
+            Texture.UnBind(Settings.COLOR_TEXUNIT);
+            GL.PopMatrix();
+        }
+
+        /// <summary>
+        /// renderoidaan n‰kyv‰t objektit listoista jotka Render() metodi on luonut.
+        /// </summary>
+        public void RenderAgain()
+        {
+            GL.PushMatrix();
+
+            // renderointi
+            foreach (SceneNode o in visibleObjects)
+            {
+                o.RenderModel();
+            }
+            foreach (SortedList_Models o in transparentObjects)
+            {
+                Model m = o.model;
+                m.RenderModel();
+            }
+            GLSLShader.UseProgram(0);
+            Texture.UnBind(Settings.COLOR_TEXUNIT);
+            GL.PopMatrix();
         }
 
         protected void Render(SceneNode obj)

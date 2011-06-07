@@ -350,7 +350,7 @@ namespace CSatEng
                 else GLSLShader.UseProgram(0);
 
                 GL.MatrixMode(MatrixMode.Texture);
-                GL.ActiveTexture(TextureUnit.Texture0 + BaseGame.SHADOW_TEXUNIT);
+                GL.ActiveTexture(TextureUnit.Texture0 + Settings.SHADOW_TEXUNIT);
                 GL.PushMatrix();
                 if (WorldMatrix != null) GL.MultMatrix(ref WorldMatrix);
                 GL.Rotate(-90, 1, 0, 0);
@@ -381,7 +381,7 @@ namespace CSatEng
                 if (ShadowMapping.ShadowPass == false)
                 {
                     GL.MatrixMode(MatrixMode.Texture);
-                    GL.ActiveTexture(TextureUnit.Texture0 + BaseGame.SHADOW_TEXUNIT);
+                    GL.ActiveTexture(TextureUnit.Texture0 + Settings.SHADOW_TEXUNIT);
                     GL.PopMatrix();
                     GL.MatrixMode(MatrixMode.Modelview);
                     animCalculated = false;
@@ -791,7 +791,7 @@ namespace CSatEng
                     if (anim.bboxes[q].max.Z > max.Z) max.Z = anim.bboxes[q].max.Z;
                 }
 
-                Boundings = new BoundingVolume();
+                Boundings = new BoundingSphere();
                 Boundings.CreateBoundingVolume(this, min, max);
 
                 Update(0);

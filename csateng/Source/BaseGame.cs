@@ -7,26 +7,20 @@
 #endregion
 using System;
 using OpenTK.Input;
+using OpenTK.Graphics.OpenGL;
 
 namespace CSatEng
 {
 
     public class BaseGame
     {
-        public static readonly int DIFFUSE_TEXUNIT = 0;
-        public static readonly int LIGHTMAP_TEXUNIT = 1;
-        public static readonly int BUMP_TEXUNIT = 2;
-        public static readonly int LIGHTMASK_TEXUNIT = 6;
-        public static readonly int SHADOW_TEXUNIT = 7;
-        public static readonly int DEPTH_TEXUNIT = SHADOW_TEXUNIT;
-
         public static Random Rnd = new Random();
         public static KeyboardDevice Keyboard;
         public static MouseDevice Mouse; //public static OpenTK.Input.Mouse mouse;
 
         protected Sky skybox;
         protected static ShadowMapping shadows;
-        protected FBO fbo;
+        protected FBO colorFBO, depthFBO, depthColorFBO;
         protected SceneNode world = new SceneNode("World");
         protected Camera camera = new Camera();
         protected BitmapFont font = null;
@@ -42,12 +36,17 @@ namespace CSatEng
         public virtual void Dispose()
         {
             if (font != null) font.Dispose();
-            if (fbo != null) fbo.Dispose();
+            if (colorFBO != null) colorFBO.Dispose();
+            if (depthFBO != null) depthFBO.Dispose();
+            if (depthColorFBO != null) depthColorFBO.Dispose();
             if (skybox != null) skybox.Dispose();
             skybox = null;
-            fbo = null;
+            colorFBO = null;
+            depthFBO = null;
+            depthColorFBO = null;
             font = null;
             world = null;
+            GLSLShader.UseProgram(0);
             SceneNode.ObjectCount = 0;
         }
 
@@ -59,8 +58,11 @@ namespace CSatEng
             Texture.DisposeAll();
             GLSLShader.DisposeAll();
             MaterialInfo.DisposeAll();
+            Particles.DisposeAll();
+
             Light.Lights.Clear();
             Path.Paths.Clear();
+
             world = null;
             world = new SceneNode("World");
             SceneNode.ObjectCount = 0;

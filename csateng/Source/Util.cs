@@ -36,7 +36,7 @@ namespace CSatEng
         public static void Error(string str)
         {
             Log.WriteLine(str);
-            System.Windows.Forms.MessageBox.Show(str, "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Exclamation);
+            //System.Windows.Forms.MessageBox.Show(str, "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Exclamation);
             throw new Exception(str);
         }
     }
