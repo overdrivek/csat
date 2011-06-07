@@ -69,14 +69,14 @@ namespace CSatEng
                 Vbo = new VBO();
                 Vbo.DataToVBO(VertexBuffer, IndexBuffer, VBO.VertexMode.UV1);
 
-                Boundings = new BoundingVolume();
+                Boundings = new BoundingSphere();
                 Boundings.CreateBoundingVolume(this);
 
                 // lataa shader
                 string shader = Material.ShaderName;
                 if (shader != "")
                 {
-                    Shader = GLSLShader.Load(shader);
+                    Shader = GLSLShader.Load(shader, null);
                 }
             }
             else
@@ -219,7 +219,7 @@ namespace CSatEng
                 else GLSLShader.UseProgram(0);
 
                 GL.MatrixMode(MatrixMode.Texture);
-                GL.ActiveTexture(TextureUnit.Texture0 + BaseGame.SHADOW_TEXUNIT);
+                GL.ActiveTexture(TextureUnit.Texture0 + Settings.SHADOW_TEXUNIT);
                 GL.PushMatrix();
                 if (WorldMatrix != null) GL.MultMatrix(ref WorldMatrix);
                 GL.MatrixMode(MatrixMode.Modelview);
@@ -227,7 +227,7 @@ namespace CSatEng
                 Vbo.Render();
 
                 GL.MatrixMode(MatrixMode.Texture);
-                GL.ActiveTexture(TextureUnit.Texture0 + BaseGame.SHADOW_TEXUNIT);
+                GL.ActiveTexture(TextureUnit.Texture0 + Settings.SHADOW_TEXUNIT);
                 GL.PopMatrix();
                 GL.MatrixMode(MatrixMode.Modelview);
                 GL.ActiveTexture(TextureUnit.Texture0);

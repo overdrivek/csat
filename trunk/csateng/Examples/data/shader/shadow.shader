@@ -22,7 +22,7 @@ void main()
 [FRAGMENT]
 // renderoi texturen ja varjon.
 
-uniform sampler2D diffuse;
+uniform sampler2D diffuseMap;
 uniform sampler2DShadow shadowMap;
 uniform float lightEnergy;
 uniform float ambient;
@@ -36,8 +36,10 @@ varying vec3 normal;
 
 void main()
 {
-    vec4  col = texture2D(diffuse, gl_TexCoord[0].xy) * ambient;
-    float shadow = shadow2DProj(shadowMap, gl_TexCoord[SHADOWMAP]).r;
+    vec4  col = texture2D(diffuseMap, gl_TexCoord[0].xy) * ambient;
+    float shadow=1.0;
+    if(gl_TexCoord[SHADOWMAP].w>0.0)
+        shadow = shadow2DProj(shadowMap, gl_TexCoord[SHADOWMAP]).r;
 
 #ifdef NO_NORMALS
     vec3 lit=vec3(1,1,1);

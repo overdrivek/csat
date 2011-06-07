@@ -37,7 +37,7 @@ namespace CSatEng
             SceneNode skyNode = new SceneNode();
             DotScene ds = DotScene.Load("sky/sky.scene", skyNode);
             skyNode.GetList(true);
-            shader = GLSLShader.Load("model.shader:SKY");
+            shader = GLSLShader.Load("model.shader:SKY", null);
 
             int side = 0;
             TextureLoaderParameters.WrapModeS = TextureWrapMode.ClampToEdge;
@@ -56,7 +56,7 @@ namespace CSatEng
                     string fileName = skyName + sideStr[side] + "." + ext;
                     m.MaterialName = fileName;
                     m.Material = MaterialInfo.GetMaterial(fileName + "_material");
-                    m.Material.Textures[BaseGame.DIFFUSE_TEXUNIT].Tex = Texture.Load(m.MaterialName);
+                    m.Material.Textures[Settings.COLOR_TEXUNIT].Tex = Texture.Load(m.MaterialName);
                     side++;
                 }
             }

@@ -40,14 +40,14 @@ void main()
 #else
 varying vec3 lightDir,normal;
 varying vec4 diffuse, ambient;
-uniform sampler2D texture;
+uniform sampler2D textureMap;
 
 void main()
 {
         float diffuse_value = max(dot(normal, lightDir), 0.0);
         vec4 color = /*gl_Color **/ vec4(diffuse_value,diffuse_value,diffuse_value,1);
 #ifdef TEXTURE
-        color = color * texture2D(texture, gl_TexCoord[0].st);
+        color = color * texture2D(textureMap, gl_TexCoord[0].st);
 #endif
         gl_FragColor = color;
 }

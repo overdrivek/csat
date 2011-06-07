@@ -39,16 +39,22 @@ namespace CSatEng
         /// <summary>
         /// renderoi yhden billboardin.
         /// </summary>
-        public void RenderBillboard(float x, float y, float z, float zrot, float size)
+        public void RenderBillboard(float x, float y, float z, float zrot, float size, bool blend)
         {
             billBoard.Bind(0);
             GL.PushAttrib(AttribMask.ColorBufferBit | AttribMask.EnableBit | AttribMask.PolygonBit);
             GL.Disable(EnableCap.CullFace);
             GL.Disable(EnableCap.Lighting);
-            GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-            GL.Enable(EnableCap.AlphaTest);
-            GL.AlphaFunc(AlphaFunction.Greater, Texture2D.AlphaMin);
+            if (blend)
+            {
+                GL.Enable(EnableCap.Blend);
+                GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            }
+            else
+            {
+                GL.Enable(EnableCap.AlphaTest);
+                GL.AlphaFunc(AlphaFunction.Greater, Texture2D.AlphaMin);
+            }
 
             GL.PushMatrix();
             GL.Translate(x, y, z);
@@ -56,26 +62,19 @@ namespace CSatEng
             GL.Scale(size, size, size);
             GL.Rotate(zrot, 0, 0, 1);
 
-            float[] modelMatrix = new float[16];
-            GL.GetFloat(GetPName.ModelviewMatrix, modelMatrix);
-            for (int i = 0; i < 3; i++)
-            {
-                for (int j = 0; j < 3; j++)
-                {
-                    if (i == j) modelMatrix[i * 4 + j] = 1;
-                    else modelMatrix[i * 4 + j] = 0;
-                }
-            }
-            GL.LoadMatrix(modelMatrix);
+            Matrix4 matrix = Matrix4.Identity, modelViemMatrix;
+            GL.GetFloat(GetPName.ModelviewMatrix, out modelViemMatrix);
+            matrix.Row3 = modelViemMatrix.Row3;
+            GL.LoadMatrix(ref matrix);
 
             billBoard.Vbo.Render();
             GL.PopAttrib();
             GL.PopMatrix();
         }
         
-        public void RenderBillboard(Vector3 pos, float zrot, float size)
+        public void RenderBillboard(Vector3 pos, float zrot, float size, bool blend)
         {
-            RenderBillboard(pos.X, pos.Y, pos.Z, zrot, size);
+            RenderBillboard(pos.X, pos.Y, pos.Z, zrot, size, blend);
         }
 
         public void Dispose()

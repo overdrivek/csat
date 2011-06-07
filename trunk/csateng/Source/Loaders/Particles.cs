@@ -25,6 +25,8 @@ using OpenTK;
 
 namespace CSatEng
 {
+    public delegate void ParticleCallback(Particle part);
+
     class SortedList_Particles
     {
         public float Len = 0;
@@ -37,8 +39,6 @@ namespace CSatEng
             Matrix = mat;
         }
     }
-
-    public delegate void ParticleCallback(Particle part);
 
     public struct Particle
     {
@@ -59,25 +59,28 @@ namespace CSatEng
     {
         public static List<Particles> ParticleGroups = new List<Particles>();
         public static float AlphaMin = 0.1f;
+        public bool CastShadow = false;
 
-        /// <summary>
-        /// jos t‰m‰ true, particles.shader ladataan kun luodaan partikkelit.
-        /// softparticles vaatii fbo:n & depth texturen jotka pit‰‰ bindata
-        /// ennen skenen renderointia. sen j‰lkeen renderoidaan partikkelit.
-        /// </summary>
         public static bool SoftParticles = false;
+        public static void SetSoftParticles(bool enable, ShaderCallback callback)
+        {
+            if (enable == true && Texture.IsFloatTextureSupported == false)
+            {
+                Log.WriteLine("Float textures not supported so no soft particles.");
+                SoftParticles = false;
+                return;
+            }
+            SoftParticles = enable;
+            if (SoftParticles == true && softParticlesShader == null)
+                softParticlesShader = GLSLShader.Load("particles.shader", callback);
+        }
 
         public bool IsTransparent = false;
         Billboard particleTex = null;
         public ParticleCallback callBack = null;
 
         List<Particle> particles = new List<Particle>();
-        static GLSLShader softParticles;
-
-        public Particles()
-        {
-            if (SoftParticles == true && softParticles == null) softParticles = GLSLShader.Load("particles.shader");
-        }
+        static GLSLShader softParticlesShader;
 
         /// <summary>
         ///  TODO
@@ -86,7 +89,8 @@ namespace CSatEng
         {
             Particles part = new Particles();
 
-            // TODO
+
+
 
             part.Name = particleFileName;
             return part;
@@ -97,14 +101,18 @@ namespace CSatEng
             get { return particles.Count; }
         }
 
+        public static void DisposeAll()
+        {
+            foreach (Particles p in ParticleGroups)
+                p.Dispose();
+        }
         public override void Dispose()
         {
             if (particleTex != null) particleTex.Dispose();
-            if (softParticles != null) softParticles.Dispose();
+            if (softParticlesShader != null) softParticlesShader.Dispose();
             particleTex = null;
-            softParticles = null;
+            softParticlesShader = null;
             particles.Clear();
-
             Log.WriteLine("Disposed: Particles", true);
         }
 
@@ -128,11 +136,12 @@ namespace CSatEng
         /// <summary>
         /// aseta partikkelikuva ja callback-metodi
         /// </summary>
-        public void SetParticle(Billboard tex, bool isTransparent, ParticleCallback particleCallback)
+        public void SetParticle(Billboard tex, bool isTransparent, bool castShadow, ParticleCallback particleCallback)
         {
             this.particleTex = tex;
             this.IsTransparent = isTransparent;
             this.callBack = particleCallback;
+            this.CastShadow = castShadow;
             ParticleGroups.Add(this);
         }
 
@@ -142,6 +151,7 @@ namespace CSatEng
         /// <param name="time"></param>
         public void Update(float time)
         {
+            float utime = time * 50;
             for (int q = 0; q < particles.Count; q++)
             {
                 Particle p = (Particle)particles[q];
@@ -152,9 +162,9 @@ namespace CSatEng
                     particles.RemoveAt(q); // poista se
                     continue;
                 }
-                p.pos += p.dir;
-                p.dir += p.gravity;
-                p.zrot += p.zrotAdder;
+                p.pos += p.dir * utime;
+                p.dir += p.gravity * utime;
+                p.zrot += p.zrotAdder * utime;
 
                 particles.RemoveAt(q);
                 particles.Insert(q, p);
@@ -167,12 +177,12 @@ namespace CSatEng
         public static new void Render()
         {
             GL.Color4(1f, 1, 1, 1f);
-            Settings.NumOfObjects += ParticleGroups.Count;
+            GL.PushMatrix();
 
             List<SortedList_Particles> slist = new List<SortedList_Particles>();
-            if (SoftParticles == true && softParticles != null)
+            if (SoftParticles == true && softParticlesShader != null)
             {
-                softParticles.UseProgram();
+                softParticlesShader.UseProgram();
             }
             GL.PushAttrib(AttribMask.AllAttribBits);
             GL.Disable(EnableCap.Lighting);
@@ -181,40 +191,54 @@ namespace CSatEng
             GL.Disable(EnableCap.CullFace);
             GL.Disable(EnableCap.Lighting);
 
+            int c = 0;
             // j‰rjestet‰‰n taulukko kauimmaisesta l‰himp‰‰n. pit‰‰ rendata siin‰ j‰rjestyksess‰.
             // vain l‰pikuultavat pit‰‰ j‰rjest‰‰. t‰ysin n‰kyv‰t renderoidaan samantien.
             for (int q = 0; q < ParticleGroups.Count; q++)
             {
                 Particles curpar = ParticleGroups[q];
                 if (curpar.particles.Count <= 0) continue;
-                curpar.particles[0].partTex.Bind(0);
+                if (ShadowMapping.ShadowPass == true)
+                {
+                    if (curpar.CastShadow == false) continue;
+                }
+                else
+                    curpar.particles[0].partTex.Bind(0);
+
                 GL.PushMatrix();
-                GL.Translate(curpar.Position);
-                
+                GL.MultMatrix(ref curpar.WorldMatrix);
+
                 for (int w = 0; w < curpar.NumOfParticles; w++)
                 {
                     Particle p = curpar.particles[w];
                     GL.PushMatrix();
-
                     GL.Translate(p.pos.X, p.pos.Y, p.pos.Z);
                     Matrix4 matrix = Matrix4.Identity, modelViemMatrix;
                     GL.GetFloat(GetPName.ModelviewMatrix, out modelViemMatrix);
                     matrix.Row3 = modelViemMatrix.Row3;
                     GL.LoadMatrix(ref matrix);
 
-                    if (p.isTransparent == true) // listaan renderoitavaks myˆhemmin
+                    Vector3 v = curpar.WorldMatrix.Row3.Xyz + curpar.Position + p.pos;
+                    if (Frustum.SphereInFrustum(v.X, v.Y, v.Z, 10) != 0)
                     {
-                        Vector3 rp = p.pos + curpar.Position;
-                        float len = (Camera.cam.Position - rp).LengthSquared;
-                        slist.Add(new SortedList_Particles(len, p, matrix));
-                    }
-                    else // rendataan se nyt, ei lis‰t‰ sortattavaks
-                    {
-                        GL.Scale(p.size, p.size, p.size);
-                        GL.Rotate(p.zrot, 0, 0, 1);
-                        GL.Color4(p.color);
-                        if (p.callBack != null) p.callBack(p);
-                        p.partTex.RenderBillboard();
+                        c++;
+                        if (p.isTransparent == true) // listaan renderoitavaks myˆhemmin
+                        {
+                            //float len = (Camera.cam.Position - (p.pos + curpar.Position)).LengthSquared;
+                            float len = (Camera.cam.Position - matrix.Row3.Xyz).LengthSquared;
+                            slist.Add(new SortedList_Particles(len, p, matrix));
+                        }
+                        else // rendataan se nyt, ei lis‰t‰ sortattavaks
+                        {
+                            GL.Scale(p.size, p.size, p.size);
+                            GL.Rotate(p.zrot, 0, 0, 1);
+                            if (ShadowMapping.ShadowPass == false)
+                            {
+                                GL.Color4(p.color);
+                                if (p.callBack != null) p.callBack(p);
+                            }
+                            p.partTex.RenderBillboard();
+                        }
                     }
                     GL.PopMatrix();
                 }
@@ -231,20 +255,22 @@ namespace CSatEng
             for (int q = 0; q < slist.Count; q++)
             {
                 Particle p = slist[q].Part;
-                p.partTex.Bind(0);
-                GL.PushMatrix();
+                if (ShadowMapping.ShadowPass == false)
                 {
-                    GL.LoadMatrix(ref  slist[q].Matrix);
-                    GL.Scale(p.size, p.size, p.size);
-                    GL.Rotate(p.zrot, 0, 0, 1);
+                    p.partTex.Bind(0);
                     GL.Color4(p.color);
                     if (p.callBack != null) p.callBack(p);
-                    p.partTex.RenderBillboard();
                 }
-                GL.PopMatrix();
+                GL.LoadMatrix(ref slist[q].Matrix);
+                GL.Scale(p.size, p.size, p.size);
+                GL.Rotate(p.zrot, 0, 0, 1);
+                p.partTex.RenderBillboard();
             }
             GL.PopAttrib();
+            GL.PopMatrix();
             GL.Color4(1f, 1, 1, 1f);
+            GLSLShader.UseProgram(0);
+            Settings.NumOfObjects += c;
         }
     }
 }

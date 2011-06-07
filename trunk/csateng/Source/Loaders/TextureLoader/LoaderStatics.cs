@@ -25,8 +25,8 @@ namespace CSatEng
         /// <summary>false==DirectX TexCoords, true==OpenGL TexCoords (Default: true)</summary>
         public static bool FlipImages = true;
 
-        /// <summary>When Enabled, will create MipMaps for images loaded with GDI+ (Default: true)</summary>
-        public static bool BuildMipmapsForUncompressed = true;
+        /// <summary>When Enabled, will create MipMaps for images loaded with GDI+ (Default: false)</summary>
+        public static bool BuildMipmapsForUncompressed = false;
 
         /// <summary>Selects the Magnification filter for following Textures to be loaded.</summary>
         public static TextureMagFilter MagnificationFilter = TextureMagFilter.Linear;

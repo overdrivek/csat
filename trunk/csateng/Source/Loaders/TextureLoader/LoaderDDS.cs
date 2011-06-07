@@ -172,14 +172,6 @@ namespace CSatEng
 #endif
         #endregion Private Members
 
-
-        public static void LoadFromDisk(string filename, out uint texturehandle, out TextureTarget dimension)
-        {
-            LoadFromDisk(filename, out texturehandle, out dimension,
-                TextureLoaderParameters.MinificationFilter, TextureLoaderParameters.MagnificationFilter,
-                TextureLoaderParameters.WrapModeS, TextureLoaderParameters.WrapModeT);
-        }
-
         /// <summary>
         /// This function will generate, bind and fill a Texture object with a DXT1/3/5 compressed Texture in .dds Format.
         /// MipMaps below 4x4 Pixel Size are discarded, because DXTn's smallest unit is a 4x4 block of Pixel data.
@@ -189,7 +181,7 @@ namespace CSatEng
         /// <param name="filename">The name of the file you wish to load, including path and file extension.</param>
         /// <param name="texturehandle">0 if invalid, otherwise a Texture object usable with GL.BindTexture().</param>
         /// <param name="dimension">0 if invalid, will output what was loaded (typically Texture1D/2D/3D or Cubemap)</param>
-        public static void LoadFromDisk(string filename, out uint texturehandle, out TextureTarget dimension, TextureMinFilter minFilter, TextureMagFilter magFilter, TextureWrapMode wrapS, TextureWrapMode wrapT)
+        public static void LoadFromDisk(string filename, out uint texturehandle, out TextureTarget dimension)
         {
             #region Prep data
             // invalidate whatever it was before
@@ -325,10 +317,9 @@ namespace CSatEng
                 #endregion Translate Header to less cryptic representation
 
                 #region send the Texture to GL
-                #region Generate and Bind Handle
+
                 GL.GenTextures(1, out texturehandle);
-                GL.BindTexture(dimension, texturehandle);
-                #endregion Generate and Bind Handle
+                Texture.Bind(0, dimension, texturehandle);
 
                 int Cursor = HeaderSizeInBytes;
                 // foreach face in the cubemap, get all it's mipmaps levels. Only one iteration for Texture2D
@@ -520,24 +511,16 @@ namespace CSatEng
                     GL.GetTexParameter(dimension, GetTextureParameter.TextureMaxLevel, out TexMaxLevel);
 
                     if (TextureLoaderParameters.Verbose)
-                        Trace.WriteLine("Verification: GL: " + GL.GetError().ToString() + " TextureMaxLevel: " + TexMaxLevel + ((TexMaxLevel == trueMipMapCount) ? " (Correct.)" : " (Wrong!)"));
+                        Trace.WriteLine("Verification: GL: " + GL.GetError().ToString() + " TextureMaxLevel: " + TexMaxLevel + ((TexMaxLevel == trueMipMapCount) ? " (Correct)" : " (Wrong!)"));
                     #endregion Set States properly
                 }
 
                 #region Set Texture Parameters
-                GL.TexParameter(dimension, TextureParameterName.TextureMinFilter, (int)minFilter); //(int)TextureLoaderParameters.MinificationFilter);
-                GL.TexParameter(dimension, TextureParameterName.TextureMagFilter, (int)magFilter); //(int)TextureLoaderParameters.MagnificationFilter);
-
-                GL.TexParameter(dimension, TextureParameterName.TextureWrapS, (int)wrapS); //(int)TextureLoaderParameters.WrapModeS);
-                GL.TexParameter(dimension, TextureParameterName.TextureWrapT, (int)wrapT); //(int)TextureLoaderParameters.WrapModeT);
-
+                GL.TexParameter(dimension, TextureParameterName.TextureMinFilter, (int)TextureLoaderParameters.MinificationFilter);
+                GL.TexParameter(dimension, TextureParameterName.TextureMagFilter, (int)TextureLoaderParameters.MagnificationFilter);
+                GL.TexParameter(dimension, TextureParameterName.TextureWrapS, (int)TextureLoaderParameters.WrapModeS);
+                GL.TexParameter(dimension, TextureParameterName.TextureWrapT, (int)TextureLoaderParameters.WrapModeT);
                 GL.TexEnv(TextureEnvTarget.TextureEnv, TextureEnvParameter.TextureEnvMode, (int)TextureLoaderParameters.EnvMode);
-
-                GLError = GL.GetError();
-                if (GLError != ErrorCode.NoError)
-                {
-                    Util.Error("Error setting Texture Parameters. GL Error: " + GLError);
-                }
                 #endregion Set Texture Parameters
 
                 // If it made it here without throwing any Exception the result is a valid Texture.

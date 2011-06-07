@@ -12,11 +12,10 @@ using OpenTK.Graphics.OpenGL;
 
 namespace CSatEng
 {
+    public delegate void ShaderCallback(int programID);
+
     public class GLSLShader
     {
-        enum ShaderTypes { Texture, Shadow };
-        ShaderTypes shaderType = ShaderTypes.Texture;
-
         static Dictionary<string, GLSLShader> shaders = new Dictionary<string, GLSLShader>();
         public static bool IsSupported = false;
         static int currentShaderID = -1;
@@ -25,13 +24,16 @@ namespace CSatEng
         public int ProgramID = 0;
         string ShaderName = "";
 
+        ShaderCallback callBack;
+
         /// <summary>
         /// lataa glsl shader (vertex ja fragment shader samassa tiedostossa)
         /// </summary>
-        public static GLSLShader Load(string fileName)
+        public static GLSLShader Load(string fileName, ShaderCallback callback)
         {
             GLSLShader shader = new GLSLShader();
             shader.LoadShader(fileName);
+            shader.callBack = callback;
             return shader;
         }
 
@@ -48,9 +50,6 @@ namespace CSatEng
                 string shader = shd.ReadToEnd();
                 CreateShaders(shaderFileName, shader);
             }
-
-            if (shaderFileName.Contains("shadow")) shaderType = ShaderTypes.Shadow;
-
         }
 
         void CreateShaders(string shaderFileName, string shaderStr)
@@ -76,7 +75,7 @@ namespace CSatEng
 
             Log.WriteLine("Shader: " + shaderFileName, true);
             shaders.Add(shaderFileName, this);
-
+            if (shaderStr.Contains("[SETUP]") == false) shaderStr = "[SETUP]\n" + shaderStr;
             int s = shaderStr.IndexOf("[SETUP]") + 8;
             int v = shaderStr.IndexOf("[VERTEX]") + 9;
             int f = shaderStr.IndexOf("[FRAGMENT]") + 11;
@@ -148,18 +147,7 @@ namespace CSatEng
             if (currentShaderID == ProgramID) return;
             currentShaderID = ProgramID;
             GL.UseProgram(ProgramID);
-
-            if (shaderType == ShaderTypes.Shadow)
-            {
-                ShadowMapping.BindLightMask();
-                GL.Uniform1(GL.GetUniformLocation(ProgramID, "diffuse"), BaseGame.DIFFUSE_TEXUNIT);
-                GL.Uniform1(GL.GetUniformLocation(ProgramID, "shadowMap"), BaseGame.SHADOW_TEXUNIT);
-                GL.Uniform1(GL.GetUniformLocation(ProgramID, "lightmask"), BaseGame.LIGHTMASK_TEXUNIT);
-                GL.Uniform1(GL.GetUniformLocation(ProgramID, "lightEnergy"), 2f);
-                GL.Uniform1(GL.GetUniformLocation(ProgramID, "ambient"), 0.8f);
-                //GL.Uniform1(GL.GetUniformLocation(ProgramID, "xPixelOffset"), (1.0f / (float)Settings.Width));
-                //GL.Uniform1(GL.GetUniformLocation(ProgramID, "yPixelOffset"), (1.0f / (float)Settings.Height));
-            }
+            if (callBack != null) callBack(ProgramID);
         }
 
         public static void UseProgram(int shaderID)
@@ -194,10 +182,9 @@ namespace CSatEng
         /// <summary>
         /// lataa shaderit.
         /// jos meshnamessa on * merkki, ladataan shaderi kaikkiin mesheihin
-        /// joissa on fileName nimessä, eli esim  box*  lataa box1, box2, jne mesheihin shaderin.
+        /// joissa on meshname nimessä, eli esim  box*  lataa box1, box2, jne mesheihin shaderin.
         /// </summary>
-        /// <param name="meshName"></param>
-        public static void LoadShader(Model model, string meshName, string shaderFileName)
+        public static void LoadShader(Model model, string meshName, string shaderFileName, ShaderCallback callback)
         {
             if (GLSLShader.IsSupported == false) return;
             for (int q = 0; q < model.Childs.Count; q++)
@@ -210,13 +197,13 @@ namespace CSatEng
                     if (child.Name.Contains(meshName))
                     {
                         child.Shader = new GLSLShader();
-                        child.Shader = GLSLShader.Load(shaderFileName);
+                        child.Shader = GLSLShader.Load(shaderFileName, callback);
                     }
                 }
                 else if (child.Name.Equals(meshName))
                 {
                     child.Shader = new GLSLShader();
-                    child.Shader = GLSLShader.Load(shaderFileName);
+                    child.Shader = GLSLShader.Load(shaderFileName, callback);
                 }
             }
         }
@@ -224,7 +211,7 @@ namespace CSatEng
         /// <summary>
         /// lataa shaderit ja käytä koko objektissa.
         /// </summary>
-        public static void LoadShader(Model model, string shaderFileName)
+        public static void LoadShader(Model model, string shaderFileName, ShaderCallback callback)
         {
             if (GLSLShader.IsSupported == false) return;
             bool use = true;
@@ -242,7 +229,7 @@ namespace CSatEng
                     if (use == true)
                     {
                         if (child.Shader != null) child.Shader.Dispose();
-                        child.Shader = GLSLShader.Load(shaderFileName);
+                        child.Shader = GLSLShader.Load(shaderFileName, callback);
                     }
                     else
                     {

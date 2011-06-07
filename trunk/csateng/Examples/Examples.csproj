@@ -42,11 +42,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="src\Callbacks.cs" />
     <Compile Include="src\Main.cs" />
     <Compile Include="src\Test2D.cs" />
     <Compile Include="src\TestMD5.cs" />
     <Compile Include="src\TestParticles.cs" />
     <Compile Include="src\TestPath.cs" />
+    <Compile Include="src\TestSoftParticles.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CSatEng.csproj">

@@ -25,11 +25,8 @@ namespace CSatEng
         }
         public object RunMethod(string methodName, object[] parameters)
         {
-            // TODO  pystyykö RunMethod(xxx) tekee delegaatit?
-
             MethodInfo method = loadedClass.GetMethod(methodName);
             return method.Invoke(classInstance, parameters);
         }
     }
-
 }

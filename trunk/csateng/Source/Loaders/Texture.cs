@@ -23,6 +23,7 @@ namespace CSatEng
         public static Dictionary<string, Texture> textures = new Dictionary<string, Texture>();
         public static uint[] BindedTextures;
         public static bool IsNPOTSupported = false;
+        public static bool IsFloatTextureSupported = false;
         public static int MaxTextures;
 
         protected string textureName;
@@ -94,7 +95,6 @@ namespace CSatEng
             // jos texture on jo ladattu, palauta se
             textures.TryGetValue(fileName, out tex);
             if (tex != null) return tex;
-
             tex = new Texture();
 
             tex.textureName = fileName;
@@ -193,8 +193,9 @@ namespace CSatEng
             tex.Height = height;
             tex.RealWidth = width;
             tex.RealHeight = height;
-            tex.CreateVBO();
+            tex.Target = TextureTarget.Texture2D;
             tex.TextureID = textureID;
+            tex.CreateVBO();
             return tex;
         }
 
@@ -203,19 +204,22 @@ namespace CSatEng
             if (Vbo == null) CreateVBO();
             Bind(0);
             GL.PushAttrib(AttribMask.ColorBufferBit | AttribMask.EnableBit | AttribMask.PolygonBit);
-            GL.PushMatrix();
-            GL.Translate(x + RealWidth / 2, Settings.Height - y - RealHeight / 2, 0);
-            GL.Rotate(rotate, 0, 0, 1);
-            GL.Scale(sx, sy, 1);
             GL.Disable(EnableCap.Lighting);
-            if (blend)
+            GL.Disable(EnableCap.DepthTest);
+            GL.PushMatrix();
             {
-                GL.Enable(EnableCap.Blend);
-                GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-                GL.Enable(EnableCap.AlphaTest);
-                GL.AlphaFunc(AlphaFunction.Greater, AlphaMin);
+                GL.Translate(x + RealWidth / 2, Settings.Height - y - RealHeight / 2, 0);
+                GL.Rotate(rotate, 0, 0, 1);
+                GL.Scale(sx, sy, 1);
+                if (blend)
+                {
+                    GL.Enable(EnableCap.Blend);
+                    GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+                    GL.Enable(EnableCap.AlphaTest);
+                    GL.AlphaFunc(AlphaFunction.Greater, AlphaMin);
+                }
+                Vbo.Render();
             }
-            Vbo.Render();
             GL.PopMatrix();
             GL.PopAttrib();
         }
@@ -226,12 +230,15 @@ namespace CSatEng
             if (Vbo == null) CreateVBO();
             Bind(0);
             GL.PushAttrib(AttribMask.ColorBufferBit | AttribMask.EnableBit | AttribMask.PolygonBit);
-            GL.PushMatrix();
-            GL.Translate(sx * (x + RealWidth / 2), Settings.Height + sy * (y - RealHeight / 2), 0);
-            GL.Rotate(rotate, 0, 0, 1);
-            GL.Scale(sx, sy, 1);
             GL.Disable(EnableCap.Lighting);
-            Vbo.Render();
+            GL.Disable(EnableCap.DepthTest);
+            GL.PushMatrix();
+            {
+                GL.Translate(sx * (x + RealWidth / 2), Settings.Height + sy * (y - RealHeight / 2), 0);
+                GL.Rotate(rotate, 0, 0, 1);
+                GL.Scale(sx, sy, 1);
+                Vbo.Render();
+            }
             GL.PopMatrix();
             GL.PopAttrib();
         }
