@@ -1,6 +1,6 @@
 #region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt[matola@sci.fi]
+ * Copyright (c) 2011 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -19,10 +19,8 @@ namespace CSatEng
 {
     public class Frustum
     {
-        public static float[] ProjMatrix = new float[16];
-        public static float[] ModelMatrix = new float[16];
-        public static float[] ClipMatrix = new float[16];
-
+        static Matrix4 ProjMatrix, ModelMatrix;
+        static float[] ClipMatrix = new float[16];
         static float[,] frustum = new float[6, 4];
         const int RIGHT = 0, LEFT = 1, BOTTOM = 2, TOP = 3, BACK = 4, FRONT = 5;
 
@@ -40,28 +38,28 @@ namespace CSatEng
         public static void CalculateFrustum()
         {
             // ota projection ja Modelview matriisit
-            GL.GetFloat(GetPName.ProjectionMatrix, ProjMatrix);
-            GL.GetFloat(GetPName.ModelviewMatrix, ModelMatrix);
+            ProjMatrix = GLExt.ProjectionMatrix;
+            ModelMatrix = GLExt.ModelViewMatrix;
 
-            ClipMatrix[0] = (ModelMatrix[0] * ProjMatrix[0]) + (ModelMatrix[1] * ProjMatrix[4]) + (ModelMatrix[2] * ProjMatrix[8]) + (ModelMatrix[3] * ProjMatrix[12]);
-            ClipMatrix[1] = (ModelMatrix[0] * ProjMatrix[1]) + (ModelMatrix[1] * ProjMatrix[5]) + (ModelMatrix[2] * ProjMatrix[9]) + (ModelMatrix[3] * ProjMatrix[13]);
-            ClipMatrix[2] = (ModelMatrix[0] * ProjMatrix[2]) + (ModelMatrix[1] * ProjMatrix[6]) + (ModelMatrix[2] * ProjMatrix[10]) + (ModelMatrix[3] * ProjMatrix[14]);
-            ClipMatrix[3] = (ModelMatrix[0] * ProjMatrix[3]) + (ModelMatrix[1] * ProjMatrix[7]) + (ModelMatrix[2] * ProjMatrix[11]) + (ModelMatrix[3] * ProjMatrix[15]);
+            ClipMatrix[0] = (ModelMatrix.M11 * ProjMatrix.M11) + (ModelMatrix.M12 * ProjMatrix.M21) + (ModelMatrix.M13 * ProjMatrix.M31) + (ModelMatrix.M14 * ProjMatrix.M41);
+            ClipMatrix[1] = (ModelMatrix.M11 * ProjMatrix.M12) + (ModelMatrix.M12 * ProjMatrix.M22) + (ModelMatrix.M13 * ProjMatrix.M32) + (ModelMatrix.M14 * ProjMatrix.M42);
+            ClipMatrix[2] = (ModelMatrix.M11 * ProjMatrix.M13) + (ModelMatrix.M12 * ProjMatrix.M23) + (ModelMatrix.M13 * ProjMatrix.M33) + (ModelMatrix.M14 * ProjMatrix.M43);
+            ClipMatrix[3] = (ModelMatrix.M11 * ProjMatrix.M14) + (ModelMatrix.M12 * ProjMatrix.M24) + (ModelMatrix.M13 * ProjMatrix.M34) + (ModelMatrix.M14 * ProjMatrix.M44);
 
-            ClipMatrix[4] = (ModelMatrix[4] * ProjMatrix[0]) + (ModelMatrix[5] * ProjMatrix[4]) + (ModelMatrix[6] * ProjMatrix[8]) + (ModelMatrix[7] * ProjMatrix[12]);
-            ClipMatrix[5] = (ModelMatrix[4] * ProjMatrix[1]) + (ModelMatrix[5] * ProjMatrix[5]) + (ModelMatrix[6] * ProjMatrix[9]) + (ModelMatrix[7] * ProjMatrix[13]);
-            ClipMatrix[6] = (ModelMatrix[4] * ProjMatrix[2]) + (ModelMatrix[5] * ProjMatrix[6]) + (ModelMatrix[6] * ProjMatrix[10]) + (ModelMatrix[7] * ProjMatrix[14]);
-            ClipMatrix[7] = (ModelMatrix[4] * ProjMatrix[3]) + (ModelMatrix[5] * ProjMatrix[7]) + (ModelMatrix[6] * ProjMatrix[11]) + (ModelMatrix[7] * ProjMatrix[15]);
+            ClipMatrix[4] = (ModelMatrix.M21 * ProjMatrix.M11) + (ModelMatrix.M22 * ProjMatrix.M21) + (ModelMatrix.M23 * ProjMatrix.M31) + (ModelMatrix.M24 * ProjMatrix.M41);
+            ClipMatrix[5] = (ModelMatrix.M21 * ProjMatrix.M12) + (ModelMatrix.M22 * ProjMatrix.M22) + (ModelMatrix.M23 * ProjMatrix.M32) + (ModelMatrix.M24 * ProjMatrix.M42);
+            ClipMatrix[6] = (ModelMatrix.M21 * ProjMatrix.M13) + (ModelMatrix.M22 * ProjMatrix.M23) + (ModelMatrix.M23 * ProjMatrix.M33) + (ModelMatrix.M24 * ProjMatrix.M43);
+            ClipMatrix[7] = (ModelMatrix.M21 * ProjMatrix.M14) + (ModelMatrix.M22 * ProjMatrix.M24) + (ModelMatrix.M23 * ProjMatrix.M34) + (ModelMatrix.M24 * ProjMatrix.M44);
 
-            ClipMatrix[8] = (ModelMatrix[8] * ProjMatrix[0]) + (ModelMatrix[9] * ProjMatrix[4]) + (ModelMatrix[10] * ProjMatrix[8]) + (ModelMatrix[11] * ProjMatrix[12]);
-            ClipMatrix[9] = (ModelMatrix[8] * ProjMatrix[1]) + (ModelMatrix[9] * ProjMatrix[5]) + (ModelMatrix[10] * ProjMatrix[9]) + (ModelMatrix[11] * ProjMatrix[13]);
-            ClipMatrix[10] = (ModelMatrix[8] * ProjMatrix[2]) + (ModelMatrix[9] * ProjMatrix[6]) + (ModelMatrix[10] * ProjMatrix[10]) + (ModelMatrix[11] * ProjMatrix[14]);
-            ClipMatrix[11] = (ModelMatrix[8] * ProjMatrix[3]) + (ModelMatrix[9] * ProjMatrix[7]) + (ModelMatrix[10] * ProjMatrix[11]) + (ModelMatrix[11] * ProjMatrix[15]);
+            ClipMatrix[8] = (ModelMatrix.M31 * ProjMatrix.M11) + (ModelMatrix.M32 * ProjMatrix.M21) + (ModelMatrix.M33 * ProjMatrix.M31) + (ModelMatrix.M34 * ProjMatrix.M41);
+            ClipMatrix[9] = (ModelMatrix.M31 * ProjMatrix.M12) + (ModelMatrix.M32 * ProjMatrix.M22) + (ModelMatrix.M33 * ProjMatrix.M32) + (ModelMatrix.M34 * ProjMatrix.M42);
+            ClipMatrix[10] = (ModelMatrix.M31 * ProjMatrix.M13) + (ModelMatrix.M32 * ProjMatrix.M23) + (ModelMatrix.M33 * ProjMatrix.M33) + (ModelMatrix.M34 * ProjMatrix.M43);
+            ClipMatrix[11] = (ModelMatrix.M31 * ProjMatrix.M14) + (ModelMatrix.M32 * ProjMatrix.M24) + (ModelMatrix.M33 * ProjMatrix.M34) + (ModelMatrix.M34 * ProjMatrix.M44);
 
-            ClipMatrix[12] = (ModelMatrix[12] * ProjMatrix[0]) + (ModelMatrix[13] * ProjMatrix[4]) + (ModelMatrix[14] * ProjMatrix[8]) + (ModelMatrix[15] * ProjMatrix[12]);
-            ClipMatrix[13] = (ModelMatrix[12] * ProjMatrix[1]) + (ModelMatrix[13] * ProjMatrix[5]) + (ModelMatrix[14] * ProjMatrix[9]) + (ModelMatrix[15] * ProjMatrix[13]);
-            ClipMatrix[14] = (ModelMatrix[12] * ProjMatrix[2]) + (ModelMatrix[13] * ProjMatrix[6]) + (ModelMatrix[14] * ProjMatrix[10]) + (ModelMatrix[15] * ProjMatrix[14]);
-            ClipMatrix[15] = (ModelMatrix[12] * ProjMatrix[3]) + (ModelMatrix[13] * ProjMatrix[7]) + (ModelMatrix[14] * ProjMatrix[11]) + (ModelMatrix[15] * ProjMatrix[15]);
+            ClipMatrix[12] = (ModelMatrix.M41 * ProjMatrix.M11) + (ModelMatrix.M42 * ProjMatrix.M21) + (ModelMatrix.M43 * ProjMatrix.M31) + (ModelMatrix.M44 * ProjMatrix.M41);
+            ClipMatrix[13] = (ModelMatrix.M41 * ProjMatrix.M12) + (ModelMatrix.M42 * ProjMatrix.M22) + (ModelMatrix.M43 * ProjMatrix.M32) + (ModelMatrix.M44 * ProjMatrix.M42);
+            ClipMatrix[14] = (ModelMatrix.M41 * ProjMatrix.M13) + (ModelMatrix.M42 * ProjMatrix.M23) + (ModelMatrix.M43 * ProjMatrix.M33) + (ModelMatrix.M44 * ProjMatrix.M43);
+            ClipMatrix[15] = (ModelMatrix.M41 * ProjMatrix.M14) + (ModelMatrix.M42 * ProjMatrix.M24) + (ModelMatrix.M43 * ProjMatrix.M34) + (ModelMatrix.M44 * ProjMatrix.M44);
 
             // laske frustumin tasot ja normalisoi ne
             frustum[RIGHT, 0] = ClipMatrix[3] - ClipMatrix[0];

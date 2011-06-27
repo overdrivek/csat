@@ -1,13 +1,12 @@
 #region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt[matola@sci.fi]
+ * Copyright (c) 2011 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
 #endregion
 
 // note: SceneNode this == Childs[0]
-//
 
 using System;
 using OpenTK.Graphics.OpenGL;
@@ -42,7 +41,6 @@ namespace CSatEng
 
         public Vector3 Position, Scale = Vector3.One;
         public Vector3 Rotation;
-        //public Matrix4 RotationMatrix = Matrix4.Identity;
         public Matrix4 OrigOrientationMatrix = Matrix4.Identity; // alkup asento .scene tiedostosta (quat->matrix)
 
         /// <summary>
@@ -173,14 +171,12 @@ namespace CSatEng
             SceneNode obj = node;
             if (node == null) obj = this;
 
-            GL.Translate(obj.Position);
-            GL.Rotate(Rotation.Z, 0, 0, 1);
-            GL.Rotate(Rotation.Y, 0, 1, 0);
-            GL.Rotate(Rotation.X, 1, 0, 0);
-            //GL.MultMatrix(ref RotationMatrix);
-            GL.MultMatrix(ref OrigOrientationMatrix);
-
-            GL.Scale(obj.Scale);
+            GLExt.Translate(obj.Position.X, obj.Position.Y, obj.Position.Z);
+            GLExt.RotateZ(Rotation.Z);
+            GLExt.RotateY(Rotation.Y);
+            GLExt.RotateX(Rotation.X);
+            GLExt.MultMatrix(ref OrigOrientationMatrix);
+            GLExt.Scale(obj.Scale.X, obj.Scale.Y, obj.Scale.Z);
         }
 
         /// <summary>
@@ -206,7 +202,7 @@ namespace CSatEng
                         cent.Z += m.WorldMatrix.M43;
                         if (Frustum.ObjectInFrustum(cent, m.Boundings, m.Scale))
                         {
-                            Settings.NumOfObjects++;
+                            BaseGame.NumOfObjects++;
 
                             if (m.IsTransparent == false) visibleObjects.Add(m);
                             else
@@ -252,39 +248,39 @@ namespace CSatEng
         /// <param name="getWMatrix"></param>
         public void CalcPositions(bool getWMatrix)
         {
-            GL.PushMatrix();
+            GLExt.PushMatrix();
             foreach (SceneNode o in Childs)
             {
                 if (o == this) continue;
-                GL.PushMatrix();
+                GLExt.PushMatrix();
 
                 if (getWMatrix)
                 {
                     o.Translate(o);
-                    GL.GetFloat(GetPName.ModelviewMatrix, out o.WorldMatrix);
+                    o.WorldMatrix = GLExt.ModelViewMatrix;
                 }
                 else
                 {
                     o.Translate(null);
-                    GL.GetFloat(GetPName.ModelviewMatrix, out o.Matrix);
+                    o.Matrix = GLExt.ModelViewMatrix;
                 }
 
                 if (o.Childs.Count > 0)
                     o.CalcPositions(getWMatrix);
 
-                GL.PopMatrix();
+                GLExt.PopMatrix();
             }
-            GL.PopMatrix();
+            GLExt.PopMatrix();
         }
 
         protected void CalculatePositions()
         {
             CalcPositions(false);
 
-            GL.PushMatrix();
-            GL.LoadIdentity();
+            GLExt.PushMatrix();
+            GLExt.LoadIdentity();
             CalcPositions(true);
-            GL.PopMatrix();
+            GLExt.PopMatrix();
 
             MakeLists();
 
@@ -301,10 +297,13 @@ namespace CSatEng
         /// </summary>
         public virtual void Render()
         {
+            Light.UpdateLights();
+            Frustum.CalculateFrustum();
+
             visibleObjects.Clear();
             transparentObjects.Clear();
 
-            GL.PushMatrix();
+            GLExt.PushMatrix();
 
             // lasketaan kaikkien objektien paikat valmiiksi. 
             // näkyvät objektit asetetaan visible ja transparent listoihin
@@ -320,9 +319,8 @@ namespace CSatEng
                 Model m = o.model;
                 m.RenderModel();
             }
-            GLSLShader.UseProgram(0);
             Texture.UnBind(Settings.COLOR_TEXUNIT);
-            GL.PopMatrix();
+            GLExt.PopMatrix();
         }
 
         /// <summary>
@@ -330,7 +328,8 @@ namespace CSatEng
         /// </summary>
         public void RenderAgain()
         {
-            GL.PushMatrix();
+            Light.UpdateLights();
+            GLExt.PushMatrix();
 
             // renderointi
             foreach (SceneNode o in visibleObjects)
@@ -342,14 +341,59 @@ namespace CSatEng
                 Model m = o.model;
                 m.RenderModel();
             }
-            GLSLShader.UseProgram(0);
             Texture.UnBind(Settings.COLOR_TEXUNIT);
-            GL.PopMatrix();
+            GLExt.PopMatrix();
         }
 
         protected void Render(SceneNode obj)
         {
             obj.Render();
+        }
+
+        public void RenderSceneWithParticles()
+        {
+            if (Particles.SoftParticles)
+            {
+                // rendaa skenen depth colorbufferiin, ei textureita/materiaaleja
+                Particles.Screen.BindFBO();
+                {
+                    GL.ReadBuffer(ReadBufferMode.ColorAttachment1);
+                    GL.DrawBuffer(DrawBufferMode.ColorAttachment1);
+
+                    GL.ClearColor(float.MaxValue, float.MaxValue, float.MaxValue, float.MaxValue);
+                    Particles.Screen.Clear();
+                    GL.ClearColor(0.0f, 0.0f, 0.1f, 0);
+                    VBO.FastRenderPass = true;
+                    Particles.SetDepthProgram();
+                    Render();
+                    VBO.FastRenderPass = false;
+
+                    // rendaa skene uudelleen textureineen
+                    GL.ReadBuffer(ReadBufferMode.ColorAttachment0);
+                    GL.DrawBuffer(DrawBufferMode.ColorAttachment0);
+
+                    Particles.Screen.Clear();
+                    RenderAgain();
+
+                    GL.ReadBuffer(ReadBufferMode.ColorAttachment1);
+                    Particles.Screen.BindColorBuffer(1, Settings.DEPTH_TEXUNIT);
+                    Particles.Render();
+                    Particles.Screen.UnBindColorBuffer(Settings.DEPTH_TEXUNIT);
+                    GL.ReadBuffer(ReadBufferMode.ColorAttachment0);
+                }
+                Particles.Screen.UnBindFBO();
+            }
+            else
+            {
+                // rendaa skene textureineen
+                Particles.Screen.BindFBO();
+                {
+                    Particles.Screen.Clear();
+                    Render();
+                    Particles.Render();
+                }
+                Particles.Screen.UnBindFBO();
+            }
         }
 
     }

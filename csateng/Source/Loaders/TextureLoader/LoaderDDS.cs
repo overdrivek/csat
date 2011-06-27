@@ -216,18 +216,18 @@ namespace CSatEng
                      !CheckFlag(dwFlags, (uint)eDDSD.PIXELFORMAT) || // must know it's format
                      !CheckFlag(dwCaps1, (uint)eDDSCAPS.TEXTURE)     // must be a Texture
                     )
-                    Util.Error("ERROR: File has invalid signature or missing Flags.");
+                    Log.Error("ERROR: File has invalid signature or missing Flags.");
 
                 #region Examine Flags
                 if (CheckFlag(dwFlags, (uint)eDDSD.WIDTH))
                     _Width = (int)dwWidth;
                 else
-                    Util.Error("ERROR: Flag for Width not set.");
+                    Log.Error("ERROR: Flag for Width not set.");
 
                 if (CheckFlag(dwFlags, (uint)eDDSD.HEIGHT))
                     _Height = (int)dwHeight;
                 else
-                    Util.Error("ERROR: Flag for Height not set.");
+                    Log.Error("ERROR: Flag for Height not set.");
 
                 if (CheckFlag(dwFlags, (uint)eDDSD.DEPTH) && CheckFlag(dwCaps2, (uint)eDDSCAPS2.VOLUME))
                 {
@@ -257,7 +257,7 @@ namespace CSatEng
 
                 // Should never happen
                 if (CheckFlag(dwFlags, (uint)eDDSD.PITCH) && CheckFlag(dwFlags, (uint)eDDSD.LINEARSIZE))
-                    Util.Error("INVALID: Pitch AND Linear Flags both set. Image cannot be uncompressed and DTXn compressed at the same time.");
+                    Log.Error("INVALID: Pitch AND Linear Flags both set. Image cannot be uncompressed and DTXn compressed at the same time.");
 
                 // This flag is set if format is uncompressed RGB RGBA etc.
                 if (CheckFlag(dwFlags, (uint)eDDSD.PITCH))
@@ -414,7 +414,7 @@ namespace CSatEng
                                                 RawDataOfSurface[target + 15] = _RawDataFromFile[source + 12];
                                                 break;
                                             default:
-                                                Util.Error("ERROR: Should have never arrived here! Bad _PixelInternalFormat! Should have been dealt with much earlier.");
+                                                Log.Error("ERROR: Should have never arrived here! Bad _PixelInternalFormat! Should have been dealt with much earlier.");
                                                 break;
                                         }
                                         #endregion Swap Bytes
@@ -449,7 +449,7 @@ namespace CSatEng
                                 case TextureTarget.Texture1D: // Untested
                                 case TextureTarget.Texture3D: // Untested
                                 default:
-                                    Util.Error("ERROR: Use DXT for 2D Images only. Cannot evaluate " + dimension);
+                                    Log.Error("ERROR: Use DXT for 2D Images only. Cannot evaluate " + dimension);
                                     break;
                             }
                             GL.Finish();
@@ -482,7 +482,7 @@ namespace CSatEng
                             if (GLError != ErrorCode.NoError || compressed == 0 || width == 0 || height == 0 || internalformat == 0)
                             {
                                 GL.DeleteTextures(1, ref texturehandle);
-                                Util.Error("ERROR: Something went wrong after GL.CompressedTexImage(); Last GL Error: " + GLError.ToString());
+                                Log.Error("ERROR: Something went wrong after GL.CompressedTexImage(); Last GL Error: " + GLError.ToString());
                             }
                             #endregion Query Success
                         }
@@ -520,7 +520,6 @@ namespace CSatEng
                 GL.TexParameter(dimension, TextureParameterName.TextureMagFilter, (int)TextureLoaderParameters.MagnificationFilter);
                 GL.TexParameter(dimension, TextureParameterName.TextureWrapS, (int)TextureLoaderParameters.WrapModeS);
                 GL.TexParameter(dimension, TextureParameterName.TextureWrapT, (int)TextureLoaderParameters.WrapModeT);
-                GL.TexEnv(TextureEnvTarget.TextureEnv, TextureEnvParameter.TextureEnvMode, (int)TextureLoaderParameters.EnvMode);
                 #endregion Set Texture Parameters
 
                 // If it made it here without throwing any Exception the result is a valid Texture.
@@ -531,7 +530,7 @@ namespace CSatEng
             {
                 dimension = (TextureTarget)0;
                 texturehandle = TextureLoaderParameters.OpenGLDefaultTexture;
-                Util.Error("ERROR: Exception caught when attempting to load file " + filename + ".\n" + e + "\n" + GetDescriptionFromFile(filename));
+                Log.Error("ERROR: Exception caught when attempting to load file " + filename + ".\n" + e + "\n" + GetDescriptionFromFile(filename));
                 // return; // failure
             }
             finally

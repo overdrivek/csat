@@ -1,6 +1,6 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt[matola@sci.fi]
+ * Copyright (c) 2011 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -26,15 +26,14 @@
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;
-
+using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
 namespace CSatEng
 {
-    class Rect
+    struct Rect
     {
         public float x, y, w, h;
-
         public Rect(float x, float y, float w, float h)
         {
             this.x = x;
@@ -50,18 +49,29 @@ namespace CSatEng
         Texture texture = new Texture();
         Rect[] uv = new Rect[chars.Length];
         float charHeight = 0;
-
         float curX = 0, curY = 0;
         public float Size = 500;
 
+        static VBO vbo;
+        static Vertex[] letter =
+        {
+            new Vertex(new Vector3(-1, -1, 0), new Vector3(0, 0, 1), new Vector2(0, 0)),
+            new Vertex(new Vector3(-1, 1, 0), new Vector3(0, 0, 1), new Vector2(0, 1)),
+            new Vertex(new Vector3(1, 1, 0), new Vector3(0, 0, 1), new Vector2(1, 1)),
+            new Vertex(new Vector3(1, -1, 0), new Vector3(0, 0, 1), new Vector2(1, 0))
+        };
+
         public void Dispose()
         {
-            texture.Dispose();
+            if (texture != null) texture.Dispose();
+            if (vbo != null) vbo.Dispose();
+            texture = null;
+            vbo = null;
         }
 
         public static BitmapFont Load(string fileName)
         {
-            BitmapFont font = new BitmapFont(); ;
+            BitmapFont font = new BitmapFont();
             try
             {
                 // lataa fonttitexture
@@ -75,15 +85,23 @@ namespace CSatEng
                     font.SearchUV(ref Data, (CurrentBitmap.PixelFormat == System.Drawing.Imaging.PixelFormat.Format24bppRgb) ? 3 : 4);
                     CurrentBitmap.UnlockBits(Data);
                 }
-                else Util.Error("Font: wrong pixel format.");
+                else Log.Error("Font: wrong pixel format.");
             }
             catch (Exception e)
             {
-                Util.Error("Font: error loading file " + fileName + "\n" + e.ToString());
+                Log.Error("Font: error loading file " + fileName + "\n" + e.ToString());
+            }
+
+            if (vbo == null)
+            {
+                ushort[] ind = new ushort[] { 0, 1, 3, 1, 2, 3 };
+                vbo = new VBO(BufferUsageHint.StreamDraw);
+                string flags = VBO.Flags;
+                vbo.DataToVBO(letter, ind, VBO.VertexMode.UV1);
+                vbo.Shader = GLSLShader.Load("default2d.shader", null);
             }
             return font;
         }
-
 
         long GetColor(byte r, byte g, byte b)
         {
@@ -175,62 +193,64 @@ namespace CSatEng
             float h = uv[ch].h;
             float wm = w * Size;
             float hm = h * Size;
-            float xp = 0, yp = 0;
-            GL.Begin(BeginMode.Quads);
-            GL.TexCoord2(u, v);
-            GL.Vertex2(xp, yp);
-            GL.TexCoord2(u + w, v);
-            GL.Vertex2(xp + wm, yp);
-            GL.TexCoord2(u + w, v + h);
-            GL.Vertex2(xp + wm, yp + hm);
-            GL.TexCoord2(u, v + h);
-            GL.Vertex2(xp, yp + hm);
-            GL.End();
+            letter[0].UV.X = u;
+            letter[0].UV.Y = v;
+            letter[1].UV.X = u + w;
+            letter[1].UV.Y = v;
+            letter[1].Position.X = wm;
+            letter[2].UV.X = u + w;
+            letter[2].UV.Y = v + h;
+            letter[2].Position.X = wm;
+            letter[2].Position.Y = hm;
+            letter[3].UV.X = u;
+            letter[3].UV.Y = v + h;
+            letter[3].Position.Y = hm;
+            vbo.Update(letter);
+            vbo.Render();
         }
-
 
         public void Write(string str)
         {
             Write(str, curX, curY);
         }
+
         public void Write(string str, float x, float y)
         {
             texture.Bind(0);
-            GL.PushAttrib(AttribMask.AllAttribBits);
-            GL.PushMatrix();
-            curX = x;
-            curY = y;
-            GL.Disable(EnableCap.CullFace);
-            GL.Disable(EnableCap.Lighting);
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-            GL.Translate(x, (float)Settings.Height - y, 0);
-            float xp = 0;
-            for (int q = 0, ch; q < str.Length; q++)
+            GLExt.PushMatrix();
             {
-                // etsi kirjain
-                for (ch = 0; ch < chars.Length; ch++)
+                curX = x;
+                curY = y;
+                GLExt.Translate(x, (float)Settings.Height - y, 0);
+                float xp = 0;
+                for (int q = 0, ch; q < str.Length; q++)
                 {
-                    if (str[q] == chars[ch])
+                    // etsi kirjain
+                    for (ch = 0; ch < chars.Length; ch++)
                     {
-                        break;
+                        if (str[q] == chars[ch])
+                        {
+                            break;
+                        }
                     }
+                    if (str[q] == '\n')
+                    {
+                        curY -= charHeight * Size;
+                        GLExt.Translate(-xp, -charHeight * Size, 0);
+                        xp = 0;
+                        continue;
+                    }
+                    float w = uv[ch].w;
+                    float wm = w * Size;
+                    xp += wm;
+                    DrawChar(ch);
+                    GLExt.Translate(wm, 0, 0);
                 }
-                if (str[q] == '\n')
-                {
-                    curY -= charHeight * Size;
-                    GL.Translate(-xp, -charHeight * Size, 0);
-                    xp = 0;
-                    continue;
-                }
-                float w = uv[ch].w;
-                float wm = w * Size;
-                xp += wm;
-                DrawChar(ch);
-                GL.Translate(wm, 0, 0);
             }
-            GL.PopMatrix();
-            GL.PopAttrib();
+            GLExt.PopMatrix();
+            GL.Disable(EnableCap.Blend);
         }
     }
 }

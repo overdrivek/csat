@@ -1,6 +1,6 @@
 #region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt[matola@sci.fi]
+ * Copyright (c) 2011 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -22,8 +22,8 @@ namespace CSatEng
         /// </summary>
         public static Dictionary<string, Texture> textures = new Dictionary<string, Texture>();
         public static uint[] BindedTextures;
-        public static bool IsNPOTSupported = false;
-        public static bool IsFloatTextureSupported = false;
+        public static bool IsNPOTSupported = true;
+        public static bool IsFloatTextureSupported = true;
         public static int MaxTextures;
 
         protected string textureName;
@@ -105,7 +105,6 @@ namespace CSatEng
 
             try
             {
-
                 if (fileName.Contains(".dds")) // jos dds texture
                 {
                     ImageDDS.LoadFromDisk(fileName, out tex.TextureID, out target);
@@ -117,7 +116,7 @@ namespace CSatEng
             }
             catch (Exception e)
             {
-                Util.Error(e.ToString());
+                Log.Error(e.ToString());
             }
 
             int pwidth, pheight;
@@ -149,7 +148,6 @@ namespace CSatEng
     /// </summary>
     public class Texture2D : Texture
     {
-        public static float AlphaMin = 0.1f;
         public Vector2 Scale = new Vector2(1, 1);
         public VBO Vbo = null;
 
@@ -162,13 +160,14 @@ namespace CSatEng
             int h = RealHeight / 2;
             Vertex[] vert =
             {
-                new Vertex(new Vector3(-w, -h, 0), new Vector3(0, 0, 1), new Vector2(0,0)),
-                new Vertex(new Vector3(-w, h, 0), new Vector3(0, 0, 1), new Vector2(0,1)),
-                new Vertex(new Vector3(w, h, 0), new Vector3(0, 0, 1), new Vector2(1,1)),
-                new Vertex(new Vector3(w, -h, 0), new Vector3(0, 0, 1), new Vector2(1,0))
+                new Vertex(new Vector3(-w, -h, 0), new Vector3(0, 0, 1), new Vector2(0, 0)),
+                new Vertex(new Vector3(-w, h, 0), new Vector3(0, 0, 1), new Vector2(0, 1)),
+                new Vertex(new Vector3(w, h, 0), new Vector3(0, 0, 1), new Vector2(1, 1)),
+                new Vertex(new Vector3(w, -h, 0), new Vector3(0, 0, 1), new Vector2(1, 0))
             };
             Vbo = new VBO();
             Vbo.DataToVBO(vert, ind, VBO.VertexMode.UV1);
+            Vbo.Shader = GLSLShader.Load("default2d.shader", null);
         }
 
         public static new Texture2D Load(string fileName)
@@ -203,49 +202,37 @@ namespace CSatEng
         {
             if (Vbo == null) CreateVBO();
             Bind(0);
-            GL.PushAttrib(AttribMask.ColorBufferBit | AttribMask.EnableBit | AttribMask.PolygonBit);
-            GL.Disable(EnableCap.Lighting);
-            GL.Disable(EnableCap.DepthTest);
-            GL.PushMatrix();
+            GLExt.PushMatrix();
             {
-                GL.Translate(x + RealWidth / 2, Settings.Height - y - RealHeight / 2, 0);
-                GL.Rotate(rotate, 0, 0, 1);
-                GL.Scale(sx, sy, 1);
+                GLExt.Translate(x + RealWidth / 2, Settings.Height - y - RealHeight / 2, 0);
+                GLExt.RotateZ(rotate);
+                GLExt.Scale(sx, sy, 1);
                 if (blend)
                 {
                     GL.Enable(EnableCap.Blend);
                     GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-                    GL.Enable(EnableCap.AlphaTest);
-                    GL.AlphaFunc(AlphaFunction.Greater, AlphaMin);
+                    Vbo.Render();
+                    GL.Disable(EnableCap.Blend);
                 }
-                Vbo.Render();
+                else
+                    Vbo.Render();
             }
-            GL.PopMatrix();
-            GL.PopAttrib();
-        }
-
-        public void DrawFullScreen(int x, int y, float rotate)
-        {
-            float sx = (float)Settings.Width / (float)RealWidth, sy = (float)Settings.Height / (float)RealHeight;
-            if (Vbo == null) CreateVBO();
-            Bind(0);
-            GL.PushAttrib(AttribMask.ColorBufferBit | AttribMask.EnableBit | AttribMask.PolygonBit);
-            GL.Disable(EnableCap.Lighting);
-            GL.Disable(EnableCap.DepthTest);
-            GL.PushMatrix();
-            {
-                GL.Translate(sx * (x + RealWidth / 2), Settings.Height + sy * (y - RealHeight / 2), 0);
-                GL.Rotate(rotate, 0, 0, 1);
-                GL.Scale(sx, sy, 1);
-                Vbo.Render();
-            }
-            GL.PopMatrix();
-            GL.PopAttrib();
+            GLExt.PopMatrix();
         }
 
         public void DrawFullScreen(int x, int y)
         {
-            DrawFullScreen(x, y, 0);
+            float sx = (float)Settings.Width / (float)RealWidth;
+            float sy = (float)Settings.Height / (float)RealHeight;
+            if (Vbo == null) CreateVBO();
+            Bind(0);
+            GLExt.PushMatrix();
+            {
+                GLExt.Translate(sx * (x + RealWidth / 2), Settings.Height + sy * (y - RealHeight / 2), 0);
+                GLExt.Scale(sx, sy, 1);
+                Vbo.Render();
+            }
+            GLExt.PopMatrix();
         }
         public void Draw(int x, int y)
         {

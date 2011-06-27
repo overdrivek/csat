@@ -1,6 +1,6 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt[matola@sci.fi]
+ * Copyright (c) 2011 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -18,7 +18,7 @@ namespace CSatEng
         public static readonly int LIGHTMASK_TEXUNIT = 6;
         public static readonly int SHADOW_TEXUNIT = 7;
         public static readonly int DEPTH_TEXUNIT = SHADOW_TEXUNIT;
-        
+
         public static string ModelDir = "../../data/model/";
         public static string TextureDir = "../../data/texture/";
         public static string ShaderDir = "../../data/shader/";
@@ -27,8 +27,9 @@ namespace CSatEng
         public static int Width, Height, Bpp, FSAA, DepthBpp;
         public static bool FullScreen;
         public static bool VSync;
+        public static bool UseGL3;
 
-        public static int NumOfObjects = 0;
+        public static bool DisableFbo, DisableShadowMapping, DisableSoftParticles, DisableNPOTTextures, DisableShaders, DisableFloatTextures;
 
         public static void ReadXML(string fileName)
         {
@@ -54,6 +55,32 @@ namespace CSatEng
 
             XmlNode mipmaps = doc.SelectSingleNode("//settings/mipmaps/text()");
             TextureLoaderParameters.BuildMipmapsForUncompressed = mipmaps.Value == "true";
+
+            XmlNode fbores = doc.SelectSingleNode("//settings/fbo_size/text()");
+            res = fbores.Value.Split('x');
+            FBO.WidthS = int.Parse(res[0]);
+            FBO.HeightS = int.Parse(res[1]);
+
+            XmlNode dis = doc.SelectSingleNode("//settings/use_gl3/text()");
+            UseGL3 = dis.Value == "true";
+
+            dis = doc.SelectSingleNode("//settings/disable_fbo/text()");
+            DisableFbo = dis.Value == "true";
+
+            dis = doc.SelectSingleNode("//settings/disable_shadowmapping/text()");
+            DisableShadowMapping = dis.Value == "true";
+
+            dis = doc.SelectSingleNode("//settings/disable_softparticles/text()");
+            DisableSoftParticles = dis.Value == "true";
+
+            dis = doc.SelectSingleNode("//settings/disable_npot_textures/text()");
+            DisableNPOTTextures = dis.Value == "true";
+
+            dis = doc.SelectSingleNode("//settings/disable_shaders/text()");
+            DisableShaders = dis.Value == "true";
+
+            dis = doc.SelectSingleNode("//settings/disable_float_textures/text()");
+            DisableFloatTextures = dis.Value == "true";
         }
     }
 }

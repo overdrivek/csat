@@ -1,11 +1,4 @@
-﻿#region --- MIT License ---
-/* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt[matola@sci.fi]
- * This notice may not be removed from any source distribution.
- * See license.txt for licensing details.
- */
-#endregion
-using System;
+﻿using System;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
@@ -28,6 +21,10 @@ namespace CSatEng
 
         public override void Dispose()
         {
+            back.Dispose();
+            img.Dispose();
+            font.Dispose();
+
             ClearArrays();
             base.Dispose();
         }
@@ -44,16 +41,18 @@ namespace CSatEng
         public override void Render()
         {
             ang += 1;
+            GL.Clear(ClearFlags);
+
             back.DrawFullScreen(0, 0);
 
-            GL.Color4(1f, 1, 1, (float)Math.Abs(Math.Sin(ang * 0.01f)));
+            GLExt.Color4(1, 1, 1, (float)Math.Abs(Math.Sin(ang * 0.01f)));
             back.Draw(10, 10, 0, 1, 1, false); // no blending
             back.Draw(Settings.Width / 2 + 10, 10, 0, 1, 1, true);
-            GL.Color4(1f, 1, 1, 1f);
+            GLExt.Color4(1, 1, 1, 1);
 
             img.Draw(Mouse.X, Mouse.Y, ang, 1, 1, true);
 
-            font.Write("Hi there! 2D-test.");
+            font.Write("2D-test.");
             font.Write("Press ESC\nto start the next test.", 10, 20);
 
             base.Render();

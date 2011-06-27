@@ -1,15 +1,12 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt[matola@sci.fi]
+ * Copyright (c) 2011 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
 #endregion
 using System;
-using System.Drawing;
-using OpenTK;
 using OpenTK.Graphics.OpenGL;
-using OpenTK.Input;
 
 namespace CSatEng
 {
@@ -18,19 +15,34 @@ namespace CSatEng
         uint[] colorTexture;
         uint depthTexture;
         uint fboHandle = 0;
-        ClearBufferMask clearFlags = 0;
-        public static int Width, Height;
-        public static bool IsSupported = false;
+        public Texture2D DepthTexture;
+        public Texture2D[] ColorTextures;
+        public int Width, Height;
+        public static int WidthS = 512, HeightS = 512;
+        public static bool IsSupported = true;
         public static float ColorZNear = 1, ColorZFar = 1000;
-        public static float DepthZNear = 500, DepthZFar = 800;
+        public static float DepthZNear = 1, DepthZFar = 1000;
+        ClearBufferMask clearFlags = 0;
 
+        /// <summary>
+        /// luo fbo. jos width ja height on 0, käytetään arvoja jotka on jo Width ja Height:ssä 
+        /// (ladattu settings.xml tiedostosta)
+        /// </summary>
         public FBO(int width, int height, int createColorBuffers, bool createDepthBuffer)
         {
             if (IsSupported == false) return;
 
             if (fboHandle != 0) return;
-            Width = width;
-            Height = height;
+            if (width != 0 && height != 0)
+            {
+                Width = width;
+                Height = height;
+            }
+            else
+            {
+                Width = WidthS; // aseta settings.xml tiedostossa annetut arvot
+                Height = HeightS;
+            }
 
             GL.Ext.GenFramebuffers(1, out fboHandle);
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, fboHandle);
@@ -114,21 +126,24 @@ namespace CSatEng
                 // This is to allow usage of shadow2DProj function in the shader
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureCompareMode, (int)TextureCompareMode.CompareRToTexture);
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureCompareFunc, (int)All.Lequal);
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.DepthTextureMode, (int)All.Intensity);
+                if (Settings.UseGL3 == false) GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.DepthTextureMode, (int)All.Intensity);
             }
 
             bool ok = CheckFBOError();
 
             // using FBO might have changed states, e.g. the FBO might not support stereoscopic views or double buffering
-            int[] queryinfo = new int[6];
-            GL.GetInteger(GetPName.MaxColorAttachmentsExt, out queryinfo[0]);
-            GL.GetInteger(GetPName.AuxBuffers, out queryinfo[1]);
-            GL.GetInteger(GetPName.MaxDrawBuffers, out queryinfo[2]);
-            GL.GetInteger(GetPName.Stereo, out queryinfo[3]);
-            GL.GetInteger(GetPName.Samples, out queryinfo[4]);
-            GL.GetInteger(GetPName.Doublebuffer, out queryinfo[5]);
-            Log.WriteLine("Max ColorBuffers: " + queryinfo[0] + " / Max AuxBuffers: " + queryinfo[1] + " / Max DrawBuffers: " + queryinfo[2] +
-                               " / Stereo: " + queryinfo[3] + " / Samples: " + queryinfo[4] + " / DoubleBuffer: " + queryinfo[5]);
+            if (Settings.UseGL3 == false)
+            {
+                int[] queryinfo = new int[6];
+                GL.GetInteger(GetPName.MaxColorAttachmentsExt, out queryinfo[0]);
+                GL.GetInteger(GetPName.AuxBuffers, out queryinfo[1]);
+                GL.GetInteger(GetPName.MaxDrawBuffers, out queryinfo[2]);
+                GL.GetInteger(GetPName.Stereo, out queryinfo[3]);
+                GL.GetInteger(GetPName.Samples, out queryinfo[4]);
+                GL.GetInteger(GetPName.Doublebuffer, out queryinfo[5]);
+                Log.WriteLine("Max ColorBuffers: " + queryinfo[0] + " / Max AuxBuffers: " + queryinfo[1] + " / Max DrawBuffers: " + queryinfo[2] +
+                    " / Stereo: " + (queryinfo[3] > 0 ? "true" : "false") + " / Samples: " + queryinfo[4] + " / DoubleBuffer: " + queryinfo[5]);
+            }
 
             if (ok == false)
             {
@@ -141,6 +156,21 @@ namespace CSatEng
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0); // disable rendering into the FBO
             GL.BindTexture(TextureTarget.Texture2D, 0);
+
+            CreateTextures();
+        }
+
+        void CreateTextures()
+        {
+            if (IsSupported == false) return;
+
+            if (depthTexture != 0) DepthTexture = Texture2D.CreateDrawableTexture(Width, Height, depthTexture);
+            if (colorTexture != null)
+            {
+                ColorTextures = new Texture2D[colorTexture.Length];
+                for (int q = 0; q < colorTexture.Length; q++)
+                    ColorTextures[q] = Texture2D.CreateDrawableTexture(Width, Height, colorTexture[q]);
+            }
         }
 
         bool CheckFBOError()
@@ -152,9 +182,12 @@ namespace CSatEng
                 case FramebufferErrorCode.FramebufferCompleteExt:
                     {
                         Log.WriteLine("FBO: The framebuffer is complete and valid for rendering.");
-                        int bit;
-                        GL.GetInteger(GetPName.DepthBits, out bit);
-                        Log.WriteLine("Depthbits: " + bit);
+                        if (Settings.UseGL3 == false)
+                        {
+                            int bit;
+                            GL.GetInteger(GetPName.DepthBits, out bit);
+                            Log.WriteLine("Depthbits: " + bit);
+                        }
                         ok = true;
                         break;
                     }
@@ -222,72 +255,46 @@ namespace CSatEng
         }
 
         /// <summary>
-        /// aloita piirtämään fbo:hon. jos drawtodepth==true, asetetaan pienemmät ZNear ja ZFar arvot.
+        /// aloita piirtämään fbo:hon.
         /// </summary>
-        public void BeginDrawing(bool drawToDepth)
+        public void BindFBO()
         {
             if (IsSupported == false) return;
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, fboHandle);
-
-            float ZNear, ZFar;
-            if (drawToDepth)
-            {
-                ZNear = DepthZNear;
-                ZFar = DepthZFar;
-            }
-            else
-            {
-                ZNear = ColorZNear;
-                ZFar = ColorZFar;
-            }
-
-            GL.MatrixMode(MatrixMode.Projection);
-            GL.PushMatrix();
-            Matrix4 perpective = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(Camera.Fov), (float)Width / (float)Height, ZNear, ZFar);
-            GL.LoadMatrix(ref perpective);
-            GL.MatrixMode(MatrixMode.Modelview);
-            GL.PushAttrib(AttribMask.ViewportBit);
             GL.Viewport(0, 0, Width, Height);
         }
 
-        public void EndDrawing()
+        public void UnBindFBO()
         {
             if (IsSupported == false) return;
-            GL.PopAttrib();
+            GL.Viewport(0, 0, Settings.Width, Settings.Height);
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0);
-            GL.MatrixMode(MatrixMode.Projection);
-            GL.PopMatrix();
-            GL.MatrixMode(MatrixMode.Modelview);
         }
 
         public void BindDepth()
         {
+            if (IsSupported == false) return;
             Texture.Bind(Settings.DEPTH_TEXUNIT, TextureTarget.Texture2D, depthTexture);
         }
         public void UnBindDepth()
         {
+            if (IsSupported == false) return;
             Texture.UnBind(Settings.DEPTH_TEXUNIT);
         }
-        public void BindColor(int colorBufferNo, int textureUnit)
+        public void BindColorBuffer(int colorBufferNo, int textureUnit)
         {
+            if (IsSupported == false) return;
             Texture.Bind(textureUnit, TextureTarget.Texture2D, colorTexture[colorBufferNo]);
         }
-        public void UnBindColor(int textureUnit)
+        public void UnBindColorBuffer(int textureUnit)
         {
+            if (IsSupported == false) return;
             Texture.UnBind(textureUnit);
         }
 
         public void Clear()
         {
             GL.Clear(clearFlags);
-        }
-        public Texture2D CreateDrawableColorTexture(int tex)
-        {
-            return Texture2D.CreateDrawableTexture(Width, Height, colorTexture[tex]);
-        }
-        public Texture2D CreateDrawableDepthTexture()
-        {
-            return Texture2D.CreateDrawableTexture(Width, Height, depthTexture);
         }
 
     }

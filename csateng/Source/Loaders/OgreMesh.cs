@@ -1,6 +1,6 @@
 #region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt[matola@sci.fi]
+ * Copyright (c) 2011 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -48,14 +48,14 @@ namespace CSatEng
             }
             catch (Exception e)
             {
-                Util.Error(e.ToString());
+                Log.Error(e.ToString());
             }
 
             // Validate the File
             XMLRoot = XMLDoc.DocumentElement;
             if (XMLRoot.Name != "mesh")
             {
-                Util.Error("Error [" + fileName + "]: Invalid .mesh File. Missing <mesh>");
+                Log.Error("Error [" + fileName + "]: Invalid .mesh File. Missing <mesh>");
             }
 
             bool isPath = false; // jos meshi on pathi
@@ -76,7 +76,7 @@ namespace CSatEng
                 string shader = Material.ShaderName;
                 if (shader != "")
                 {
-                    Shader = GLSLShader.Load(shader, null);
+                    Vbo.Shader = GLSLShader.Load(shader, null);
                 }
             }
             else
@@ -183,7 +183,6 @@ namespace CSatEng
         {
             if (Name != "")
             {
-                if (Shader != null) Shader.Dispose();
                 if (Material != null) Material.Dispose();
                 if (Vbo != null) Vbo.Dispose();
                 Log.WriteLine("Disposed: " + Name + " (mesh)", true);
@@ -193,7 +192,7 @@ namespace CSatEng
 
         protected override void RenderModel()
         {
-            GL.LoadMatrix(ref Matrix);
+            GLExt.LoadMatrix(ref Matrix);
             RenderMesh();
         }
 
@@ -202,35 +201,35 @@ namespace CSatEng
             base.Render(); // renderoi objektin ja kaikki siihen liitetyt objektit
         }
 
-        
+
         public void RenderMesh()
         {
             if (Vbo == null) return;
 
             if (DoubleSided) GL.Disable(EnableCap.CullFace);
-            if (ShadowMapping.ShadowPass && CastShadow)
+            if (VBO.FastRenderPass)
             {
-                Vbo.Render();
+                if(CastShadow) Vbo.Render();
             }
             else
             {
                 Material.SetMaterial();
-                if (Shader != null) Shader.UseProgram();
-                else GLSLShader.UseProgram(0);
-
-                GL.MatrixMode(MatrixMode.Texture);
-                GL.ActiveTexture(TextureUnit.Texture0 + Settings.SHADOW_TEXUNIT);
-                GL.PushMatrix();
-                if (WorldMatrix != null) GL.MultMatrix(ref WorldMatrix);
-                GL.MatrixMode(MatrixMode.Modelview);
+                if (WorldMatrix != null)
+                {
+                    GLExt.MatrixMode(MatrixMode.Texture);
+                    GLExt.PushMatrix();
+                    GLExt.MultMatrix(ref WorldMatrix);
+                    GLExt.MatrixMode(MatrixMode.Modelview);
+                }
 
                 Vbo.Render();
 
-                GL.MatrixMode(MatrixMode.Texture);
-                GL.ActiveTexture(TextureUnit.Texture0 + Settings.SHADOW_TEXUNIT);
-                GL.PopMatrix();
-                GL.MatrixMode(MatrixMode.Modelview);
-                GL.ActiveTexture(TextureUnit.Texture0);
+                if (WorldMatrix != null)
+                {
+                    GLExt.MatrixMode(MatrixMode.Texture);
+                    GLExt.PopMatrix();
+                    GLExt.MatrixMode(MatrixMode.Modelview);
+                }
             }
             if (DoubleSided) GL.Enable(EnableCap.CullFace);
         }

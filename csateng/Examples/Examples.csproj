@@ -42,7 +42,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="src\Callbacks.cs" />
     <Compile Include="src\Main.cs" />
     <Compile Include="src\Test2D.cs" />
     <Compile Include="src\TestMD5.cs" />
@@ -66,8 +65,13 @@
     <None Include="data\model\ugly\ukko_action2.anim" />
     <None Include="data\model\ugly\ukko_action3.anim" />
     <None Include="data\model\ugly\ukko_walk.anim" />
-    <None Include="data\shader\model.shader" />
-    <None Include="data\shader\shadow.shader" />
+    <None Include="data\shader\bloom.shader" />
+    <None Include="data\shader\blur.shader" />
+    <None Include="data\shader\default.shader" />
+    <None Include="data\shader\default2d.shader" />
+    <None Include="data\shader\depth.shader" />
+    <None Include="data\shader\particles.shader" />
+    <None Include="data\shader\shadowmapping.shader" />
     <None Include="OpenTK.dll.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
