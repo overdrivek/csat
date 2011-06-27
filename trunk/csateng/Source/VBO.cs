@@ -1,14 +1,14 @@
 #region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt[matola@sci.fi]
+ * Copyright (c) 2011 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
 #endregion
 using System;
 using System.Runtime.InteropServices;
-using OpenTK.Graphics.OpenGL;
 using OpenTK;
+using OpenTK.Graphics.OpenGL;
 
 namespace CSatEng
 {
@@ -18,6 +18,7 @@ namespace CSatEng
         public Vector3 Position;
         public Vector3 Normal;
         public Vector4 UV;
+        public static int Size;
 
         public Vertex(Vector3 position)
         {
@@ -53,17 +54,25 @@ namespace CSatEng
 
     public class VBO
     {
-        public enum VertexMode { Normal, UV1, UV2 }; // mit‰ tietoja vertexiss‰
-
-        int vertexID = 0, indexID = 0;
-        BufferUsageHint usage = BufferUsageHint.StaticDraw;
+        /// <summary>
+        /// ladattava shaderi. pit‰‰ asettaa ennen 3d-mallin lataamista.
+        /// </summary>
+        public static string ShaderFileName = "default.shader";
 
         /// <summary>
-        /// mit‰ dataa k‰ytet‰‰n (normal, uv, uv2)
+        /// flagsit m‰‰r‰‰ mit‰ shaderista ladataan, esim "LIGHTING", "SHADOWS", "SOFTSHADOWS".
+        /// pit‰‰ asettaa ennen 3d-mallin lataamista.
         /// </summary>
-        VertexMode vertexFlags = VertexMode.Normal;
+        public static string Flags = "";
+
+        public enum VertexMode { UV1, UV2 };
+        VertexMode vertexFlags = VertexMode.UV1;
+        BufferUsageHint usage = BufferUsageHint.StaticDraw;
+        public GLSLShader Shader;
+        public static bool FastRenderPass = false;
+
+        int vertexID = -1, indexID = -1, vaoID = -1;
         int numOfIndices = 0;
-        int vertexSize = 0;
 
         public VBO()
         {
@@ -75,27 +84,30 @@ namespace CSatEng
 
         public void Dispose()
         {
-            if (vertexID != 0)
-            {
-                GL.DeleteBuffers(1, ref vertexID);
-                Log.WriteLine("Disposed: VBO", true);
-            }
-            if (indexID != 0) GL.DeleteBuffers(1, ref indexID);
-            vertexID = indexID = 0;
+            if (vertexID != -1) GL.DeleteBuffers(1, ref vertexID);
+            if (indexID != -1) GL.DeleteBuffers(1, ref indexID);
+            if (vaoID != -1) GL.DeleteVertexArrays(1, ref vaoID);
+            if (Shader != null) Shader.Dispose();
+            vertexID = indexID = vaoID = -1;
+            Shader = null;
+
+            if (numOfIndices > 0) Log.WriteLine("Disposed: VBO", true);
+            numOfIndices = 0;
         }
 
         public void DataToVBO(Vertex[] vertices, ushort[] indices, VertexMode mode)
         {
+            if (numOfIndices > 0) Dispose();
             int size;
             vertexFlags = mode;
             numOfIndices = indices.Length;
-            vertexSize = BlittableValueType.StrideOf(vertices);
+            Vertex.Size = BlittableValueType.StrideOf(vertices);
 
             GL.GenBuffers(1, out vertexID);
             GL.BindBuffer(BufferTarget.ArrayBuffer, vertexID);
-            GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(vertices.Length * vertexSize), vertices, usage);
+            GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(vertices.Length * Vertex.Size), vertices, usage);
             GL.GetBufferParameter(BufferTarget.ArrayBuffer, BufferParameterName.BufferSize, out size);
-            if (vertices.Length * BlittableValueType.StrideOf(vertices) != size) Util.Error("DataToVBO: Vertex data not uploaded correctly");
+            if (vertices.Length * BlittableValueType.StrideOf(vertices) != size) Log.Error("DataToVBO: Vertex data not uploaded correctly");
 
             GL.GenBuffers(1, out indexID);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, indexID);
@@ -103,61 +115,53 @@ namespace CSatEng
             GL.GetBufferParameter(BufferTarget.ElementArrayBuffer, BufferParameterName.BufferSize, out size);
             if (indices.Length * sizeof(short) != size) throw new ApplicationException("DataToVBO: Element data not uploaded correctly");
 
-            Util.CheckGLError("DataToVBO");
+            if (GLSLShader.IsSupported)
+            {
+                Shader = GLSLShader.Load(VBO.ShaderFileName + ":" + VBO.Flags, null);
+                if (Settings.UseGL3)
+                {
+                    GL.GenVertexArrays(1, out vaoID);
+                    GL.BindVertexArray(vaoID);
+                }
+                GL.BindBuffer(BufferTarget.ArrayBuffer, vertexID);
+                GL.BindBuffer(BufferTarget.ElementArrayBuffer, indexID);
+                Shader.SetAttributes();
+                if (Settings.UseGL3) GL.BindVertexArray(0);
+            }
+            GLExt.CheckGLError("DataToVBO");
         }
 
         public void Update(Vertex[] verts)
         {
-            if (usage == BufferUsageHint.DynamicDraw)
-            {
-                GL.BindBuffer(BufferTarget.ArrayBuffer, vertexID);
-                GL.BufferSubData(BufferTarget.ArrayBuffer, (IntPtr)0, (IntPtr)(vertexSize * numOfIndices), verts);
-            }
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexID);
+            GL.BufferSubData(BufferTarget.ArrayBuffer, (IntPtr)0, (IntPtr)(verts.Length * Vertex.Size), verts);
         }
 
-        /// <summary>
-        /// tilat p‰‰lle. pit‰‰ kutsua ennen Renderi‰.
-        /// </summary>
-        public void BeginRender()
+        void BeginRender_noShaders()
         {
-            if (vertexID == 0 || indexID == 0) Util.Error("VBO destroyed!");
-
+            if (vertexID == -1 || indexID == -1) Log.Error("VBO destroyed!");
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindBuffer(BufferTarget.ArrayBuffer, vertexID);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, indexID);
             GL.EnableClientState(ArrayCap.NormalArray);
-            GL.NormalPointer(NormalPointerType.Float, vertexSize, (IntPtr)(3 * sizeof(float)));
-
+            GL.NormalPointer(NormalPointerType.Float, Vertex.Size, (IntPtr)Vector3.SizeInBytes);
             if (vertexFlags == VertexMode.UV1 || vertexFlags == VertexMode.UV2)
             {
                 GL.ClientActiveTexture(TextureUnit.Texture0);
                 GL.EnableClientState(ArrayCap.TextureCoordArray);
-                GL.TexCoordPointer(2, TexCoordPointerType.Float, vertexSize, (IntPtr)(6 * sizeof(float)));
+                GL.TexCoordPointer(2, TexCoordPointerType.Float, Vertex.Size, (IntPtr)(2 * Vector3.SizeInBytes));
                 if (vertexFlags == VertexMode.UV2)
                 {
                     GL.ClientActiveTexture(TextureUnit.Texture1);
                     GL.EnableClientState(ArrayCap.TextureCoordArray);
-                    GL.TexCoordPointer(2, TexCoordPointerType.Float, vertexSize, (IntPtr)(8 * sizeof(float)));
+                    GL.TexCoordPointer(2, TexCoordPointerType.Float, Vertex.Size, (IntPtr)(2 * Vector3.SizeInBytes + Vector2.SizeInBytes));
                 }
             }
             GL.EnableClientState(ArrayCap.VertexArray);
-            GL.VertexPointer(3, VertexPointerType.Float, vertexSize, (IntPtr)(0));
+            GL.VertexPointer(3, VertexPointerType.Float, Vertex.Size, (IntPtr)(0));
         }
 
-        /// <summary>
-        /// renderoi vbo
-        /// </summary>
-        public void Render()
-        {
-            BeginRender();
-            GL.DrawElements(BeginMode.Triangles, numOfIndices, DrawElementsType.UnsignedShort, IntPtr.Zero);
-            EndRender();
-        }
-
-        /// <summary>
-        /// tilat pois p‰‰lt‰
-        /// </summary>
-        public void EndRender()
+        void EndRender_noShaders()
         {
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
@@ -173,6 +177,42 @@ namespace CSatEng
                     GL.DisableClientState(ArrayCap.TextureCoordArray);
                 }
             }
+        }
+
+        /// <summary>
+        /// renderoi vbo
+        /// </summary>
+        public void Render()
+        {
+            if (GLSLShader.IsSupported == false) // gl1.5 tai jos haluttu ottaa shaderit pois k‰ytˆst‰
+            {
+                GL.LoadMatrix(ref GLExt.ModelViewMatrix);
+                BeginRender_noShaders();
+                GL.DrawElements(BeginMode.Triangles, numOfIndices, DrawElementsType.UnsignedShort, IntPtr.Zero);
+                EndRender_noShaders();
+                return;
+            }
+
+            if (VBO.FastRenderPass == false) Shader.UseProgram();
+
+            if (Settings.UseGL3 == true)
+            {
+                GL.BindVertexArray(vaoID);
+                GL.BindBuffer(BufferTarget.ArrayBuffer, vertexID);
+                GL.BindBuffer(BufferTarget.ElementArrayBuffer, indexID);
+                GLSLShader.CurrentShader.SetUniforms();
+                GLSLShader.CurrentShader.SetAttributes();
+                GL.DrawElements(BeginMode.Triangles, numOfIndices, DrawElementsType.UnsignedShort, IntPtr.Zero);
+                GL.BindVertexArray(0);
+                return;
+            }
+
+            // gl2
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexID);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, indexID);
+            GLSLShader.CurrentShader.SetUniforms();
+            GLSLShader.CurrentShader.SetAttributes();
+            GL.DrawElements(BeginMode.Triangles, numOfIndices, DrawElementsType.UnsignedShort, IntPtr.Zero);
         }
     }
 }

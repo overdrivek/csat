@@ -21,7 +21,7 @@ namespace CSatEng
 
         public override void Init()
         {
-            earth.SetParticle(Billboard.Load("earth.png"), false, true, null); // ei läpikuultava, varjostaa
+            earth.SetParticle(Billboard.Load("earth.png", false), false, true, null); // ei läpikuultava, varjostaa
             explosion.SetParticle(Billboard.Load("fire.png"), true, false, new ParticleCallback(RenderParticleCallback)); // läpikuultava, ei varjosta
             smoke.SetParticle(Billboard.Load("smoke.png"), true, true, null); // läpikuultava, varjostaa
             SetupParticles(true, true, true);
@@ -63,12 +63,10 @@ namespace CSatEng
 
         public override void Render()
         {
-            GL.Clear(GameLoop.ClearFlags);
-
+            GL.Clear(ClearFlags);
             camera.SetFPSCamera();
-            Frustum.CalculateFrustum();
-            world.Render();
 
+            world.Render();
             Particles.Render();
 
             Camera.Set2D();
@@ -126,7 +124,7 @@ namespace CSatEng
         {
             // nyt voi tehdä joka partikkelille mitä haluaa, esim asettaa alphan lifeksi.
             float tc = p.life / 2;
-            GL.Color4(1f, tc, tc, tc);
+            GLExt.Color4(1f, tc, tc, tc);
         }
 
         void UpdateParticles(float time)

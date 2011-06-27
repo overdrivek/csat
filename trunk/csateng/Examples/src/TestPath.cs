@@ -1,6 +1,6 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt[matola@sci.fi]
+ * Copyright (c) 2011 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -18,15 +18,17 @@ namespace CSatEng
 
         public override void Init()
         {
-            depthFBO = new FBO(512, 512, 1, true);
-            shadows = new ShadowMapping(depthFBO);
+            depthFBO = new FBO(0, 0, 1, true);
+            ShadowMapping.Create(depthFBO, "lightmask.png");
 
             skybox = Sky.Load("sky/sky2_", "jpg");
             world.Add(skybox);
 
+            //VBO.Flags = "LIGHTING";
+            VBO.Flags = "LIGHTING:PHONG";
+
             Model scene = new Model();
             DotScene ds = DotScene.Load("scene1/scene1.scene", scene);
-            GLSLShader.LoadShader(scene, "shadow.shader", new ShaderCallback(CallBacks.ShadowShaderCallBack));
             world.Add(scene);
 
             camPath = Path.GetPath("Path_camera");
@@ -78,13 +80,9 @@ namespace CSatEng
 
         public override void Render()
         {
-            shadows.SetupShadows(world, 0, false);
-            GL.Clear(GameLoop.ClearFlags);
-
+            ShadowMapping.SetupShadows(world, 0, false);
+            GL.Clear(ClearFlags);
             camera.SetCameraMatrix();
-
-            Light.UpdateLights();
-            Frustum.CalculateFrustum();
             world.Render();
 
             Camera.Set2D();

@@ -1,13 +1,13 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt[matola@sci.fi]
+ * Copyright (c) 2011 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
 #endregion
 using System;
-using OpenTK.Input;
 using OpenTK.Graphics.OpenGL;
+using OpenTK.Input;
 
 namespace CSatEng
 {
@@ -17,10 +17,11 @@ namespace CSatEng
         public static Random Rnd = new Random();
         public static KeyboardDevice Keyboard;
         public static MouseDevice Mouse; //public static OpenTK.Input.Mouse mouse;
+        public static ClearBufferMask ClearFlags = ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit;
+        public static int NumOfObjects = 0;
 
         protected Sky skybox;
-        protected static ShadowMapping shadows;
-        protected FBO colorFBO, depthFBO, depthColorFBO;
+        protected FBO colorFBO, depthFBO;
         protected SceneNode world = new SceneNode("World");
         protected Camera camera = new Camera();
         protected BitmapFont font = null;
@@ -29,7 +30,6 @@ namespace CSatEng
 
         public BaseGame()
         {
-            Particles.SoftParticles = false;
             GameLoop.Running = true;
         }
 
@@ -38,15 +38,12 @@ namespace CSatEng
             if (font != null) font.Dispose();
             if (colorFBO != null) colorFBO.Dispose();
             if (depthFBO != null) depthFBO.Dispose();
-            if (depthColorFBO != null) depthColorFBO.Dispose();
             if (skybox != null) skybox.Dispose();
             skybox = null;
             colorFBO = null;
             depthFBO = null;
-            depthColorFBO = null;
             font = null;
             world = null;
-            GLSLShader.UseProgram(0);
             SceneNode.ObjectCount = 0;
         }
 
@@ -62,13 +59,15 @@ namespace CSatEng
 
             Light.Lights.Clear();
             Path.Paths.Clear();
+            CallBacks.Clear();
 
             world = null;
             world = new SceneNode("World");
             SceneNode.ObjectCount = 0;
             for (int q = 0; q < Texture.MaxTextures; q++) Texture.UnBind(q);
             Texture.UnBind(0);
-
+            VBO.ShaderFileName = "default.shader";
+            VBO.Flags = "";
             GC.Collect();
             GC.WaitForPendingFinalizers();
         }

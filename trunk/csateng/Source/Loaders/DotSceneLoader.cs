@@ -1,6 +1,6 @@
 #region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt[matola@sci.fi]
+ * Copyright (c) 2011 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -71,14 +71,14 @@ namespace CSatEng
             }
             catch (Exception e)
             {
-                Util.Error(e.ToString());
+                Log.Error(e.ToString());
             }
 
             // Validate the File
             XMLRoot = XMLDoc.DocumentElement;
             if (XMLRoot.Name != "scene")
             {
-                Util.Error("Error [" + fileName + "]: Invalid .scene File. Missing <scene>");
+                Log.Error("Error [" + fileName + "]: Invalid .scene File. Missing <scene>");
             }
 
             // figure out where to attach any nodes we create
@@ -171,7 +171,7 @@ namespace CSatEng
             }
             catch (Exception e)
             {
-                Util.Error("Error loading " + meshFile + "\n" + e.Message);
+                Log.Error("Error loading " + meshFile + "\n" + e.Message);
             }
             return null;
         }
@@ -393,14 +393,14 @@ namespace CSatEng
             }
             catch (Exception e)
             {
-                Util.Error(e.ToString());
+                Log.Error(e.ToString());
             }
 
             // Validate the File
             XMLRoot = XMLDoc.DocumentElement;
             if (XMLRoot.Name != "userData")
             {
-                Util.Error("Error [" + fileName + "]: Invalid .userdata File. Missing <userData>");
+                Log.Error("Error [" + fileName + "]: Invalid .userdata File. Missing <userData>");
             }
 
             XmlElement pElement;

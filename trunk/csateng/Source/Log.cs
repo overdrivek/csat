@@ -1,6 +1,6 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt[matola@sci.fi]
+ * Copyright (c) 2011 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -46,7 +46,13 @@ namespace CSatEng
             Console.WriteLine(str);
 #endif
             if (isStupidInfo == false) WriteToFile(str);
+        }
 
+        public static void Error(string str)
+        {
+            Log.WriteLine(str);
+            //System.Windows.Forms.MessageBox.Show(str, "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Exclamation);
+            throw new Exception(str);
         }
 
     }

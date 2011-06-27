@@ -1,6 +1,6 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt[matola@sci.fi]
+ * Copyright (c) 2011 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -14,13 +14,10 @@ namespace CSatEng
 {
     public class Light : SceneNode
     {
-        /// <summary>
-        /// valotaulukko. kaikki valot lisätään tähän
-        /// </summary>
         public static List<Light> Lights = new List<Light>();
 
         public enum LightTypes { Point, Spot, Directional };
-        public LightTypes Type = LightTypes.Spot;
+        public LightTypes Type = LightTypes.Directional;
 
         public Vector3 Diffuse = new Vector3(0.8f, 0.8f, 0.8f);
         public Vector3 Specular = new Vector3(0.5f, 0.5f, 0.5f);
@@ -36,6 +33,9 @@ namespace CSatEng
         /// </summary>
         public static void UpdateLights()
         {
+            if (Settings.UseGL3) return;
+
+            GL.LoadMatrix(ref GLExt.ModelViewMatrix);
             for (int q = 0; q < Lights.Count; q++)
             {
                 Light light = Lights[q];
@@ -49,7 +49,6 @@ namespace CSatEng
                     light.UpdateColors = false;
                 }
             }
-
         }
     }
 }

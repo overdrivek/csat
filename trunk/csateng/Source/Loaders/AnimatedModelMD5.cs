@@ -1,6 +1,6 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt[matola@sci.fi]
+ * Copyright (c) 2011 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  * 
@@ -108,7 +108,6 @@ namespace CSatEng
         {
             if (Name != "")
             {
-                if (Shader != null) Shader.Dispose();
                 for (int q = 0; q < model.Length; q++)
                 {
                     model[q].texture.Dispose();
@@ -329,7 +328,7 @@ namespace CSatEng
 
         protected override void RenderModel()
         {
-            GL.LoadMatrix(ref Matrix);
+            GLExt.LoadMatrix(ref Matrix);
             RenderMesh();
         }
 
@@ -343,29 +342,26 @@ namespace CSatEng
         {
             if (DoubleSided) GL.Disable(EnableCap.CullFace);
 
-            if (ShadowMapping.ShadowPass == false)
+            if (VBO.FastRenderPass == false)
             {
                 Material.SetMaterial();
-                if (Shader != null) Shader.UseProgram();
-                else GLSLShader.UseProgram(0);
-
-                GL.MatrixMode(MatrixMode.Texture);
+                GLExt.MatrixMode(MatrixMode.Texture);
                 GL.ActiveTexture(TextureUnit.Texture0 + Settings.SHADOW_TEXUNIT);
-                GL.PushMatrix();
-                if (WorldMatrix != null) GL.MultMatrix(ref WorldMatrix);
-                GL.Rotate(-90, 1, 0, 0);
-                GL.MatrixMode(MatrixMode.Modelview);
+                GLExt.PushMatrix();
+                if (WorldMatrix != null) GLExt.MultMatrix(ref WorldMatrix);
+                GLExt.RotateX(-90);
+                GLExt.MatrixMode(MatrixMode.Modelview);
             }
 
-            if (ShadowMapping.ShadowPass == false || CastShadow == true)
+            if (VBO.FastRenderPass == false || CastShadow == true)
             {
-                GL.Rotate(-90, 1, 0, 0);
+                GLExt.RotateX(-90);
 
                 for (int i = 0; i < model.Length; i++)
                 {
                     if (model[i].vbo == null) continue;
 
-                    if (ShadowMapping.ShadowPass == false) model[i].texture.Bind(0);
+                    if (VBO.FastRenderPass == false) model[i].texture.Bind(0);
 
                     // lasketaanko uusi asento (jos ei olla laskettu jo shadowpassis)
                     if (animCalculated == false)
@@ -378,12 +374,12 @@ namespace CSatEng
                     model[i].vbo.Render();
                 }
 
-                if (ShadowMapping.ShadowPass == false)
+                if (VBO.FastRenderPass == false)
                 {
-                    GL.MatrixMode(MatrixMode.Texture);
+                    GLExt.MatrixMode(MatrixMode.Texture);
                     GL.ActiveTexture(TextureUnit.Texture0 + Settings.SHADOW_TEXUNIT);
-                    GL.PopMatrix();
-                    GL.MatrixMode(MatrixMode.Modelview);
+                    GLExt.PopMatrix();
+                    GLExt.MatrixMode(MatrixMode.Modelview);
                     animCalculated = false;
                 }
             }
@@ -392,36 +388,41 @@ namespace CSatEng
 
         public void RenderSkeleton()
         {
-            GL.Disable(EnableCap.Texture2D);
-            GL.PushMatrix();
-            GL.Translate(Position);
-            GL.Rotate(Rotation.X, 1, 0, 0);
-            GL.Rotate(Rotation.Y, 0, 1, 0);
-            GL.Rotate(Rotation.Z, 0, 0, 1);
-            GL.Rotate(-90, 1, 0, 0);
-            GL.Scale(Scale);
-            GL.Disable(EnableCap.DepthTest);
-            GL.PointSize(5);
-            GL.Color3(1f, 0, 0);
-            GL.Begin(BeginMode.Points);
-            for (int q = 0; q < numJoints; q++) GL.Vertex3(skeleton[q].pos);
-            GL.End();
-            GL.PointSize(1);
-            GL.Color3(0, 1f, 0);
-            GL.Begin(BeginMode.Lines);
-            for (int q = 0; q < numJoints; q++)
+            if (Settings.UseGL3 == false)
             {
-                if (skeleton[q].parent != -1)
+                GL.Disable(EnableCap.Texture2D);
+                GL.Disable(EnableCap.DepthTest);
+                GLExt.PushMatrix();
                 {
-                    GL.Vertex3(skeleton[skeleton[q].parent].pos);
-                    GL.Vertex3(skeleton[q].pos);
+                    GLExt.Translate(Position.X, Position.Y, Position.Z);
+                    GLExt.RotateX(Rotation.X);
+                    GLExt.RotateY(Rotation.Y);
+                    GLExt.RotateZ(Rotation.Z);
+                    GLExt.RotateX(-90);
+                    GLExt.Scale(Scale.X, Scale.Y, Scale.Z);
+                    GL.PointSize(5);
+                    GLExt.Color4(1, 0, 0, 1);
+                    GL.Begin(BeginMode.Points);
+                    for (int q = 0; q < numJoints; q++) GL.Vertex3(skeleton[q].pos);
+                    GL.End();
+                    GL.PointSize(1);
+                    GLExt.Color4(0, 1, 0, 1);
+                    GL.Begin(BeginMode.Lines);
+                    for (int q = 0; q < numJoints; q++)
+                    {
+                        if (skeleton[q].parent != -1)
+                        {
+                            GL.Vertex3(skeleton[skeleton[q].parent].pos);
+                            GL.Vertex3(skeleton[q].pos);
+                        }
+                    }
+                    GL.End();
                 }
+                GLExt.PopMatrix();
+                GL.Enable(EnableCap.DepthTest);
+                GL.Enable(EnableCap.Texture2D);
+                GLExt.Color4(1, 1, 1, 1);
             }
-            GL.End();
-            GL.Enable(EnableCap.DepthTest);
-            GL.PopMatrix();
-            GL.Color4(1f, 1, 1, 1);
-            GL.Enable(EnableCap.Texture2D);
         }
 
         /******************************************************************************************
@@ -759,7 +760,7 @@ namespace CSatEng
                             if (line[0] == '}') break;
                             Cleanstring(ref line);
                             string[] splt = line.Split(' ');
-                            for (int ww = 0; ww < splt.Length; ww++) animFrameData[i++] = Util.GetFloat(splt[ww]);
+                            for (int ww = 0; ww < splt.Length; ww++) animFrameData[i++] = MathExt.GetFloat(splt[ww]);
                         }
                         /* Build frame skeleton from the collected data */
                         BuildFrameSkeleton(ref jointInfos, ref baseFrame, ref animFrameData, frame_index, anim.numJoints, ref anim);
@@ -844,12 +845,12 @@ namespace CSatEng
             {
                 if (string.Equals(splitstr[i], "%d")) //integer
                 {
-                    t.ibuffer[typed] = (int)Util.GetFloat(splitln[ii]);
+                    t.ibuffer[typed] = (int)MathExt.GetFloat(splitln[ii]);
                     typed++;
                 }
                 else if (string.Equals(splitstr[i], "%f")) //double
                 {
-                    t.fbuffer[typef] = Util.GetFloat(splitln[ii]);
+                    t.fbuffer[typef] = MathExt.GetFloat(splitln[ii]);
                     typef++;
                 }
                 else if (string.Equals(splitstr[i], "%s")) //string

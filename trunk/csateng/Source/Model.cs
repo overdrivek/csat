@@ -1,6 +1,6 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt[matola@sci.fi]
+ * Copyright (c) 2011 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -19,7 +19,6 @@ namespace CSatEng
         public ushort[] IndexBuffer; // tämä on 0,1,2,3,4,..
         public VBO Vbo;
         public BoundingSphere Boundings;
-        public GLSLShader Shader = null;
         public MaterialInfo Material = new MaterialInfo();
         public string MaterialName = "";
 

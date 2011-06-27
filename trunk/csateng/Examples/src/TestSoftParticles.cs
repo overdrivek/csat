@@ -2,6 +2,7 @@
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
+using System.Collections.Generic;
 
 namespace CSatEng
 {
@@ -13,30 +14,31 @@ namespace CSatEng
         const int PART = 100;
         Particles explosion = new Particles();
         Particles smoke = new Particles();
-        Texture2D screen;
-        GLSLShader depth;
+        PostEffect blur, bloom;
 
         public override void Init()
         {
-            depthColorFBO = new FBO(512, 512, 1, true);
-            colorFBO = new FBO(512, 512, 1, true);
-            depthFBO = new FBO(512, 512, 0, true);
-            shadows = new ShadowMapping(depthFBO);
-            screen = colorFBO.CreateDrawableColorTexture(0);
+            colorFBO = new FBO(0, 0, 2, true); // 2 colorbufferia
+            depthFBO = new FBO(0, 0, 0, true);
+            blur = PostEffect.Load("blur.shader", "HORIZ VERT", 1f / (float)colorFBO.Width);
+            bloom = PostEffect.Load("bloom.shader", "", 0.01f);
 
-            Particles.SetSoftParticles(true, new ShaderCallback(CallBacks.ParticleShaderCallBack));
-            depth = GLSLShader.Load("depth.shader", null);
-            
+            Particles.SetSoftParticles(colorFBO);
+            ShadowMapping.Create(depthFBO, "lightmask.png");
 
             font = BitmapFont.Load("fonts/comic12.png");
 
-            skybox = Sky.Load("sky/sky_", "jpg");
+            skybox = Sky.Load("sky/sky2_", "jpg");
             world.Add(skybox);
 
             lightImg = Billboard.Load("lightimg.png");
 
+            //VBO.Flags = "LIGHTING";
+            //VBO.Flags = "LIGHTING:PHONG";
+            VBO.ShaderFileName = "shadowmapping.shader";
+            VBO.Flags = "SHADOWS";
+
             DotScene ds = DotScene.Load("scene1/scene1.scene", scene);
-            GLSLShader.LoadShader(scene, "shadow.shader", new ShaderCallback(CallBacks.ShadowShaderCallBack));
             world.Add(scene);
 
             actors[0] = AnimatedModelMD5.Load("ugly/ukko.mesh");
@@ -47,7 +49,6 @@ namespace CSatEng
             actors[0].SetAnimation("act2"); // idle anim
             actors[0].Position.Y = -0.5f;
             actors[0].Scale = new Vector3(5, 5, 5);
-            GLSLShader.LoadShader(actors[0], "shadow.shader", new ShaderCallback(CallBacks.ShadowShaderCallBack));
             world.Add(actors[0]);
 
             explosion.SetParticle(Billboard.Load("fire.png"), true, false, new ParticleCallback(RenderParticleCallback));
@@ -70,7 +71,7 @@ namespace CSatEng
         {
             // nyt voi tehdä joka partikkelille mitä haluaa, esim asettaa alphan lifeksi.
             float tc = p.life / 2;
-            GL.Color4(1f, tc, tc, tc);
+            GLExt.Color4(1f, tc, tc, tc);
         }
 
         void UpdateParticles(float time)
@@ -198,70 +199,24 @@ namespace CSatEng
 
         public override void Render()
         {
-            shadows.SetupShadows(world, 0, true);
-            GL.Clear(GameLoop.ClearFlags);
+            ShadowMapping.SetupShadows(world, 0, true);
+            GL.Clear(ClearFlags);
             camera.SetFPSCamera();
-            Light.UpdateLights();
-            Frustum.CalculateFrustum();
 
-            if (Particles.SoftParticles)
-            {
-                // rendaa skenen depth colorbufferiin, ei textureita/materiaaleja
-                depthColorFBO.BeginDrawing(false);
-                {
-                    GL.ClampColor(ClampColorTarget.ClampVertexColor, ClampColorMode.False);
-                    GL.Arb.ClampColor(ArbColorBufferFloat.ClampVertexColorArb, (ArbColorBufferFloat)ClampColorMode.False);
-                    GL.Arb.ClampColor(ArbColorBufferFloat.ClampFragmentColorArb, (ArbColorBufferFloat)ClampColorMode.False);
-                    GL.Arb.ClampColor(ArbColorBufferFloat.ClampReadColorArb, (ArbColorBufferFloat)ClampColorMode.False);
-                    GL.ClampColor(ClampColorTarget.ClampFragmentColor, ClampColorMode.False);
-                    GL.ClampColor(ClampColorTarget.ClampReadColor, ClampColorMode.False);
-                    GL.ClearColor(float.MaxValue, float.MaxValue, float.MaxValue, float.MaxValue);
-                    depthColorFBO.Clear();
-                    GL.ClearColor(0, 0, 0, 0);
-
-                    ShadowMapping.ShadowPass = true;
-                    depth.UseProgram();
-                    world.Render();
-                    ShadowMapping.ShadowPass = false;
-
-                    GL.Arb.ClampColor(ArbColorBufferFloat.ClampVertexColorArb, (ArbColorBufferFloat)ClampColorMode.True);
-                    GL.Arb.ClampColor(ArbColorBufferFloat.ClampFragmentColorArb, (ArbColorBufferFloat)ClampColorMode.True);
-                    GL.Arb.ClampColor(ArbColorBufferFloat.ClampReadColorArb, (ArbColorBufferFloat)ClampColorMode.True);
-                }
-                depthColorFBO.EndDrawing();
-
-                // rendaa skene uudelleen textureineen
-                colorFBO.BeginDrawing(false);
-                {
-                    colorFBO.Clear();
-                    world.RenderAgain();
-                    depthColorFBO.BindColor(0, Settings.DEPTH_TEXUNIT);
-                    Particles.Render();
-                    depthColorFBO.UnBindColor(Settings.DEPTH_TEXUNIT);
-                }
-                colorFBO.EndDrawing();
-            }
-            else
-            {
-                // rendaa skene textureineen
-                colorFBO.BeginDrawing(false);
-                {
-                    colorFBO.Clear();
-                    world.Render();
-                    Particles.Render();
-                }
-                colorFBO.EndDrawing();
-            }
+            world.RenderSceneWithParticles();
 
             Camera.Set2D();
             {
-                screen.DrawFullScreen(0, 0);
-                font.Write("Soft particles");
+                PostEffect.Begin(colorFBO);
+                if (Keyboard[Key.R]) blur.RenderEffect();
+                if (Keyboard[Key.T]) bloom.RenderEffect();
+
+                PostEffect.End().DrawFullScreen(0, 0);
+                font.Write("Soft particles + effects (press R / T)");
             }
             Camera.Set3D();
 
             base.Render();
         }
-
     }
 }

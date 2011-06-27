@@ -64,8 +64,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Source\Loaders\AnimatedModel.cs" />
     <Compile Include="Source\BaseGame.cs" />
+    <Compile Include="Source\Callbacks.cs" />
+    <Compile Include="Source\GLExt.cs" />
+    <Compile Include="Source\Intersection.cs" />
+    <Compile Include="Source\Loaders\AnimatedModelMD5.cs" />
     <Compile Include="Source\Loaders\BitmapFont.cs" />
     <Compile Include="Source\Camera.cs" />
     <Compile Include="Source\Loaders\Billboard.cs" />
@@ -82,6 +85,7 @@
     <Compile Include="Source\Loaders\Material.cs" />
     <Compile Include="Source\MathExt.cs" />
     <Compile Include="Source\Model.cs" />
+    <Compile Include="Source\PostEffect.cs" />
     <Compile Include="Source\SceneNode.cs" />
     <Compile Include="Source\Path.cs" />
     <Compile Include="Source\Loaders\Script.cs" />
@@ -92,7 +96,6 @@
     <Compile Include="Source\Loaders\TextureLoader\LoaderDDS.cs" />
     <Compile Include="Source\Loaders\TextureLoader\LoaderGDI.cs" />
     <Compile Include="Source\Loaders\TextureLoader\LoaderStatics.cs" />
-    <Compile Include="Source\Util.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Source\VBO.cs" />
     <Compile Include="Source\XML.cs" />

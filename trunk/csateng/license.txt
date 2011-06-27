@@ -1,5 +1,5 @@
 MIT License
-Copyright ©2008-2011 mjt
+Copyright ©2008-2011 mjt[matola@sci.fi]
 All rights reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

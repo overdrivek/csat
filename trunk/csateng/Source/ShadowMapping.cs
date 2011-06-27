@@ -1,6 +1,6 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt[matola@sci.fi]
+ * Copyright (c) 2011 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -13,41 +13,42 @@ using OpenTK.Graphics.OpenGL;
 
 namespace CSatEng
 {
-    public class ShadowMapping
+    public static class ShadowMapping
     {
         public static bool UseShadowMapping = false;
-        public static bool ShadowPass = false;
         static Texture lightMask;
-        FBO fbo;
+        static GLSLShader depthShader;
+        static FBO fbo;
 
-        public ShadowMapping(FBO fbo)
+        public static void Create(FBO fbo, string lightMaskFileName)
         {
-            Create(fbo, "lightmask.png");
-        }
-        public ShadowMapping(FBO fbo, string lightMaskFileName)
-        {
-            Create(fbo, lightMaskFileName);
-        }
-        void Create(FBO fbo, string lightMaskFileName)
-        {
-            if (FBO.IsSupported == false)
+            if (Settings.DisableShadowMapping)
             {
-                Log.WriteLine("FBO not supported so no shadow mapping.");
                 UseShadowMapping = false;
                 return;
             }
-            this.fbo = fbo;
+
+            if (FBO.IsSupported == false || GLSLShader.IsSupported == false)
+            {
+                string ext;
+                if (FBO.IsSupported == false) ext = "FBOs"; else ext = "Shaders";
+                Log.WriteLine(ext + " not supported so no shadow mapping.");
+                UseShadowMapping = false;
+                return;
+            }
+
+            ShadowMapping.fbo = fbo;
             UseShadowMapping = true;
+            TextureLoaderParameters.WrapModeS = TextureWrapMode.ClampToEdge;
+            TextureLoaderParameters.WrapModeT = TextureWrapMode.ClampToEdge;
             try
             {
-                TextureLoaderParameters.WrapModeS = TextureWrapMode.ClampToEdge;
-                TextureLoaderParameters.WrapModeT = TextureWrapMode.ClampToEdge;
                 lightMask = Texture.Load(lightMaskFileName);
-                TextureLoaderParameters.WrapModeS = TextureWrapMode.Repeat;
-                TextureLoaderParameters.WrapModeT = TextureWrapMode.Repeat;
             }
-            catch (Exception)
-            { }
+            catch (Exception) { } // skipataan valitukset jos tiedostoa ei löydy
+            TextureLoaderParameters.WrapModeS = TextureWrapMode.Repeat;
+            TextureLoaderParameters.WrapModeT = TextureWrapMode.Repeat;
+            depthShader = GLSLShader.Load("depth.shader", null);
         }
 
         public static void BindLightMask()
@@ -60,7 +61,10 @@ namespace CSatEng
             Texture.UnBind(Settings.LIGHTMASK_TEXUNIT);
         }
 
-        public void SetupShadows(SceneNode world, int lightNo, bool withParticles)
+        /// <summary>
+        /// renderoi worldin valosta päin (pelkän depthin)
+        /// </summary>
+        public static void SetupShadows(SceneNode world, int lightNo, bool withParticles)
         {
             if (UseShadowMapping == false) return;
 
@@ -69,59 +73,62 @@ namespace CSatEng
                 Log.WriteLine("SetupShadows requires at least one light source!", true);
                 return;
             }
-            GL.Disable(EnableCap.Lighting);
+            if (Settings.UseGL3 == false)
+            {
+                GL.Disable(EnableCap.Lighting);
+                GL.ShadeModel(ShadingModel.Flat);
+            }
             GL.Disable(EnableCap.Blend);
-            GL.ShadeModel(ShadingModel.Flat);
             GL.ColorMask(false, false, false, false);
             GL.Disable(EnableCap.CullFace);
             GL.PolygonOffset(1, 1);
             GL.Enable(EnableCap.PolygonOffsetFill);
-            
+
             fbo.BindDepth();
-            fbo.BeginDrawing(true);
+            fbo.BindFBO();
             fbo.Clear();
 
-            // kuvakulma kamerasta päin
-            GL.LoadMatrix(ref Light.Lights[lightNo].OrigOrientationMatrix);
-            GL.Translate(-Light.Lights[lightNo].Position);
+            // kuvakulma valosta päin
+            GLExt.LoadMatrix(ref Light.Lights[lightNo].OrigOrientationMatrix);
+            GLExt.Translate(-Light.Lights[lightNo].Position.X, -Light.Lights[lightNo].Position.Y, -Light.Lights[lightNo].Position.Z);
 
             SetTextureMatrix();
             Frustum.CalculateFrustum();
 
-            ShadowPass = true;
+            VBO.FastRenderPass = true;
+            depthShader.UseProgram();
             world.Render();
             if (withParticles) Particles.Render();
-            ShadowPass = false;
+            VBO.FastRenderPass = false;
+            fbo.UnBindFBO();
 
             GL.Disable(EnableCap.PolygonOffsetFill);
-            GL.CullFace(CullFaceMode.Back);
             GL.Enable(EnableCap.CullFace);
             GL.ColorMask(true, true, true, true);
-            GL.ShadeModel(ShadingModel.Smooth);
-            fbo.EndDrawing();
 
-            Settings.NumOfObjects = 0;
+            if (Settings.UseGL3 == false)
+            {
+                GL.Enable(EnableCap.Lighting);
+                GL.ShadeModel(ShadingModel.Smooth);
+            }
+            GLExt.LoadIdentity();
+
+            BaseGame.NumOfObjects = 0;
         }
 
         /// <summary>
         /// aseta texturematriisit shadowmapping shaderia varten
         /// </summary>
-        void SetTextureMatrix()
+        static void SetTextureMatrix()
         {
-            // ota projection ja Modelview matriisit
-            Matrix4 projMatrix, modelMatrix;
-            GL.GetFloat(GetPName.ProjectionMatrix, out projMatrix);
-            GL.GetFloat(GetPName.ModelviewMatrix, out modelMatrix);
-
-            GL.MatrixMode(MatrixMode.Texture);
-            GL.LoadIdentity();
-            GL.Translate(0.5f, 0.5f, 0.5f); // remap from [-1,1]^2 to [0,1]^2
-            GL.Scale(0.5f, 0.5f, 0.5f);
-
-            GL.MultMatrix(ref projMatrix);
-            GL.MultMatrix(ref modelMatrix);
-
-            GL.MatrixMode(MatrixMode.Modelview);
+            Matrix4 projMatrix = GLExt.ProjectionMatrix, modelMatrix = GLExt.ModelViewMatrix;
+            GLExt.MatrixMode(MatrixMode.Texture);
+            GLExt.LoadIdentity();
+            GLExt.Translate(0.5f, 0.5f, 0.5f); // remap from [-1,1]^2 to [0,1]^2
+            GLExt.Scale(0.5f, 0.5f, 0.5f);
+            GLExt.MultMatrix(ref projMatrix);
+            GLExt.MultMatrix(ref modelMatrix);
+            GLExt.MatrixMode(MatrixMode.Modelview);
         }
     }
 }

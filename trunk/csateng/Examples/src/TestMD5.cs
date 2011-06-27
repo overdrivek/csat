@@ -1,6 +1,6 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt[matola@sci.fi]
+ * Copyright (c) 2011 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -20,16 +20,20 @@ namespace CSatEng
 
         public override void Init()
         {
-            depthFBO = new FBO(512, 512, 1, true);
-            shadows = new ShadowMapping(depthFBO);
+            depthFBO = new FBO(0, 0, 1, true);
+            ShadowMapping.Create(depthFBO, "lightmask.png");
 
             font = BitmapFont.Load("fonts/comic12.png");
 
             skybox = Sky.Load("sky/sky_", "jpg");
             world.Add(skybox);
 
+            //VBO.Flags = "LIGHTING";
+            //VBO.Flags = "LIGHTING:PHONG";
+            VBO.ShaderFileName = "shadowmapping.shader";
+            VBO.Flags = "SHADOWS";
+
             DotScene ds = DotScene.Load("scene1/scene1.scene", scene);
-            GLSLShader.LoadShader(scene, "shadow.shader", new ShaderCallback(CallBacks.ShadowShaderCallBack));
             world.Add(scene);
 
             actors[0] = AnimatedModelMD5.Load("ugly/ukko.mesh");
@@ -39,10 +43,6 @@ namespace CSatEng
             actors[0].LoadMD5Animation("walk", "ugly/ukko_walk.anim");
             actors[0].SetAnimation("act2"); // idle anim
             actors[0].Scale = new Vector3(5, 5, 5);
-            GLSLShader.LoadShader(actors[0], "shadow.shader", new ShaderCallback(CallBacks.ShadowShaderCallBack));
-            // "model.shader");
-            // "model.shader:TEXTURE");
-            // "shadow.shader:NO_NORMALS");
             world.Add(actors[0]);
 
             lightImg = Billboard.Load("lightimg.png");
@@ -133,13 +133,9 @@ namespace CSatEng
 
         public override void Render()
         {
-            shadows.SetupShadows(world, 0, false);
-            GL.Clear(GameLoop.ClearFlags);
-
+            ShadowMapping.SetupShadows(world, 0, false);
+            GL.Clear(ClearFlags);
             camera.SetFPSCamera();
-
-            Light.UpdateLights();
-            Frustum.CalculateFrustum();
             world.Render();
 
             if (Keyboard[Key.Space])

@@ -1,6 +1,6 @@
 #region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt[matola@sci.fi]
+ * Copyright (c) 2011 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -35,9 +35,6 @@ namespace CSatEng
         /// </summary>
         public string ShaderName = "";
 
-        /*
-        /// texturet
-         */
         public TextureInfo[] Textures = new TextureInfo[MaxTextures];
 
         /*
@@ -166,24 +163,24 @@ namespace CSatEng
                     // Ambient color
                     if (ln[0] == "ambient")
                     {
-                        mat.AmbientColor = new Vector4(Util.GetFloat(ln[1]), Util.GetFloat(ln[2]), Util.GetFloat(ln[3]), 1);
+                        mat.AmbientColor = new Vector4(MathExt.GetFloat(ln[1]), MathExt.GetFloat(ln[2]), MathExt.GetFloat(ln[3]), 1);
                         continue;
                     }
                     // Diffuse color
                     if (ln[0] == "diffuse")
                     {
-                        mat.DiffuseColor = new Vector4(Util.GetFloat(ln[1]), Util.GetFloat(ln[2]), Util.GetFloat(ln[3]), 1);
+                        mat.DiffuseColor = new Vector4(MathExt.GetFloat(ln[1]), MathExt.GetFloat(ln[2]), MathExt.GetFloat(ln[3]), 1);
                         continue;
                     }
                     // Specular color
                     if (ln[0] == "specular")
                     {
-                        mat.SpecularColor = new Vector4(Util.GetFloat(ln[1]), Util.GetFloat(ln[2]), Util.GetFloat(ln[3]), Util.GetFloat(ln[4]));
+                        mat.SpecularColor = new Vector4(MathExt.GetFloat(ln[1]), MathExt.GetFloat(ln[2]), MathExt.GetFloat(ln[3]), MathExt.GetFloat(ln[4]));
                         continue;
                     }
                     if (ln[0] == "emissive")
                     {
-                        mat.EmissionColor = new Vector4(Util.GetFloat(ln[1]), Util.GetFloat(ln[2]), Util.GetFloat(ln[3]), 1);
+                        mat.EmissionColor = new Vector4(MathExt.GetFloat(ln[1]), MathExt.GetFloat(ln[2]), MathExt.GetFloat(ln[3]), 1);
                         continue;
                     }
 
@@ -211,10 +208,13 @@ namespace CSatEng
                 if (Textures[q].Tex != null)
                     Textures[q].Tex.Bind(q);
 
-            GL.Material(MaterialFace.Front, MaterialParameter.Ambient, AmbientColor);
-            GL.Material(MaterialFace.Front, MaterialParameter.Diffuse, DiffuseColor);
-            GL.Material(MaterialFace.Front, MaterialParameter.Specular, SpecularColor);
-            GL.Material(MaterialFace.Front, MaterialParameter.Emission, EmissionColor);
+            if (Settings.UseGL3 == false)
+            {
+                GL.Material(MaterialFace.Front, MaterialParameter.Ambient, AmbientColor);
+                GL.Material(MaterialFace.Front, MaterialParameter.Diffuse, DiffuseColor);
+                GL.Material(MaterialFace.Front, MaterialParameter.Specular, SpecularColor);
+                GL.Material(MaterialFace.Front, MaterialParameter.Emission, EmissionColor);
+            }
         }
 
         public static void SetMaterial(string materialName)

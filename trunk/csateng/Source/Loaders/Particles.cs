@@ -1,6 +1,6 @@
 #region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt[matola@sci.fi]
+ * Copyright (c) 2011 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -57,22 +57,35 @@ namespace CSatEng
 
     public class Particles : SceneNode
     {
+        public static float ParticlePower = 1f;
         public static List<Particles> ParticleGroups = new List<Particles>();
-        public static float AlphaMin = 0.1f;
+        public static FBO Screen;
         public bool CastShadow = false;
-
-        public static bool SoftParticles = false;
-        public static void SetSoftParticles(bool enable, ShaderCallback callback)
+        static bool softParticles = false;
+        public static bool SoftParticles
         {
-            if (enable == true && Texture.IsFloatTextureSupported == false)
+            get { return softParticles; }
+        }
+        public static void SetSoftParticles(FBO screen)
+        {
+            Screen = screen;
+            if (Settings.DisableSoftParticles)
             {
-                Log.WriteLine("Float textures not supported so no soft particles.");
-                SoftParticles = false;
+                softParticles = false;
                 return;
             }
-            SoftParticles = enable;
-            if (SoftParticles == true && softParticlesShader == null)
-                softParticlesShader = GLSLShader.Load("particles.shader", callback);
+
+            if (Texture.IsFloatTextureSupported == false || GLSLShader.IsSupported == false)
+            {
+                string ext;
+                if (Texture.IsFloatTextureSupported == false) ext = "Float textures"; else ext = "Shaders";
+                Log.WriteLine(ext + " not supported so no soft particles.");
+                softParticles = false;
+                return;
+            }
+            if (screen.ColorTextures.Length < 2) Log.Error("Particles: fbo must have at least 2 colorbuffers.");
+            depthShader = GLSLShader.Load("depth.shader:DEPTH_W", null);
+            softParticles = true;
         }
 
         public bool IsTransparent = false;
@@ -80,7 +93,12 @@ namespace CSatEng
         public ParticleCallback callBack = null;
 
         List<Particle> particles = new List<Particle>();
-        static GLSLShader softParticlesShader;
+        static GLSLShader depthShader;
+
+        public static void SetDepthProgram()
+        {
+            depthShader.UseProgram();
+        }
 
         /// <summary>
         ///  TODO
@@ -109,9 +127,10 @@ namespace CSatEng
         public override void Dispose()
         {
             if (particleTex != null) particleTex.Dispose();
-            if (softParticlesShader != null) softParticlesShader.Dispose();
+            if (depthShader != null) depthShader.Dispose();
             particleTex = null;
-            softParticlesShader = null;
+            depthShader = null;
+
             particles.Clear();
             Log.WriteLine("Disposed: Particles", true);
         }
@@ -176,20 +195,18 @@ namespace CSatEng
         /// </summary>
         public static new void Render()
         {
-            GL.Color4(1f, 1, 1, 1f);
-            GL.PushMatrix();
+            GLExt.Color4(1f, 1, 1, 1f);
+            GLExt.PushMatrix();
 
             List<SortedList_Particles> slist = new List<SortedList_Particles>();
-            if (SoftParticles == true && softParticlesShader != null)
-            {
-                softParticlesShader.UseProgram();
-            }
-            GL.PushAttrib(AttribMask.AllAttribBits);
-            GL.Disable(EnableCap.Lighting);
-            GL.Enable(EnableCap.AlphaTest);
-            GL.AlphaFunc(AlphaFunction.Greater, AlphaMin);
+
             GL.Disable(EnableCap.CullFace);
-            GL.Disable(EnableCap.Lighting);
+            if (Settings.UseGL3 == false)
+            {
+                GL.Disable(EnableCap.Lighting);
+                GL.Enable(EnableCap.AlphaTest);
+                GL.AlphaFunc(AlphaFunction.Greater, 0.1f);
+            }
 
             int c = 0;
             // j‰rjestet‰‰n taulukko kauimmaisesta l‰himp‰‰n. pit‰‰ rendata siin‰ j‰rjestyksess‰.
@@ -198,25 +215,24 @@ namespace CSatEng
             {
                 Particles curpar = ParticleGroups[q];
                 if (curpar.particles.Count <= 0) continue;
-                if (ShadowMapping.ShadowPass == true)
+                if (VBO.FastRenderPass == true)
                 {
                     if (curpar.CastShadow == false) continue;
                 }
                 else
                     curpar.particles[0].partTex.Bind(0);
 
-                GL.PushMatrix();
-                GL.MultMatrix(ref curpar.WorldMatrix);
+                GLExt.PushMatrix();
+                GLExt.MultMatrix(ref curpar.WorldMatrix);
 
                 for (int w = 0; w < curpar.NumOfParticles; w++)
                 {
                     Particle p = curpar.particles[w];
-                    GL.PushMatrix();
-                    GL.Translate(p.pos.X, p.pos.Y, p.pos.Z);
-                    Matrix4 matrix = Matrix4.Identity, modelViemMatrix;
-                    GL.GetFloat(GetPName.ModelviewMatrix, out modelViemMatrix);
-                    matrix.Row3 = modelViemMatrix.Row3;
-                    GL.LoadMatrix(ref matrix);
+                    GLExt.PushMatrix();
+                    GLExt.Translate(p.pos.X, p.pos.Y, p.pos.Z);
+                    Matrix4 matrix = Matrix4.Identity;
+                    matrix.Row3 = GLExt.ModelViewMatrix.Row3;
+                    GLExt.ModelViewMatrix = matrix;
 
                     Vector3 v = curpar.WorldMatrix.Row3.Xyz + curpar.Position + p.pos;
                     if (Frustum.SphereInFrustum(v.X, v.Y, v.Z, 10) != 0)
@@ -230,23 +246,23 @@ namespace CSatEng
                         }
                         else // rendataan se nyt, ei lis‰t‰ sortattavaks
                         {
-                            GL.Scale(p.size, p.size, p.size);
-                            GL.Rotate(p.zrot, 0, 0, 1);
-                            if (ShadowMapping.ShadowPass == false)
+                            GLExt.Scale(p.size, p.size, p.size);
+                            GLExt.RotateZ(p.zrot);
+                            if (VBO.FastRenderPass == false)
                             {
-                                GL.Color4(p.color);
+                                GLExt.Color4(p.color.X, p.color.Y, p.color.Z, p.color.W); ;
                                 if (p.callBack != null) p.callBack(p);
                             }
                             p.partTex.RenderBillboard();
                         }
                     }
-                    GL.PopMatrix();
+                    GLExt.PopMatrix();
                 }
-                GL.PopMatrix();
+                GLExt.PopMatrix();
             }
 
             slist.Sort(delegate(SortedList_Particles z1, SortedList_Particles z2) { return z2.Len.CompareTo(z1.Len); });
-            GL.Disable(EnableCap.AlphaTest);
+            if (Settings.UseGL3 == false) GL.Disable(EnableCap.AlphaTest);
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.One);
 
@@ -255,22 +271,24 @@ namespace CSatEng
             for (int q = 0; q < slist.Count; q++)
             {
                 Particle p = slist[q].Part;
-                if (ShadowMapping.ShadowPass == false)
+                if (VBO.FastRenderPass == false)
                 {
                     p.partTex.Bind(0);
-                    GL.Color4(p.color);
+                    GLExt.Color4(p.color.X, p.color.Y, p.color.Z, p.color.W);
                     if (p.callBack != null) p.callBack(p);
                 }
-                GL.LoadMatrix(ref slist[q].Matrix);
-                GL.Scale(p.size, p.size, p.size);
-                GL.Rotate(p.zrot, 0, 0, 1);
+                GLExt.LoadMatrix(ref slist[q].Matrix);
+                GLExt.Scale(p.size, p.size, p.size);
+                GLExt.RotateZ(p.zrot);
                 p.partTex.RenderBillboard();
             }
-            GL.PopAttrib();
-            GL.PopMatrix();
-            GL.Color4(1f, 1, 1, 1f);
-            GLSLShader.UseProgram(0);
-            Settings.NumOfObjects += c;
+            GLExt.PopMatrix();
+            GL.DepthMask(true);
+            GL.Disable(EnableCap.Blend);
+            GLExt.Color4(1, 1, 1, 1);
+            GLExt.SetLighting(true);
+            BaseGame.NumOfObjects += c;
         }
+
     }
 }

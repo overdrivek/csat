@@ -1,6 +1,6 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt[matola@sci.fi]
+ * Copyright (c) 2011 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -8,21 +8,37 @@
 using System;
 using OpenTK;
 using OpenTK.Graphics;
-using OpenTK.Input;
 using OpenTK.Graphics.OpenGL;
+using OpenTK.Input;
 
 namespace CSatEng
 {
     public class GameLoop : GameWindow
     {
         public static bool Running = true;
-        public static ClearBufferMask ClearFlags = ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit;
         public static BaseGame Game;
 
         public GameLoop(string projectName, bool hideMouseCursor)
-            : base(Settings.Width, Settings.Height, new GraphicsMode(Settings.Bpp, Settings.DepthBpp, 0, Settings.FSAA, 0, 2, false), projectName)
+            : base(Settings.Width, Settings.Height,
+            new GraphicsMode(Settings.Bpp, Settings.DepthBpp, 0, Settings.FSAA, 0, 2, false),
+            projectName, 0, DisplayDevice.Default)
         {
-            Log.WriteLine("CSatEng 0.8 log // (c) mjt, 2011");
+            Init(hideMouseCursor);
+        }
+
+        public GameLoop(string projectName, bool hideMouseCursor, int glVersionMajor, int glVersionMinor, GraphicsContextFlags flags)
+            : base(Settings.Width, Settings.Height,
+            new GraphicsMode(Settings.Bpp, Settings.DepthBpp, 0, Settings.FSAA, 0, 2, false),
+            projectName, 0, DisplayDevice.Default,
+            glVersionMajor, glVersionMinor,
+            flags)
+        {
+            Init(hideMouseCursor);
+        }
+
+        void Init(bool hideMouseCursor)
+        {
+            Log.WriteLine("CSatEng 0.9 log // (c) mjt, 2011");
             Log.WriteLine("OS: " + System.Environment.OSVersion.ToString());
             Log.WriteLine("Renderer: " + GL.GetString(StringName.Renderer));
             Log.WriteLine("Vendor: " + GL.GetString(StringName.Vendor));
@@ -30,30 +46,56 @@ namespace CSatEng
             Log.WriteLine(".Net: " + Environment.Version);
 
             string version = GL.GetString(StringName.Version);
+            if (version.Contains("Compatibility")) Settings.UseGL3 = false; // ei käytetä ainoastaan gl3 core käskyjä
             int major = (int)version[0];
             int minor = (int)version[2];
-            if (major <= 1 && minor < 5) Util.Error("VBOs not supported. You need at least OpenGL 1.5.");
+            if (major <= 1 && minor < 5) Log.Error("You need at least OpenGL 1.5 to run this program. Please update your drivers.");
 
-            Log.WriteLine("--------------------------------------------");
-            Log.WriteLine("Extensions:\n" + GL.GetString(StringName.Extensions));
-            Log.WriteLine("--------------------------------------------");
-
-            if (GL.GetString(StringName.Extensions).Contains("texture_non_power_of_two"))
+            string ext = "";
+            if (Settings.UseGL3 == false) ext = GL.GetString(StringName.Extensions);
+            else
             {
-                Log.WriteLine("NPOT supported.");
-                Texture.IsNPOTSupported = true;
+                int extC;
+                GL.GetInteger(GetPName.NumExtensions, out extC);
+                for (int q = 0; q < extC; q++) ext += GL.GetString(StringName.Extensions, q) + " ";
+            }
+
+            Log.WriteLine("--------------------------------------------");
+            Log.WriteLine("Extensions:\n" + ext);
+            Log.WriteLine("--------------------------------------------");
+
+            if (ext.Contains("texture_non_power_of_two"))
+            {
+                if (Settings.DisableNPOTTextures)
+                {
+                    Log.WriteLine("NPOT textures supported but disabled.");
+                    Texture.IsNPOTSupported = false;
+                }
+                else
+                {
+                    Log.WriteLine("NPOT textures supported.");
+                    Texture.IsNPOTSupported = true;
+                }
             }
             else
             {
-                Log.WriteLine("NPOT not supported.");
+                Log.WriteLine("NPOT textures not supported.");
                 Texture.IsNPOTSupported = false;
             }
 
             // löytyykö float texture extension
-            if (GL.GetString(StringName.Extensions).Contains("texture_float") && GL.GetString(StringName.Extensions).Contains("color_buffer_float"))
+            if (ext.Contains("texture_float") && ext.Contains("color_buffer_float"))
             {
-                Log.WriteLine("Float textures supported.");
-                Texture.IsFloatTextureSupported = true;
+                if (Settings.DisableFloatTextures)
+                {
+                    Log.WriteLine("Float textures supported but disabled.");
+                    Texture.IsFloatTextureSupported = false;
+                }
+                else
+                {
+                    Log.WriteLine("Float textures supported.");
+                    Texture.IsFloatTextureSupported = true;
+                }
             }
             else
             {
@@ -62,27 +104,43 @@ namespace CSatEng
             }
 
             // tarkista voidaanko shadereita käyttää.
-            if (GL.GetString(StringName.Extensions).Contains("vertex_shader") &&
-                GL.GetString(StringName.Extensions).Contains("fragment_shader"))
+            if (ext.Contains("vertex_shader") &&
+                ext.Contains("fragment_shader"))
             {
-                GLSLShader.IsSupported = true;
-                Log.WriteLine("Shaders supported.");
+                if (Settings.DisableShaders)
+                {
+                    Log.WriteLine("Shaders supported but disabled.");
+                    GLSLShader.IsSupported = false;
+                }
+                else
+                {
+                    Log.WriteLine("Shaders supported.");
+                    GLSLShader.IsSupported = true;
+                }
             }
             else
             {
-                GLSLShader.IsSupported = false;
                 Log.WriteLine("Shaders not supported.");
+                GLSLShader.IsSupported = false;
             }
 
-            if (GL.GetString(StringName.Extensions).Contains("EXT_framebuffer_object"))
+            if (ext.Contains("EXT_framebuffer_object"))
             {
-                FBO.IsSupported = true;
-                Log.WriteLine("FBOs supported.");
+                if (Settings.DisableFbo)
+                {
+                    Log.WriteLine("FBOs supported but disabled.");
+                    FBO.IsSupported = false;
+                }
+                else
+                {
+                    Log.WriteLine("FBOs supported.");
+                    FBO.IsSupported = true;
+                }
             }
             else
             {
-                FBO.IsSupported = false;
                 Log.WriteLine("FBOs not supported.");
+                FBO.IsSupported = false;
             }
 
             GL.GetInteger(GetPName.MaxCombinedTextureImageUnits, out Texture.MaxTextures);
@@ -97,22 +155,19 @@ namespace CSatEng
                 WindowState = OpenTK.WindowState.Fullscreen;
             }
 
+            //GL.Enable(EnableCap.PolygonSmooth);
             GL.Enable(EnableCap.DepthTest);
             GL.ClearDepth(1.0);
             GL.DepthFunc(DepthFunction.Lequal);
-            GL.ClearColor(0.0f, 0.0f, 0.2f, 1);
-            GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
-            GL.Enable(EnableCap.PolygonSmooth);
-            GL.Hint(HintTarget.PolygonSmoothHint, HintMode.Nicest);
-            GL.ShadeModel(ShadingModel.Smooth);
-            GL.Enable(EnableCap.Lighting);
-            GL.Enable(EnableCap.Texture2D);
+            GL.ClearColor(0.0f, 0.0f, 0.1f, 0);
             GL.Enable(EnableCap.CullFace);
             GL.CullFace(CullFaceMode.Back);
-            GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill);
-            GL.FrontFace(FrontFaceDirection.Ccw);
-            GL.Enable(EnableCap.ColorMaterial);
-            GL.Enable(EnableCap.Normalize);
+            if (Settings.UseGL3 == false)
+            {
+                GL.Enable(EnableCap.Texture2D);
+                GL.Enable(EnableCap.ColorMaterial);
+                GL.Enable(EnableCap.Normalize);
+            }
             BaseGame.Keyboard = Keyboard;
             BaseGame.Mouse = Mouse;
 
@@ -185,12 +240,12 @@ namespace CSatEng
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             if (Game == null) return;
-            Settings.NumOfObjects = 0;
+            BaseGame.NumOfObjects = 0;
             Game.Render();
             SwapBuffers();
 
 #if DEBUG
-            this.Title = "Test project [objs: " + Settings.NumOfObjects + "]   FPS: " + (1 / e.Time).ToString("0.");
+            this.Title = "Test project [objs: " + BaseGame.NumOfObjects + "]   FPS: " + (1 / e.Time).ToString("0.");
 #endif
         }
     }

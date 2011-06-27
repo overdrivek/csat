@@ -1,17 +1,30 @@
-// by Joe Forte - http://www.joeforte.net/projects/soft-particles/
 [VERTEX]
-// Projection space depth information (before divide)
-varying float Depth;
+uniform mat4 glProjectionMatrix;
+uniform mat4 glModelViewMatrix;
+attribute vec4 glVertex;
+#ifdef DEPTH_W
+varying float vDepth;
+#endif
+
 void main()
 {
-	gl_Position = ftransform();
-	Depth = gl_Position.w;
+	gl_Position = glProjectionMatrix * glModelViewMatrix * glVertex;
+
+#ifdef DEPTH_W
+	vDepth = gl_Position.w;
+#endif
 }
 
 [FRAGMENT]
-// Projection space depth information (before divide)
-varying float Depth;
+#ifdef DEPTH_W
+varying float vDepth;
+#endif
+
 void main()
 {
-	gl_FragData[0] = vec4(Depth, 0.0, 0.0, 1.0);
+#ifdef DEPTH_W
+	gl_FragColor = vec4(vDepth, 0.0, 0.0, 1.0);
+#else
+	gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+#endif
 }

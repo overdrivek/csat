@@ -72,7 +72,7 @@ namespace CSatEng
                         pt = OpenTK.Graphics.OpenGL.PixelType.UnsignedByte;
                         break;
                     default:
-                        Util.Error("ERROR: Unsupported Pixel Format " + CurrentBitmap.PixelFormat);
+                        Log.Error("ERROR: Unsupported Pixel Format " + CurrentBitmap.PixelFormat);
                         pif = OpenTK.Graphics.OpenGL.PixelInternalFormat.Rgba;
                         pf = OpenTK.Graphics.OpenGL.PixelFormat.Bgra;
                         pt = OpenTK.Graphics.OpenGL.PixelType.UnsignedByte;
@@ -124,7 +124,6 @@ namespace CSatEng
                 GL.TexParameter(dimension, TextureParameterName.TextureMagFilter, (int)TextureLoaderParameters.MagnificationFilter);
                 GL.TexParameter(dimension, TextureParameterName.TextureWrapS, (int)TextureLoaderParameters.WrapModeS);
                 GL.TexParameter(dimension, TextureParameterName.TextureWrapT, (int)TextureLoaderParameters.WrapModeT);
-                GL.TexEnv(TextureEnvTarget.TextureEnv, TextureEnvParameter.TextureEnvMode, (int)TextureLoaderParameters.EnvMode);
                 #endregion Set Texture Parameters
 
                 return; // success
@@ -133,7 +132,7 @@ namespace CSatEng
             {
                 dimension = (TextureTarget)0;
                 texturehandle = TextureLoaderParameters.OpenGLDefaultTexture;
-                Util.Error("Texture Loading Error: Failed to read file " + filename + ".\n" + e);
+                Log.Error("Texture Loading Error: Failed to read file " + filename + ".\n" + e);
                 // return; // failure
             }
             finally

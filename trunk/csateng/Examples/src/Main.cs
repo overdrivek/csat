@@ -1,13 +1,12 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt[matola@sci.fi]
+ * Copyright (c) 2011 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
 #endregion
 using System;
-using OpenTK;
-using OpenTK.Graphics.OpenGL;
+using OpenTK.Graphics;
 
 namespace CSatEng
 {
@@ -18,18 +17,32 @@ namespace CSatEng
         {
             Log.Open("log.txt");
             Settings.ReadXML("settings.xml");
+
+            GraphicsContextFlags flags;
+            if (Settings.UseGL3 == false) flags = GraphicsContextFlags.Default;
+            else flags = GraphicsContextFlags.ForwardCompatible;
+
+#if DEBUG
+            flags |= GraphicsContextFlags.Debug;
+#endif
+
+            //using (GameLoop gameLoop = new GameLoop("Project XYZ", false, 3, 0, flags))
             using (GameLoop gameLoop = new GameLoop("Project XYZ", false))
             {
+#if !DEBUG
                 try
+#endif
                 {
                     BaseGame game = new Tests();
                     GameLoop.SetGame(game);
                     gameLoop.Run(60.0);
                 }
+#if !DEBUG
                 catch (Exception e)
                 {
                     Log.WriteLine("Main(): " + e.ToString());
                 }
+#endif
             }
 
             Log.WriteLine("Exiting..");
