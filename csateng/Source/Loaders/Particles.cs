@@ -59,7 +59,6 @@ namespace CSatEng
     {
         public static float ParticlePower = 1f;
         public static List<Particles> ParticleGroups = new List<Particles>();
-        public static FBO Screen;
         public bool CastShadow = false;
         static bool softParticles = false;
         public static bool SoftParticles
@@ -68,7 +67,6 @@ namespace CSatEng
         }
         public static void SetSoftParticles(FBO screen)
         {
-            Screen = screen;
             if (Settings.DisableSoftParticles)
             {
                 softParticles = false;

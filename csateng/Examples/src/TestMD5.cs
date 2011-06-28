@@ -141,7 +141,7 @@ namespace CSatEng
             if (Keyboard[Key.Space])
             {
                 AnimatedModelMD5 self = actors[0] as AnimatedModelMD5;
-                self.RenderSkeleton();
+                self.RenderSkeleton(); // note: ei näy gl3:ssa
             }
 
             lightImg.RenderBillboard(Light.Lights[0].Position, 0, 50, true);

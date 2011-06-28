@@ -21,12 +21,12 @@ namespace CSatEng
             depthFBO = new FBO(0, 0, 1, true);
             ShadowMapping.Create(depthFBO, "lightmask.png");
 
+            Fog.CreateFog(0.005f, Fog.Color);
+            VBO.Flags = "FOG";
             skybox = Sky.Load("sky/sky2_", "jpg");
             world.Add(skybox);
 
-            //VBO.Flags = "LIGHTING";
-            VBO.Flags = "LIGHTING:PHONG";
-
+            VBO.Flags = "LIGHTING:PHONG:FOG";
             Model scene = new Model();
             DotScene ds = DotScene.Load("scene1/scene1.scene", scene);
             world.Add(scene);
@@ -42,6 +42,7 @@ namespace CSatEng
 
         public override void Dispose()
         {
+            Fog.DisableFog();
             ClearArrays();
             base.Dispose();
         }
