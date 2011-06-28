@@ -18,14 +18,6 @@ namespace CSatEng
         public static bool Running = true;
         public static BaseGame Game;
 
-        public GameLoop(string projectName, bool hideMouseCursor)
-            : base(Settings.Width, Settings.Height,
-            new GraphicsMode(Settings.Bpp, Settings.DepthBpp, 0, Settings.FSAA, 0, 2, false),
-            projectName, 0, DisplayDevice.Default)
-        {
-            Init(hideMouseCursor);
-        }
-
         public GameLoop(string projectName, bool hideMouseCursor, int glVersionMajor, int glVersionMinor, GraphicsContextFlags flags)
             : base(Settings.Width, Settings.Height,
             new GraphicsMode(Settings.Bpp, Settings.DepthBpp, 0, Settings.FSAA, 0, 2, false),
@@ -35,6 +27,7 @@ namespace CSatEng
         {
             Init(hideMouseCursor);
         }
+
 
         void Init(bool hideMouseCursor)
         {
@@ -155,7 +148,6 @@ namespace CSatEng
                 WindowState = OpenTK.WindowState.Fullscreen;
             }
 
-            //GL.Enable(EnableCap.PolygonSmooth);
             GL.Enable(EnableCap.DepthTest);
             GL.ClearDepth(1.0);
             GL.DepthFunc(DepthFunction.Lequal);

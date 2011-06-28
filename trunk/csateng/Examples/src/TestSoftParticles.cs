@@ -203,7 +203,7 @@ namespace CSatEng
             GL.Clear(ClearFlags);
             camera.SetFPSCamera();
 
-            world.RenderSceneWithParticles();
+            world.RenderSceneWithParticles(colorFBO);
 
             Camera.Set2D();
             {

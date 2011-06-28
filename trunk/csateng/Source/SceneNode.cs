@@ -350,18 +350,18 @@ namespace CSatEng
             obj.Render();
         }
 
-        public void RenderSceneWithParticles()
+        public void RenderSceneWithParticles(FBO destination)
         {
             if (Particles.SoftParticles)
             {
                 // rendaa skenen depth colorbufferiin, ei textureita/materiaaleja
-                Particles.Screen.BindFBO();
+                destination.BindFBO();
                 {
                     GL.ReadBuffer(ReadBufferMode.ColorAttachment1);
                     GL.DrawBuffer(DrawBufferMode.ColorAttachment1);
 
                     GL.ClearColor(float.MaxValue, float.MaxValue, float.MaxValue, float.MaxValue);
-                    Particles.Screen.Clear();
+                    destination.Clear();
                     GL.ClearColor(0.0f, 0.0f, 0.1f, 0);
                     VBO.FastRenderPass = true;
                     Particles.SetDepthProgram();
@@ -372,27 +372,27 @@ namespace CSatEng
                     GL.ReadBuffer(ReadBufferMode.ColorAttachment0);
                     GL.DrawBuffer(DrawBufferMode.ColorAttachment0);
 
-                    Particles.Screen.Clear();
+                    destination.Clear();
                     RenderAgain();
 
                     GL.ReadBuffer(ReadBufferMode.ColorAttachment1);
-                    Particles.Screen.BindColorBuffer(1, Settings.DEPTH_TEXUNIT);
+                    destination.BindColorBuffer(1, Settings.DEPTH_TEXUNIT);
                     Particles.Render();
-                    Particles.Screen.UnBindColorBuffer(Settings.DEPTH_TEXUNIT);
+                    destination.UnBindColorBuffer(Settings.DEPTH_TEXUNIT);
                     GL.ReadBuffer(ReadBufferMode.ColorAttachment0);
                 }
-                Particles.Screen.UnBindFBO();
+                destination.UnBindFBO();
             }
             else
             {
                 // rendaa skene textureineen
-                Particles.Screen.BindFBO();
+                destination.BindFBO();
                 {
-                    Particles.Screen.Clear();
+                    destination.Clear();
                     Render();
                     Particles.Render();
                 }
-                Particles.Screen.UnBindFBO();
+                destination.UnBindFBO();
             }
         }
 

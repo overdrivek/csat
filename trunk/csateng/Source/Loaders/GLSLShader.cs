@@ -5,7 +5,7 @@
  * See license.txt for licensing details.
  */
 #endregion
-//#define SHOWSHADERS
+#define SHOWSHADERS
 
 using System.Collections.Generic;
 using System.IO;
@@ -30,6 +30,7 @@ namespace CSatEng
 
         int projMatrixLoc = -1, modelMatrixLoc = -1, normalMatrixLoc = -1;
         int texMapLoc, lightLoc, vertexLoc, normalLoc, UVLoc, textureMatrixLoc, materialDiffuseLoc;
+        int fogColorLoc, fogDensityLoc;
 
         /// <summary>
         /// lataa glsl shader (vertex ja fragment shader samassa tiedostossa).
@@ -71,6 +72,8 @@ namespace CSatEng
                 texMapLoc = GL.GetUniformLocation(ProgramID, "textureMap");
                 lightLoc = GL.GetUniformLocation(ProgramID, "glLight");
                 materialDiffuseLoc = GL.GetUniformLocation(ProgramID, "materialDiffuse"); // tätä väriä voidaan muuttaa GLExt.Color metodilla
+                fogColorLoc = GL.GetUniformLocation(ProgramID, "glFogColor");
+                fogDensityLoc = GL.GetUniformLocation(ProgramID, "glFogDensity");
             }
         }
 
@@ -201,6 +204,12 @@ namespace CSatEng
             if (textureMatrixLoc != -1) GL.UniformMatrix4(textureMatrixLoc, false, ref GLExt.TextureMatrix);
             if (texMapLoc != -1) GL.Uniform1(texMapLoc, Settings.COLOR_TEXUNIT);
             if (materialDiffuseLoc != -1) GL.Uniform4(materialDiffuseLoc, GLExt.Color);
+
+            if (fogColorLoc != -1)
+            {
+                GL.Uniform3(fogColorLoc, Fog.Color);
+                GL.Uniform1(fogDensityLoc, Fog.Density);
+            }
 
             // todo: multiple lights
             if (lightLoc != -1)

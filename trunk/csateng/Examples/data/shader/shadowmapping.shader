@@ -1,5 +1,9 @@
-﻿[VERTEX]
-uniform mat4 texmat;
+﻿// flags:
+//   -none-   not supported
+//   SHADOWS  enable shadows
+
+[VERTEX]
+#ifdef SHADOWS
 uniform mat4 glTextureMatrix;
 uniform mat4 glProjectionMatrix;
 uniform mat4 glModelViewMatrix;
@@ -18,8 +22,10 @@ void main()
 	vNormal = glNormalMatrix * glNormal;
 	gl_Position = glProjectionMatrix * glModelViewMatrix * glVertex;
 }
+#endif
 
 [FRAGMENT]
+#ifdef SHADOWS
 uniform sampler2D textureMap;
 uniform sampler2D lightmaskMap;
 uniform sampler2DShadow depthMap;
@@ -39,3 +45,4 @@ void main()
 	if(shadow<0.1) shadow=0.1;
 	gl_FragColor = texture2D(textureMap, vUV) * materialDiffuse * lm * shadow * max(dot(N, L), 0.0);
 }
+#endif

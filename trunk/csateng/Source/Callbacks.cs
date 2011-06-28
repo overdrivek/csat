@@ -25,10 +25,7 @@ namespace CSatEng
 
         public static void Clear()
         {
-            if (particleLocs != null) particleLocs.Clear();
-            if (shadowLocs != null) shadowLocs.Clear();
-            if (effectLocs != null) effectLocs.Clear();
-            particleLocs = shadowLocs = effectLocs = null;
+            particleLocs = shadowLocs = effectLocs = lightingLocs = null;
         }
 
         static List<int> particleLocs;
@@ -64,7 +61,7 @@ namespace CSatEng
             if (lightingLocs == null) lightingLocs = MakeUniformLists(programID, new string[] { 
                 "materialSpecular", "materialAmbient", "lightDiffuse", "lightSpecular", "lightAmbient", "shininess" });
 
-            if (lightingLocs[5] != -1) // shininess eli jos tämä löytyy shaderista, käytetään phongia
+            if (lightingLocs[5] != -1) // shininess - jos tämä löytyy shaderista, käytetään phongia
             {
                 GL.Uniform4(lightingLocs[0], new Vector4(0.5f, 0.5f, 0.5f, 1));
                 GL.Uniform4(lightingLocs[1], new Vector4(0.5f, 0.5f, 0.5f, 1));

@@ -26,8 +26,7 @@ namespace CSatEng
             flags |= GraphicsContextFlags.Debug;
 #endif
 
-            //using (GameLoop gameLoop = new GameLoop("Project XYZ", false, 3, 0, flags))
-            using (GameLoop gameLoop = new GameLoop("Project XYZ", false))
+            using (GameLoop gameLoop = new GameLoop("Project XYZ", false, 3, 0, flags))
             {
 #if !DEBUG
                 try
