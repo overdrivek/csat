@@ -33,7 +33,7 @@ namespace CSatEng
 
         public static void SetLighting(bool active)
         {
-            if (Settings.UseGL3 == false)
+            if (GLSLShader.IsSupported == false)
                 if (active == true) GL.Enable(EnableCap.Lighting);
                 else GL.Disable(EnableCap.Lighting);
         }

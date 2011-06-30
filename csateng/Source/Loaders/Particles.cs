@@ -5,23 +5,11 @@
  * See license.txt for licensing details.
  */
 #endregion
-/*
-Yksinkertainen .particle.xml formaatti:
-* annetaan vakioarvo ja jos annetaan _max arvo, randomilla luku vakio->max väliltä.
-
-<particles>
-        <particle name="smoke" billboard="smoke.png" translucent="true" count="100" life="10" life_max="100" zrotation="0", zrotation_max="360"
-          zrotation_adder="0.5" zrotation_adder_max="1" size="1" size_max="200">
-                <position x="1" y="1" z="1" x_max="10" y_max="100" z_max="10">
-                <direction x="0" y="1" z="0" x_max="0" y_max="2" z_max="0">
-                <gravitation x="0" y="-1" z="0">
-                <color r="0" g="0" b="0" a="0" r_max="1" g_max="1" b_max="1" a_max="1">
-        </particle>
-</particles>
-*/
+using System;
 using System.Collections.Generic;
-using OpenTK.Graphics.OpenGL;
+using System.Xml;
 using OpenTK;
+using OpenTK.Graphics.OpenGL;
 
 namespace CSatEng
 {
@@ -55,17 +43,39 @@ namespace CSatEng
         public ParticleCallback callBack;
     }
 
+    // nämä ladataan xml tiedostosta joiden perusteella luodaan Particle structin arvot
+    struct OrigValues
+    {
+        public int count;
+        public float life, life_max, size, size_max;
+        public float zrotation, zrotation_max, zrotation_adder, zrotation_adder_max;
+        public Vector3 pos, posMax, dir, dirMax, grav;
+        public Vector4 color, colorMax;
+    }
+
     public class Particles : SceneNode
     {
         public static float ParticlePower = 1f;
         public static List<Particles> ParticleGroups = new List<Particles>();
         public bool CastShadow = false;
+        public bool IsTransparent = false;
+        public ParticleCallback callBack = null;
+        static GLSLShader depthShader;
+        Billboard particleTex = null;
+        OrigValues origValues;
+
         static bool softParticles = false;
         public static bool SoftParticles
         {
             get { return softParticles; }
         }
-        public static void SetSoftParticles(FBO screen)
+        List<Particle> particles = new List<Particle>();
+        public int NumOfParticles
+        {
+            get { return particles.Count; }
+        }
+
+        public static void EnableSoftParticles()
         {
             if (Settings.DisableSoftParticles)
             {
@@ -81,40 +91,129 @@ namespace CSatEng
                 softParticles = false;
                 return;
             }
-            if (screen.ColorTextures.Length < 2) Log.Error("Particles: fbo must have at least 2 colorbuffers.");
             depthShader = GLSLShader.Load("depth.shader:DEPTH_W", null);
             softParticles = true;
         }
-
-        public bool IsTransparent = false;
-        Billboard particleTex = null;
-        public ParticleCallback callBack = null;
-
-        List<Particle> particles = new List<Particle>();
-        static GLSLShader depthShader;
 
         public static void SetDepthProgram()
         {
             depthShader.UseProgram();
         }
 
-        /// <summary>
-        ///  TODO
-        /// </summary>
-        public static Particles Load(string particleFileName)
+        public static Particles Load(string fileName, ParticleCallback particleCallback)
         {
             Particles part = new Particles();
-
-
-
-
-            part.Name = particleFileName;
+            part.LoadParticles(fileName, particleCallback);
             return part;
         }
 
-        public int NumOfParticles
+        void LoadParticles(string fileName, ParticleCallback particleCallback)
         {
-            get { return particles.Count; }
+            XmlDocument XMLDoc = null;
+            XmlElement XMLRoot;
+            try
+            {
+                using (System.IO.StreamReader file = new System.IO.StreamReader(Settings.ParticleDir + fileName))
+                {
+                    // tiedosto muistiin
+                    string data = file.ReadToEnd();
+                    XMLDoc = new XmlDocument();
+                    XMLDoc.LoadXml(data);
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.ToString());
+            }
+            // Validate the File
+            XMLRoot = XMLDoc.DocumentElement;
+            if (XMLRoot.Name != "particles")
+            {
+                Log.Error("Error [" + fileName + "]: Invalid .particles.xml File. Missing <particles>");
+            }
+
+            Name = XML.GetAttrib(XMLRoot, "name");
+            string billboard = XML.GetAttrib(XMLRoot, "billboard");
+            bool translucent = XML.GetAttribBool(XMLRoot, "translucent", false);
+            bool castshadows = XML.GetAttribBool(XMLRoot, "castshadows", false);
+            origValues.count = (int)XML.GetAttribFloat(XMLRoot, "count", 0);
+            origValues.life = XML.GetAttribFloat(XMLRoot, "life", 0);
+            origValues.life_max = XML.GetAttribFloat(XMLRoot, "life_max", origValues.life);
+            origValues.zrotation = XML.GetAttribFloat(XMLRoot, "zrotation", 0);
+            origValues.zrotation_max = XML.GetAttribFloat(XMLRoot, "zrotation_max", origValues.zrotation);
+            origValues.zrotation_adder = XML.GetAttribFloat(XMLRoot, "zrotation_adder", 0);
+            origValues.zrotation_adder_max = XML.GetAttribFloat(XMLRoot, "zrotation_adder_max", origValues.zrotation_adder);
+            origValues.size = XML.GetAttribFloat(XMLRoot, "size", 0);
+            origValues.size_max = XML.GetAttribFloat(XMLRoot, "size_max", origValues.size);
+
+            XmlElement node = (XmlElement)XMLRoot.SelectSingleNode("position");
+            origValues.pos = new Vector3(XML.GetAttribFloat(node, "x", 0),
+                                    XML.GetAttribFloat(node, "y", 0),
+                                    XML.GetAttribFloat(node, "z", 0));
+            origValues.posMax = new Vector3(XML.GetAttribFloat(node, "x_max", origValues.pos.X),
+                                        XML.GetAttribFloat(node, "y_max", origValues.pos.Y),
+                                        XML.GetAttribFloat(node, "z_max", origValues.pos.Z));
+
+
+            node = (XmlElement)XMLRoot.SelectSingleNode("direction");
+            origValues.dir = new Vector3(XML.GetAttribFloat(node, "x", 0),
+                                    XML.GetAttribFloat(node, "y", 0),
+                                    XML.GetAttribFloat(node, "z", 0));
+            origValues.dirMax = new Vector3(XML.GetAttribFloat(node, "x_max", origValues.dir.X),
+                                        XML.GetAttribFloat(node, "y_max", origValues.dir.Y),
+                                        XML.GetAttribFloat(node, "z_max", origValues.dir.Z));
+
+            node = (XmlElement)XMLRoot.SelectSingleNode("gravitation");
+            origValues.grav = new Vector3(XML.GetAttribFloat(node, "x", 0),
+                                    XML.GetAttribFloat(node, "y", 0),
+                                    XML.GetAttribFloat(node, "z", 0));
+
+            node = (XmlElement)XMLRoot.SelectSingleNode("color");
+            origValues.color = new Vector4(XML.GetAttribFloat(node, "r", 0),
+                                    XML.GetAttribFloat(node, "g", 0),
+                                    XML.GetAttribFloat(node, "b", 0),
+                                    XML.GetAttribFloat(node, "a", 0));
+            origValues.colorMax = new Vector4(XML.GetAttribFloat(node, "r_max", origValues.color.X),
+                                        XML.GetAttribFloat(node, "g_max", origValues.color.Y),
+                                        XML.GetAttribFloat(node, "b_max", origValues.color.Z),
+                                        XML.GetAttribFloat(node, "a_max", origValues.color.W));
+
+            SetParticle(Billboard.Load(billboard), translucent, castshadows, particleCallback);
+            Reset();
+        }
+
+        Vector3 Random(Vector3 min, Vector3 max)
+        {
+            Vector3 f = min;
+            Vector3 r = max - min;
+            f.X += r.X * (float)BaseGame.Rnd.NextDouble();
+            f.Y += r.Y * (float)BaseGame.Rnd.NextDouble();
+            f.Z += r.Z * (float)BaseGame.Rnd.NextDouble();
+            return f;
+        }
+
+        public void Reset()
+        {
+            for (int q = 0; q < origValues.count; q++)
+            {
+                ResetOneParticle();
+            }
+        }
+
+        public void ResetOneParticle()
+        {
+            Vector3 pos, dir;
+            Vector4 col;
+            float life, zrot, zrotAdder, size;
+            pos = Random(origValues.pos, origValues.posMax);
+            dir = Random(origValues.dir, origValues.dirMax);
+            col = new Vector4(Random(origValues.color.Xyz, origValues.colorMax.Xyz), 1);
+            col.W = origValues.color.W + ((origValues.colorMax.W - origValues.color.W) * (float)BaseGame.Rnd.NextDouble());
+            life = origValues.life + ((origValues.life_max - origValues.life) * (float)BaseGame.Rnd.NextDouble());
+            size = origValues.size + ((origValues.size_max - origValues.size) * (float)BaseGame.Rnd.NextDouble());
+            zrot = origValues.zrotation + ((origValues.zrotation_max - origValues.zrotation) * (float)BaseGame.Rnd.NextDouble());
+            zrotAdder = origValues.zrotation_adder + ((origValues.zrotation_adder_max - origValues.zrotation_adder) * (float)BaseGame.Rnd.NextDouble());
+            AddParticle(ref pos, ref dir, ref origValues.grav, life, zrot, zrotAdder, size, col);
         }
 
         public static void DisposeAll()
@@ -195,11 +294,12 @@ namespace CSatEng
         {
             GLExt.Color4(1f, 1, 1, 1f);
             GLExt.PushMatrix();
+            GLExt.SetLighting(false);
 
             List<SortedList_Particles> slist = new List<SortedList_Particles>();
 
             GL.Disable(EnableCap.CullFace);
-            if (Settings.UseGL3 == false)
+            if (GLSLShader.IsSupported == false)
             {
                 GL.Disable(EnableCap.Lighting);
                 GL.Enable(EnableCap.AlphaTest);
@@ -217,8 +317,8 @@ namespace CSatEng
                 {
                     if (curpar.CastShadow == false) continue;
                 }
-                else
-                    curpar.particles[0].partTex.Bind(0);
+
+                curpar.particles[0].partTex.Bind(0);
 
                 GLExt.PushMatrix();
                 GLExt.MultMatrix(ref curpar.WorldMatrix);
@@ -235,23 +335,28 @@ namespace CSatEng
                     Vector3 v = curpar.WorldMatrix.Row3.Xyz + curpar.Position + p.pos;
                     if (Frustum.SphereInFrustum(v.X, v.Y, v.Z, 10) != 0)
                     {
-                        c++;
-                        if (p.isTransparent == true) // listaan renderoitavaks myöhemmin
-                        {
-                            //float len = (Camera.cam.Position - (p.pos + curpar.Position)).LengthSquared;
-                            float len = (Camera.cam.Position - matrix.Row3.Xyz).LengthSquared;
-                            slist.Add(new SortedList_Particles(len, p, matrix));
-                        }
-                        else // rendataan se nyt, ei lisätä sortattavaks
+                        if (VBO.FastRenderPass == true) // renderoi partikkeli depthbufferiin (varjostusta varten)
                         {
                             GLExt.Scale(p.size, p.size, p.size);
                             GLExt.RotateZ(p.zrot);
-                            if (VBO.FastRenderPass == false)
+                            p.partTex.RenderBillboard();
+                        }
+                        else
+                        {
+                            c++;
+                            if (p.isTransparent == true) // listaan renderoitavaks myöhemmin
                             {
+                                float len = (Camera.cam.Position - matrix.Row3.Xyz).LengthSquared;
+                                slist.Add(new SortedList_Particles(len, p, matrix));
+                            }
+                            else // rendataan se nyt, ei lisätä sortattavaks
+                            {
+                                GLExt.Scale(p.size, p.size, p.size);
+                                GLExt.RotateZ(p.zrot);
                                 GLExt.Color4(p.color.X, p.color.Y, p.color.Z, p.color.W); ;
                                 if (p.callBack != null) p.callBack(p);
+                                p.partTex.RenderBillboard();
                             }
-                            p.partTex.RenderBillboard();
                         }
                     }
                     GLExt.PopMatrix();
@@ -259,30 +364,35 @@ namespace CSatEng
                 GLExt.PopMatrix();
             }
 
-            slist.Sort(delegate(SortedList_Particles z1, SortedList_Particles z2) { return z2.Len.CompareTo(z1.Len); });
-            if (Settings.UseGL3 == false) GL.Disable(EnableCap.AlphaTest);
-            GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.One);
-
-            // rendataan läpikuultavat
-            GL.DepthMask(false); // ei kirjoiteta zbufferiin
-            for (int q = 0; q < slist.Count; q++)
+            if (VBO.FastRenderPass == false)
             {
-                Particle p = slist[q].Part;
-                if (VBO.FastRenderPass == false)
+                slist.Sort(delegate(SortedList_Particles z1, SortedList_Particles z2) { return z2.Len.CompareTo(z1.Len); });
+                if (GLSLShader.IsSupported == false) GL.Disable(EnableCap.AlphaTest);
+                GL.Enable(EnableCap.Blend);
+                GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.One);
+
+                // rendataan läpikuultavat
+                GL.DepthMask(false); // ei kirjoiteta zbufferiin
+                for (int q = 0; q < slist.Count; q++)
                 {
-                    p.partTex.Bind(0);
-                    GLExt.Color4(p.color.X, p.color.Y, p.color.Z, p.color.W);
-                    if (p.callBack != null) p.callBack(p);
+                    Particle p = slist[q].Part;
+                    if (VBO.FastRenderPass == false)
+                    {
+                        p.partTex.Bind(0);
+                        GLExt.Color4(p.color.X, p.color.Y, p.color.Z, p.color.W);
+                        if (p.callBack != null) p.callBack(p);
+                    }
+                    GLExt.LoadMatrix(ref slist[q].Matrix);
+                    GLExt.Scale(p.size, p.size, p.size);
+                    GLExt.RotateZ(p.zrot);
+                    p.partTex.RenderBillboard();
                 }
-                GLExt.LoadMatrix(ref slist[q].Matrix);
-                GLExt.Scale(p.size, p.size, p.size);
-                GLExt.RotateZ(p.zrot);
-                p.partTex.RenderBillboard();
+                GL.DepthMask(true);
+                GL.Disable(EnableCap.Blend);
             }
             GLExt.PopMatrix();
-            GL.DepthMask(true);
-            GL.Disable(EnableCap.Blend);
+
+            GL.Enable(EnableCap.CullFace);
             GLExt.Color4(1, 1, 1, 1);
             GLExt.SetLighting(true);
             BaseGame.NumOfObjects += c;

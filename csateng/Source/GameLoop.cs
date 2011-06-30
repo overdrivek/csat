@@ -154,7 +154,7 @@ namespace CSatEng
             GL.ClearColor(0.0f, 0.0f, 0.1f, 0);
             GL.Enable(EnableCap.CullFace);
             GL.CullFace(CullFaceMode.Back);
-            if (Settings.UseGL3 == false)
+            if (GLSLShader.IsSupported == false)
             {
                 GL.Enable(EnableCap.Texture2D);
                 GL.Enable(EnableCap.ColorMaterial);

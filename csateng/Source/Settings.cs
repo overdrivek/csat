@@ -13,15 +13,16 @@ namespace CSatEng
     public static class Settings
     {
         public static readonly int COLOR_TEXUNIT = 0;
-        public static readonly int LIGHTMAP_TEXUNIT = 1;
-        public static readonly int BUMP_TEXUNIT = 2;
-        public static readonly int LIGHTMASK_TEXUNIT = 6;
-        public static readonly int SHADOW_TEXUNIT = 7;
+        public static readonly int SHADOW_TEXUNIT = 1;
         public static readonly int DEPTH_TEXUNIT = SHADOW_TEXUNIT;
+        public static readonly int LIGHTMASK_TEXUNIT = 2;
+        public static readonly int LIGHTMAP_TEXUNIT = 3;
+        public static readonly int BUMP_TEXUNIT = 4;
 
         public static string ModelDir = "../../data/model/";
         public static string TextureDir = "../../data/texture/";
         public static string ShaderDir = "../../data/shader/";
+        public static string ParticleDir = "../../data/particles/";
 
         public static DisplayDevice Device;
         public static int Width, Height, Bpp, FSAA, DepthBpp;

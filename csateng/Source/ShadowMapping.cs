@@ -17,7 +17,7 @@ namespace CSatEng
     {
         public static bool UseShadowMapping = false;
         static Texture lightMask;
-        static GLSLShader depthShader;
+        static GLSLShader depthShader, depthShaderAlphaTest;
         static FBO fbo;
 
         public static void Create(FBO fbo, string lightMaskFileName)
@@ -49,6 +49,7 @@ namespace CSatEng
             TextureLoaderParameters.WrapModeS = TextureWrapMode.Repeat;
             TextureLoaderParameters.WrapModeT = TextureWrapMode.Repeat;
             depthShader = GLSLShader.Load("depth.shader", null);
+            depthShaderAlphaTest = GLSLShader.Load("depth.shader:ALPHATEST", null);
         }
 
         public static void BindLightMask()
@@ -73,11 +74,6 @@ namespace CSatEng
                 Log.WriteLine("SetupShadows requires at least one light source!", true);
                 return;
             }
-            if (Settings.UseGL3 == false)
-            {
-                GL.Disable(EnableCap.Lighting);
-                GL.ShadeModel(ShadingModel.Flat);
-            }
             GL.Disable(EnableCap.Blend);
             GL.ColorMask(false, false, false, false);
             GL.Disable(EnableCap.CullFace);
@@ -98,7 +94,11 @@ namespace CSatEng
             VBO.FastRenderPass = true;
             depthShader.UseProgram();
             world.Render();
-            if (withParticles) Particles.Render();
+            if (withParticles)
+            {
+                depthShaderAlphaTest.UseProgram();
+                Particles.Render();
+            }
             VBO.FastRenderPass = false;
             fbo.UnBindFBO();
 
@@ -106,13 +106,7 @@ namespace CSatEng
             GL.Enable(EnableCap.CullFace);
             GL.ColorMask(true, true, true, true);
 
-            if (Settings.UseGL3 == false)
-            {
-                GL.Enable(EnableCap.Lighting);
-                GL.ShadeModel(ShadingModel.Smooth);
-            }
             GLExt.LoadIdentity();
-
             BaseGame.NumOfObjects = 0;
         }
 

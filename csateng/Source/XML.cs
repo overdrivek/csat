@@ -26,9 +26,9 @@ namespace CSatEng
                 return defaultValue;
         }
 
-        public static bool GetAttribBool(XmlElement XMLNode, String parameter)
+        public static bool GetAttribBool(XmlElement XMLNode, String attrib)
         {
-            return GetAttribBool(XMLNode, parameter, false);
+            return GetAttribBool(XMLNode, attrib, false);
         }
 
         public static bool GetAttribBool(XmlElement XMLNode, String attrib, bool defaultValue)
@@ -42,12 +42,12 @@ namespace CSatEng
             return false;
         }
 
-        public static float GetAttribReal(XmlElement XMLNode, String parameter)
+        public static float GetAttribFloat(XmlElement XMLNode, String attrib)
         {
-            return GetAttribReal(XMLNode, parameter, 0.0f);
+            return GetAttribFloat(XMLNode, attrib, 0.0f);
         }
 
-        public static float GetAttribReal(XmlElement XMLNode, String attrib, float defaultValue)
+        public static float GetAttribFloat(XmlElement XMLNode, String attrib, float defaultValue)
         {
             if (!string.IsNullOrEmpty(XMLNode.GetAttribute(attrib)))
                 return MathExt.GetFloat(XMLNode.GetAttribute(attrib));
@@ -72,6 +72,7 @@ namespace CSatEng
             orientation.W = MathExt.GetFloat(XMLNode.GetAttribute("w"));
             return orientation;
         }
+
         public static Quaternion ParseOrientation(XmlElement XMLNode)
         {
             Quaternion orientation = new Quaternion();
@@ -107,6 +108,7 @@ namespace CSatEng
                MathExt.GetFloat(XMLNode.GetAttribute("v2")),
                MathExt.GetFloat(XMLNode.GetAttribute("v3")));
         }
+
         public static Vector2 ParseUV(XmlElement XMLNode)
         {
             return new Vector2(
@@ -114,6 +116,5 @@ namespace CSatEng
                MathExt.GetFloat(XMLNode.GetAttribute("v"))
               );
         }
-
     }
 }

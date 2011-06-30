@@ -70,12 +70,12 @@ void main()
 		vec4 ambient = materialDiffuse * materialAmbient;
 		vec4 diffuse = materialDiffuse * (1.0 - materialAmbient) * max(dot(L, N), 0.0);
 		vec4 specular = vec4(1.0, 1.0, 1.0, 1.0) * pow(max(dot(R, L), 0.0), shininess);
-		color = texture2D(textureMap, vUV.xy) * (ambient + diffuse + specular); // phong color
+		color = texture2D(textureMap, vUV) * (ambient + diffuse + specular); // phong color
 	#else
-		color = texture2D(textureMap, vUV.xy) * max(dot(N, L), 0.0) * materialDiffuse; // lighting color
+		color = texture2D(textureMap, vUV) * max(dot(N, L), 0.0) * materialDiffuse; // lighting color
 	#endif // PHONG
 #else
-	color = texture2D(textureMap, vUV.xy) * materialDiffuse; // only texture color
+	color = texture2D(textureMap, vUV) * materialDiffuse; // only texture color
 #endif // LIGHTING
 
 #ifdef FOG

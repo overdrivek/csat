@@ -51,12 +51,12 @@ void main()
 	vec4 c;
 
 #ifdef SOFT
-	float d = texture2D(depthMap, vPos.xy).x; // Scene vDepth
-	c = texture2D(textureMap, vUV.st);
+	float d = texture2D(depthMap, vPos).x; // Scene vDepth
+	c = texture2D(textureMap, vUV);
 	c.a = c.a * Contrast(d - vDepth); // Computes alpha based on the particles distance to the rest of the scene
 #else
-	c = texture2D(textureMap, vUV.xy);
-	if(c.a < 0.1) discard;
+	c = texture2D(textureMap, vUV);
+	if(c.a == 0.0) discard;
 #endif
 
 	gl_FragColor = c * materialDiffuse;

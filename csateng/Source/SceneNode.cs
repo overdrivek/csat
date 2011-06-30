@@ -354,6 +354,8 @@ namespace CSatEng
         {
             if (Particles.SoftParticles)
             {
+                if (destination.ColorTextures.Length < 2) Log.Error("RenderSceneWithParticles: fbo must have at least 2 colorbuffers.");
+
                 // rendaa skenen depth colorbufferiin, ei textureita/materiaaleja
                 destination.BindFBO();
                 {

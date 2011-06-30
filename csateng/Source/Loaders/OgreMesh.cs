@@ -33,15 +33,12 @@ namespace CSatEng
             Name = name;
             XmlDocument XMLDoc = null;
             XmlElement XMLRoot;
-
             try
             {
                 using (System.IO.StreamReader file = new System.IO.StreamReader(Settings.ModelDir + fileName))
                 {
                     // tiedosto muistiin
                     string data = file.ReadToEnd();
-
-                    // Open the .scene File
                     XMLDoc = new XmlDocument();
                     XMLDoc.LoadXml(data);
                 }
@@ -55,7 +52,7 @@ namespace CSatEng
             XMLRoot = XMLDoc.DocumentElement;
             if (XMLRoot.Name != "mesh")
             {
-                Log.Error("Error [" + fileName + "]: Invalid .mesh File. Missing <mesh>");
+                Log.Error("Error [" + fileName + "]: Invalid .mesh.xml File. Missing <mesh>");
             }
 
             bool isPath = false; // jos meshi on pathi
@@ -135,7 +132,7 @@ namespace CSatEng
 
         void processFaces(XmlElement XMLNode)
         {
-            int numOfFaces = (int)XML.GetAttribReal(XMLNode, "count");
+            int numOfFaces = (int)XML.GetAttribFloat(XMLNode, "count");
             IndexBuffer = new ushort[numOfFaces * 3];
             XmlElement pElement = (XmlElement)XMLNode.SelectSingleNode("face");
             for (int q = 0; q < numOfFaces; q++)
@@ -150,7 +147,7 @@ namespace CSatEng
 
         void processGeometry(XmlElement XMLNode, bool path)
         {
-            int numOfVerts = (int)XML.GetAttribReal(XMLNode, "vertexcount");
+            int numOfVerts = (int)XML.GetAttribFloat(XMLNode, "vertexcount");
             VertexBuffer = new Vertex[numOfVerts];
             XmlElement pElement = (XmlElement)XMLNode.SelectSingleNode("vertexbuffer");
             pElement = (XmlElement)pElement.SelectSingleNode("vertex");
@@ -209,7 +206,7 @@ namespace CSatEng
             if (DoubleSided) GL.Disable(EnableCap.CullFace);
             if (VBO.FastRenderPass)
             {
-                if(CastShadow) Vbo.Render();
+                if (CastShadow) Vbo.Render();
             }
             else
             {

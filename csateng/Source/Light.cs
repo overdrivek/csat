@@ -33,7 +33,7 @@ namespace CSatEng
         /// </summary>
         public static void UpdateLights()
         {
-            if (Settings.UseGL3) return;
+            if (GLSLShader.IsSupported==true) return;
 
             GL.LoadMatrix(ref GLExt.ModelViewMatrix);
             for (int q = 0; q < Lights.Count; q++)

@@ -11,9 +11,7 @@ namespace CSatEng
         Model[] actors = new Model[10];
         Model scene = new Model();
         Billboard lightImg;
-        const int PART = 100;
-        Particles explosion = new Particles();
-        Particles smoke = new Particles();
+        Particles explosion, smoke;
         PostEffect blur, bloom;
 
         public override void Init()
@@ -21,9 +19,9 @@ namespace CSatEng
             colorFBO = new FBO(0, 0, 2, true); // 2 colorbufferia
             depthFBO = new FBO(0, 0, 0, true);
             blur = PostEffect.Load("blur.shader", "HORIZ VERT", 1f / (float)colorFBO.Width);
-            bloom = PostEffect.Load("bloom.shader", "", 0.01f);
+            bloom = PostEffect.Load("bloom.shader", "", 0.001f);
 
-            Particles.SetSoftParticles(colorFBO);
+            Particles.EnableSoftParticles();
             ShadowMapping.Create(depthFBO, "lightmask.png");
 
             font = BitmapFont.Load("fonts/comic12.png");
@@ -51,9 +49,8 @@ namespace CSatEng
             actors[0].Scale = new Vector3(5, 5, 5);
             world.Add(actors[0]);
 
-            explosion.SetParticle(Billboard.Load("fire.png"), true, false, new ParticleCallback(RenderParticleCallback));
-            smoke.SetParticle(Billboard.Load("smoke.png"), true, true, null);
-            smoke.Position.Y = 3;
+            explosion = Particles.Load("explosion.particles.xml", new ParticleCallback(RenderParticleCallback));
+            smoke = Particles.Load("smoke.particles.xml", null);
             actors[0].Add(smoke);
 
             Camera.Set3D();
@@ -76,50 +73,11 @@ namespace CSatEng
 
         void UpdateParticles(float time)
         {
-            if (explosion.NumOfParticles == 0) SetupParticles(true, false);
+            if (explosion.NumOfParticles == 0) explosion.Reset();
             explosion.Update(time);
 
-            Vector3 pos = new Vector3(0, 0, 0);
-            Vector3 dir = new Vector3(-0.05f + (float)(Rnd.NextDouble() * 0.1f), 0.2f, -0.05f + (float)(Rnd.NextDouble() * 0.1f));
-            Vector3 grav = new Vector3(0, 0, 0);
-            float life = 1;
-            float size = (float)Rnd.NextDouble() + 0.5f;
-            float zrot = (float)(Rnd.NextDouble() * 360);
-            float zrotAdder = (float)(Rnd.NextDouble());
-            smoke.AddParticle(ref pos, ref dir, ref grav, life, zrot, zrotAdder, size, new Vector4(0.5f, 0.5f, 0.5f, 0.1f));
+            smoke.ResetOneParticle();
             smoke.Update(time);
-        }
-
-        void SetupParticles(bool explosion, bool smoke)
-        {
-            if (explosion)
-            {
-                for (int q = 0; q < PART; q++)
-                {
-                    Vector3 pos = new Vector3(50 + (float)(Rnd.NextDouble() * 1), 5 + (float)(Rnd.NextDouble() * 1), 0);
-                    Vector3 dir = new Vector3(0.5f * (0.5f - (float)(Rnd.NextDouble())), 0.5f * (0.5f - (float)(Rnd.NextDouble())), 0.5f * (0.5f - (float)(Rnd.NextDouble())));
-                    Vector3 grav = new Vector3(0, 0, 0);
-                    float life = 2;
-                    float size = (float)(Rnd.NextDouble() * 2 + 1);
-                    float zrot = (float)(Rnd.NextDouble() * 360);
-                    float zrotAdder = 0;
-                    this.explosion.AddParticle(ref pos, ref dir, ref grav, life, zrot, zrotAdder, size, new Vector4(0.3f, 0, 0, 0.5f));
-                }
-            }
-            if (smoke)
-            {
-                for (int q = 0; q < PART; q++)
-                {
-                    Vector3 pos = new Vector3(0, 5 + (float)(Rnd.NextDouble() * 10), 0);
-                    Vector3 dir = new Vector3(-0.05f + (float)(Rnd.NextDouble() * 0.1f), 0.1f, -0.05f + (float)(Rnd.NextDouble() * 0.1f));
-                    Vector3 grav = new Vector3(0, 0, 0);
-                    float life = (float)(Rnd.NextDouble() * 2);
-                    float size = 1;
-                    float zrot = (float)(Rnd.NextDouble() * 360);
-                    float zrotAdder = (float)(Rnd.NextDouble());
-                    this.smoke.AddParticle(ref pos, ref dir, ref grav, life, zrot, zrotAdder, size, new Vector4(0.4f, 0.4f, 0.4f, 0.1f));
-                }
-            }
         }
 
         public override void Update(float time)
@@ -203,7 +161,11 @@ namespace CSatEng
             GL.Clear(ClearFlags);
             camera.SetFPSCamera();
 
+            // render scene to colorFBO
             world.RenderSceneWithParticles(colorFBO);
+            colorFBO.BindFBO();
+            lightImg.RenderBillboard(Light.Lights[0].Position, 0, 100, true);
+            colorFBO.UnBindFBO();
 
             Camera.Set2D();
             {

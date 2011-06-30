@@ -63,7 +63,7 @@ namespace CSatEng
 
             if (lightingLocs[5] != -1) // shininess - jos tämä löytyy shaderista, käytetään phongia
             {
-                GL.Uniform4(lightingLocs[0], new Vector4(0.5f, 0.5f, 0.5f, 1));
+                GL.Uniform4(lightingLocs[0], new Vector4(0.5f, 0.5f, 0.5f, 1)); // todo: nämä arvot pitäis ottaa muualta
                 GL.Uniform4(lightingLocs[1], new Vector4(0.5f, 0.5f, 0.5f, 1));
                 GL.Uniform4(lightingLocs[2], new Vector4(0.5f, 0.5f, 0.5f, 1));
                 GL.Uniform4(lightingLocs[3], new Vector4(0.5f, 0.5f, 0.5f, 1));

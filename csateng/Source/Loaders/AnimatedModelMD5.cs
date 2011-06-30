@@ -386,6 +386,7 @@ namespace CSatEng
             if (DoubleSided) GL.Enable(EnableCap.CullFace);
         }
 
+        // debug
         public void RenderSkeleton()
         {
             if (Settings.UseGL3 == false)
