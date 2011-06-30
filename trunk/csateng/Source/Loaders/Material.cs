@@ -208,7 +208,7 @@ namespace CSatEng
                 if (Textures[q].Tex != null)
                     Textures[q].Tex.Bind(q);
 
-            if (Settings.UseGL3 == false)
+            if (GLSLShader.IsSupported == false)
             {
                 GL.Material(MaterialFace.Front, MaterialParameter.Ambient, AmbientColor);
                 GL.Material(MaterialFace.Front, MaterialParameter.Diffuse, DiffuseColor);

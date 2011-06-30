@@ -89,6 +89,8 @@
     <Content Include="data\model\sky\Left.mesh.xml" />
     <Content Include="data\model\sky\Right.mesh.xml" />
     <Content Include="data\model\sky\Top.mesh.xml" />
+    <Content Include="data\particles\explosion.particles.xml" />
+    <Content Include="data\particles\smoke.particles.xml" />
     <Content Include="data\texture\earth.png" />
     <Content Include="data\texture\fire.png" />
     <Content Include="data\texture\fonts\arial12.png" />

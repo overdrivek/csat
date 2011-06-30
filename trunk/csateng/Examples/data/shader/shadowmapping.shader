@@ -1,8 +1,4 @@
-﻿// flags:
-//   -none-   not supported
-//   SHADOWS  enable shadows
-
-[VERTEX]
+﻿[VERTEX]
 #ifdef SHADOWS
 uniform mat4 glTextureMatrix;
 uniform mat4 glProjectionMatrix;

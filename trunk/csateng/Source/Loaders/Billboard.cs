@@ -58,7 +58,7 @@ namespace CSatEng
             }
             else
             {
-                if (Settings.UseGL3 == false)
+                if (GLSLShader.IsSupported == false)
                 {
                     GL.Enable(EnableCap.AlphaTest);
                     GL.AlphaFunc(AlphaFunction.Greater, 0.1f);
@@ -82,7 +82,7 @@ namespace CSatEng
             GLExt.PopMatrix();
 
             if (blend) GL.Disable(EnableCap.Blend);
-            else if (Settings.UseGL3 == false) GL.Disable(EnableCap.AlphaTest);
+            else if (GLSLShader.IsSupported == false) GL.Disable(EnableCap.AlphaTest);
         }
 
         public void RenderBillboard(Vector3 pos, float zrot, float size, bool blend)

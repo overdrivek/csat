@@ -94,7 +94,7 @@ namespace CSatEng
             String name = XML.GetAttrib(XMLNode, "name");
             Camera pCamera = Camera.cam;
 
-            float pFov = XML.GetAttribReal(XMLNode, "fov", 45);
+            float pFov = XML.GetAttribFloat(XMLNode, "fov", 45);
             Camera.Fov = pFov * MathExt.RadToDeg;
 
             XmlElement pElement;
@@ -104,20 +104,20 @@ namespace CSatEng
             if (pElement != null)
             {
                 // Blender
-                float nearDist = XML.GetAttribReal(pElement, "nearPlaneDist");
+                float nearDist = XML.GetAttribFloat(pElement, "nearPlaneDist");
                 if (nearDist == 0)
                 {
                     // 3ds
-                    nearDist = XML.GetAttribReal(pElement, "near");
+                    nearDist = XML.GetAttribFloat(pElement, "near");
                 }
                 Camera.Near = nearDist;
 
                 // Blender
-                float farDist = XML.GetAttribReal(pElement, "farPlaneDist");
+                float farDist = XML.GetAttribFloat(pElement, "farPlaneDist");
                 if (farDist == 0)
                 {
                     // 3ds
-                    farDist = XML.GetAttribReal(pElement, "far");
+                    farDist = XML.GetAttribFloat(pElement, "far");
                 }
                 Camera.Far = farDist;
             }
@@ -139,7 +139,7 @@ namespace CSatEng
 
             bool bvisible = XML.GetAttribBool(XMLNode, "visible", true);
             bool bcastshadows = XML.GetAttribBool(XMLNode, "castShadows", true);
-            float brenderingDistance = XML.GetAttribReal(XMLNode, "renderingDistance", 0);
+            float brenderingDistance = XML.GetAttribFloat(XMLNode, "renderingDistance", 0);
 
             meshFile = Settings.ModelDir + dir + meshFile;
 
