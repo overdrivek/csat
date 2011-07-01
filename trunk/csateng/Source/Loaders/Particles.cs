@@ -43,7 +43,7 @@ namespace CSatEng
         public ParticleCallback callBack;
     }
 
-    // nämä ladataan xml tiedostosta joiden perusteella luodaan Particle structin arvot
+    // nämä ladataan xml tiedostosta joiden perusteella lasketaan Particle structin arvot
     struct OrigValues
     {
         public int count;
@@ -55,7 +55,7 @@ namespace CSatEng
 
     public class Particles : SceneNode
     {
-        public static float ParticlePower = 1f;
+        public static float ParticlePower = 0.1f;
         public static List<Particles> ParticleGroups = new List<Particles>();
         public bool CastShadow = false;
         public bool IsTransparent = false;
@@ -93,6 +93,11 @@ namespace CSatEng
             }
             depthShader = GLSLShader.Load("depth.shader:DEPTH_W", null);
             softParticles = true;
+        }
+
+        public static void DisableSoftParticles()
+        {
+            softParticles = false;
         }
 
         public static void SetDepthProgram()

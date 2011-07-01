@@ -1,5 +1,4 @@
-﻿// http://www.joeforte.net/projects/soft-particles/
-// flags:
+﻿// flags:
 //   -none-  uses default rendering (no lighting)
 //   SOFT    uses softparticles (init with Particles.SetSoftParticles)
 
@@ -38,12 +37,6 @@ uniform sampler2D depthMap;
 uniform float power;
 varying float vDepth; // Projection space vDepth information (before divide)
 varying vec2 vPos; // Poition information of the pixels
-float Contrast(float d)
-{
-	float val = clamp( 2.0*( (d > 0.5) ? 1.0-d : d ), 0.0, 1.0);
-	float a = 0.5 * pow(val, power);
-	return (d > 0.5) ? 1.0 - a : a;
-}
 #endif
 
 void main()
@@ -51,9 +44,8 @@ void main()
 	vec4 c;
 
 #ifdef SOFT
-	float d = texture2D(depthMap, vPos).x; // Scene vDepth
-	c = texture2D(textureMap, vUV);
-	c.a = c.a * Contrast(d - vDepth); // Computes alpha based on the particles distance to the rest of the scene
+	float d = texture2D(depthMap, vPos).x; // Scene depth
+	c = texture2D(textureMap, vUV) * clamp((d - vDepth)*power, 0.0, 1.0);
 #else
 	c = texture2D(textureMap, vUV);
 	if(c.a == 0.0) discard;
