@@ -21,6 +21,8 @@ namespace CSatEng
 
         public override void Init()
         {
+            Particles.DisableSoftParticles();
+
             earth.SetParticle(Billboard.Load("earth.png", false), false, true, null); // ei läpikuultava, varjostaa
             explosion.SetParticle(Billboard.Load("fire.png"), true, false, new ParticleCallback(RenderParticleCallback)); // läpikuultava, ei varjosta
             smoke.SetParticle(Billboard.Load("smoke.png"), true, true, null); // läpikuultava, varjostaa

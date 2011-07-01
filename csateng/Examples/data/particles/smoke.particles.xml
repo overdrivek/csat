@@ -1,7 +1,7 @@
 ﻿<particles name="smoke" billboard="smoke.png" translucent="true" castshadows="true" count="100" life="1.2"
            zrotation="0" zrotation_max="360" zrotation_adder="0" zrotation_adder_max="1" size="0.5" size_max="1.5">
   <position x="0" y="0" z="0" y_max="1"/>
-  <direction x="-0.05" y="0.1" z="-0.05" x_max="0.05"  z_max="0.05"/>
+  <direction x="-0.01" y="0.1" z="-0.01" x_max="0.01"  z_max="0.01"/>
   <gravitation x="0" y="0" z="0"/>
   <color r="0.4" g="0.4" b="0.4" a="0.1" r_max="0.5" g_max="0.5" b_max="0.5" a_max="0.3"/>
 </particles>

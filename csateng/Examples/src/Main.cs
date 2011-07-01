@@ -64,7 +64,6 @@ namespace CSatEng
                 if (game != null) game.Dispose();
                 switch (testNo)
                 {
-              
                     case 1:
                         game = new Test2D();
                         game.Init();
