@@ -55,12 +55,6 @@
     <Compile Include="src\TestSoftParticles.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CSatEng.csproj">
-      <Project>{BE7FBE03-6952-4987-9E49-343951B632BF}</Project>
-      <Name>CSatEng</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="app.config" />
     <None Include="data\model\scene1\scene1.material" />
     <None Include="data\model\scene1\scene1.scene" />
@@ -136,6 +130,12 @@
     <Content Include="settings.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CSatEng.csproj">
+      <Project>{BE7FBE03-6952-4987-9E49-343951B632BF}</Project>
+      <Name>CSatEng</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -65,12 +65,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\CSatEng_SVN\csateng\CSatEng.csproj">
-      <Project>{BE7FBE03-6952-4987-9E49-343951B632BF}</Project>
-      <Name>CSatEng</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="data\texture\bg.jpg" />
     <Content Include="settings.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -81,6 +75,12 @@
       <DependentUpon>Menu.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\csateng\CSatEng.csproj">
+      <Project>{BE7FBE03-6952-4987-9E49-343951B632BF}</Project>
+      <Name>CSatEng</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
