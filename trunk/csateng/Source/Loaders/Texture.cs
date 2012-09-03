@@ -1,6 +1,6 @@
 #region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt
+ * Copyright (c) 2008-2012 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -13,7 +13,7 @@ using OpenTK.Graphics.OpenGL;
 namespace CSatEng
 {
     /// <summary>
-    /// texture luokka lataa kuvan ja luo ogl texturen 
+    /// Texture luokka lataa kuvan ja luo ogl texturen 
     /// </summary>
     public class Texture
     {
@@ -67,7 +67,7 @@ namespace CSatEng
             {
                 GL.DeleteTextures(1, ref TextureID);
                 textures.Remove(textureName);
-                Log.WriteLine("Disposed: " + textureName, true);
+                Log.WriteLine("Disposed: " + textureName, false);
             }
             TextureID = 0;
             textureName = "";
@@ -98,7 +98,7 @@ namespace CSatEng
             tex = new Texture();
 
             tex.textureName = fileName;
-            Log.WriteLine("Texture: " + tex.textureName, true);
+            Log.WriteLine("Texture: " + tex.textureName, false);
 
             if (useTexDir) fileName = Settings.TextureDir + fileName;
             TextureTarget target = TextureTarget.Texture2D;
@@ -141,36 +141,49 @@ namespace CSatEng
             UnBind(0);
             return tex;
         }
-
     }
+
     /// <summary>
-    /// texture2d luokka renderoi 2d-kuvat
+    /// Texture2D luokka renderoi 2d-kuvat
     /// </summary>
     public class Texture2D : Texture
     {
         public Vector2 Scale = new Vector2(1, 1);
         public VBO Vbo = null;
 
-        void CreateVBO()
+        void CreateVBO(bool origCenter)
         {
             if (Vbo != null) Vbo.Dispose();
 
             ushort[] ind = new ushort[] { 0, 1, 3, 1, 2, 3 };
-            int w = RealWidth / 2;
-            int h = RealHeight / 2;
+            int w, h, nw = 0, nh = 0;
+            if (origCenter)
+            {
+                w = RealWidth / 2;
+                h = RealHeight / 2;
+                nw = -w;
+                nh = -h;
+            }
+            else
+            {
+                w = RealWidth;
+                h = RealHeight;
+            }
+
             Vertex[] vert =
             {
-                new Vertex(new Vector3(-w, -h, 0), new Vector3(0, 0, 1), new Vector2(0, 0)),
-                new Vertex(new Vector3(-w, h, 0), new Vector3(0, 0, 1), new Vector2(0, 1)),
+                new Vertex(new Vector3(nw, nh, 0), new Vector3(0, 0, 1), new Vector2(0, 0)),
+                new Vertex(new Vector3(nw, h, 0), new Vector3(0, 0, 1), new Vector2(0, 1)),
                 new Vertex(new Vector3(w, h, 0), new Vector3(0, 0, 1), new Vector2(1, 1)),
-                new Vertex(new Vector3(w, -h, 0), new Vector3(0, 0, 1), new Vector2(1, 0))
+                new Vertex(new Vector3(w, nh, 0), new Vector3(0, 0, 1), new Vector2(1, 0))
             };
             Vbo = new VBO();
             Vbo.DataToVBO(vert, ind, VBO.VertexMode.UV1);
-            Vbo.Shader = GLSLShader.Load("default2d.shader", null);
+
+            Vbo.Shader = GLSLShader.Load("default2d.shader");
         }
 
-        public static new Texture2D Load(string fileName)
+        public static new Texture2D Load(string fileName, bool origCenter)
         {
             Texture t = Texture.Load(fileName);
             Texture2D tex = new Texture2D();
@@ -181,8 +194,13 @@ namespace CSatEng
             tex.RealWidth = t.RealWidth;
             tex.RealHeight = t.RealHeight;
             tex.Target = t.Target;
-            tex.CreateVBO();
+            tex.CreateVBO(origCenter);
             return tex;
+        }
+
+        public static new Texture2D Load(string fileName)
+        {
+            return Load(fileName, false);
         }
 
         public static Texture2D CreateDrawableTexture(int width, int height, uint textureID)
@@ -194,17 +212,21 @@ namespace CSatEng
             tex.RealHeight = height;
             tex.Target = TextureTarget.Texture2D;
             tex.TextureID = textureID;
-            tex.CreateVBO();
+            tex.CreateVBO(false);
             return tex;
         }
 
         public void Draw(int x, int y, float rotate, float sx, float sy, bool blend)
         {
-            if (Vbo == null) CreateVBO();
+            Draw(x, y, 0, rotate, sx, sy, blend);
+        }
+        public void Draw(int x, int y, float z, float rotate, float sx, float sy, bool blend)
+        {
+            if (Vbo == null) CreateVBO(false);
             Bind(0);
             GLExt.PushMatrix();
             {
-                GLExt.Translate(x + RealWidth / 2, Settings.Height - y - RealHeight / 2, 0);
+                GLExt.Translate(x, y, z);
                 GLExt.RotateZ(rotate);
                 GLExt.Scale(sx, sy, 1);
                 if (blend)
@@ -224,11 +246,11 @@ namespace CSatEng
         {
             float sx = (float)Settings.Width / (float)RealWidth;
             float sy = (float)Settings.Height / (float)RealHeight;
-            if (Vbo == null) CreateVBO();
+            if (Vbo == null) CreateVBO(false);
             Bind(0);
             GLExt.PushMatrix();
             {
-                GLExt.Translate(sx * (x + RealWidth / 2), Settings.Height + sy * (y - RealHeight / 2), 0);
+                GLExt.Translate(sx * x, Settings.Height + sy * (y - RealHeight), 0);
                 GLExt.Scale(sx, sy, 1);
                 Vbo.Render();
             }
@@ -249,7 +271,7 @@ namespace CSatEng
             {
                 Vbo.Dispose();
                 Vbo = null;
-                Log.WriteLine("Disposed: Texture2D", true);
+                Log.WriteLine("Disposed: Texture2D", false);
             }
             base.Dispose();
         }

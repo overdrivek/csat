@@ -1,6 +1,6 @@
 #region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt
+ * Copyright (c) 2008-2012 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -54,21 +54,14 @@ namespace CSatEng
 
     public class VBO
     {
-        /// <summary>
-        /// ladattava shaderi. pit‰‰ asettaa ennen 3d-mallin lataamista.
-        /// </summary>
-        public static string ShaderFileName = "default.shader";
-
-        /// <summary>
-        /// flagsit m‰‰r‰‰ mit‰ shaderista ladataan, esim "LIGHTING", "SHADOWS", "SOFTSHADOWS".
-        /// pit‰‰ asettaa ennen 3d-mallin lataamista.
-        /// </summary>
-        public static string Flags = "";
-
         public enum VertexMode { UV1, UV2 };
         VertexMode vertexFlags = VertexMode.UV1;
         BufferUsageHint usage = BufferUsageHint.StaticDraw;
         public GLSLShader Shader;
+
+        /// <summary>
+        /// k‰ytet‰‰n kun renderoidaan depth-bufferiin esim varjostusta varten
+        /// </summary>
         public static bool FastRenderPass = false;
 
         int vertexID = -1, indexID = -1, vaoID = -1;
@@ -91,7 +84,7 @@ namespace CSatEng
             vertexID = indexID = vaoID = -1;
             Shader = null;
 
-            if (numOfIndices > 0) Log.WriteLine("Disposed: VBO", true);
+            if (numOfIndices > 0) Log.WriteLine("Disposed: VBO", false);
             numOfIndices = 0;
         }
 
@@ -117,16 +110,20 @@ namespace CSatEng
 
             if (GLSLShader.IsSupported)
             {
-                Shader = GLSLShader.Load(VBO.ShaderFileName + ":" + VBO.Flags, null);
-                if (Settings.UseGL3)
+                Shader = GLSLShader.Load();
+
+                if (Shader != null)
                 {
-                    GL.GenVertexArrays(1, out vaoID);
-                    GL.BindVertexArray(vaoID);
+                    if (Settings.UseGL3)
+                    {
+                        GL.GenVertexArrays(1, out vaoID);
+                        GL.BindVertexArray(vaoID);
+                    }
+                    GL.BindBuffer(BufferTarget.ArrayBuffer, vertexID);
+                    GL.BindBuffer(BufferTarget.ElementArrayBuffer, indexID);
+                    Shader.SetAttributes();
+                    if (Settings.UseGL3) GL.BindVertexArray(0);
                 }
-                GL.BindBuffer(BufferTarget.ArrayBuffer, vertexID);
-                GL.BindBuffer(BufferTarget.ElementArrayBuffer, indexID);
-                Shader.SetAttributes();
-                if (Settings.UseGL3) GL.BindVertexArray(0);
             }
             GLExt.CheckGLError("DataToVBO");
         }
@@ -140,7 +137,6 @@ namespace CSatEng
         void BeginRender_noShaders()
         {
             if (vertexID == -1 || indexID == -1) Log.Error("VBO destroyed!");
-            GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindBuffer(BufferTarget.ArrayBuffer, vertexID);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, indexID);
             GL.EnableClientState(ArrayCap.NormalArray);
@@ -158,7 +154,7 @@ namespace CSatEng
                 }
             }
             GL.EnableClientState(ArrayCap.VertexArray);
-            GL.VertexPointer(3, VertexPointerType.Float, Vertex.Size, (IntPtr)(0));
+            GL.VertexPointer(3, VertexPointerType.Float, Vertex.Size, IntPtr.Zero);
         }
 
         void EndRender_noShaders()
@@ -184,8 +180,12 @@ namespace CSatEng
         /// </summary>
         public void Render()
         {
-            if (GLSLShader.IsSupported == false) // gl1.5 tai jos haluttu ottaa shaderit pois k‰ytˆst‰
+            GL.ActiveTexture(TextureUnit.Texture0);
+
+            if (GLSLShader.IsSupported == false) // jos gl 1.5 tai shaderit otettu pois k‰ytˆst‰
             {
+                GLSLShader.UnBindShader();
+
                 GL.LoadMatrix(ref GLExt.ModelViewMatrix);
                 BeginRender_noShaders();
                 GL.DrawElements(BeginMode.Triangles, numOfIndices, DrawElementsType.UnsignedShort, IntPtr.Zero);
@@ -193,26 +193,39 @@ namespace CSatEng
                 return;
             }
 
-            if (VBO.FastRenderPass == false) Shader.UseProgram();
+            if (VBO.FastRenderPass == false)
+                if (Shader != null)
+                    Shader.UseProgram();
 
             if (Settings.UseGL3 == true)
             {
                 GL.BindVertexArray(vaoID);
                 GL.BindBuffer(BufferTarget.ArrayBuffer, vertexID);
                 GL.BindBuffer(BufferTarget.ElementArrayBuffer, indexID);
-                GLSLShader.CurrentShader.SetUniforms();
-                GLSLShader.CurrentShader.SetAttributes();
+                if (GLSLShader.CurrentShader != null)
+                {
+                    GLSLShader.CurrentShader.SetUniforms();
+                    GLSLShader.CurrentShader.SetAttributes();
+                }
                 GL.DrawElements(BeginMode.Triangles, numOfIndices, DrawElementsType.UnsignedShort, IntPtr.Zero);
                 GL.BindVertexArray(0);
                 return;
             }
+            else
+            {
+                // gl2
+                GL.BindBuffer(BufferTarget.ArrayBuffer, vertexID);
+                GL.BindBuffer(BufferTarget.ElementArrayBuffer, indexID);
+                if (GLSLShader.CurrentShader != null)
+                {
+                    GLSLShader.CurrentShader.SetUniforms();
+                    GLSLShader.CurrentShader.SetAttributes();
+                }
+                else
+                    GLSLShader.UnBindShader();
 
-            // gl2
-            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexID);
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, indexID);
-            GLSLShader.CurrentShader.SetUniforms();
-            GLSLShader.CurrentShader.SetAttributes();
-            GL.DrawElements(BeginMode.Triangles, numOfIndices, DrawElementsType.UnsignedShort, IntPtr.Zero);
+                GL.DrawElements(BeginMode.Triangles, numOfIndices, DrawElementsType.UnsignedShort, IntPtr.Zero);
+            }
         }
     }
 }

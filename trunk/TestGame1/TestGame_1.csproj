@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{613B3669-2CB7-4F66-A7EE-22824A440434}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>test</RootNamespace>
+    <AssemblyName>testgame1</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>CSatEng.Main_Class</StartupObject>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="DragonOgg">
+      <HintPath>..\Libraries\DragonOgg.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenTK">
+      <HintPath>..\..\CSatEng_SVN\Libraries\OpenTK.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="src\GameMenu.cs" />
+    <Compile Include="src\Game.cs" />
+    <Compile Include="src\Main_Class.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="data\music.ogg" />
+    <None Include="data\shader\default.shader" />
+    <None Include="data\shader\default2d.shader" />
+    <None Include="data\snd1.ogg" />
+    <None Include="data\snd2.ogg" />
+    <None Include="OpenTK.dll.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\CSatEng_SVN\csateng\CSatEng.csproj">
+      <Project>{BE7FBE03-6952-4987-9E49-343951B632BF}</Project>
+      <Name>CSatEng</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="alut.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\texture\ball.png" />
+    <Content Include="data\texture\bg.jpg" />
+    <Content Include="data\texture\cross.png" />
+    <Content Include="data\texture\fonts\arial12.png" />
+    <Content Include="data\texture\fonts\arial_12.png" />
+    <Content Include="data\texture\fonts\comic12.png" />
+    <Content Include="data\texture\fonts\font.png" />
+    <Content Include="data\texture\fonts\georgia12.png" />
+    <Content Include="data\texture\fonts\kaggish12.png" />
+    <Content Include="data\texture\fonts\lucida14.png" />
+    <Content Include="data\texture\fonts\orig.png" />
+    <Content Include="data\texture\fonts\palatino14.png" />
+    <Content Include="data\texture\fonts\sylfaen14.png" />
+    <Content Include="data\texture\fonts\times14.png" />
+    <Content Include="data\texture\fonts\xirod14.png" />
+    <Content Include="data\texture\head.png" />
+    <Content Include="data\texture\menu.jpg" />
+    <Content Include="OpenAL32.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="settings.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wrap_oal.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

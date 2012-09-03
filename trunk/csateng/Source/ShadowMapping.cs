@@ -1,6 +1,6 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt
+ * Copyright (c) 2008-2012 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -48,8 +48,8 @@ namespace CSatEng
             catch (Exception) { } // skipataan valitukset jos tiedostoa ei löydy
             TextureLoaderParameters.WrapModeS = TextureWrapMode.Repeat;
             TextureLoaderParameters.WrapModeT = TextureWrapMode.Repeat;
-            depthShader = GLSLShader.Load("depth.shader", null);
-            depthShaderAlphaTest = GLSLShader.Load("depth.shader:ALPHATEST", null);
+            depthShader = GLSLShader.Load("depth.shader");
+            depthShaderAlphaTest = GLSLShader.Load("depth.shader:ALPHATEST");
         }
 
         public static void BindLightMask()
@@ -65,13 +65,13 @@ namespace CSatEng
         /// <summary>
         /// renderoi worldin valosta päin (pelkän depthin)
         /// </summary>
-        public static void SetupShadows(SceneNode world, int lightNo, bool withParticles)
+        public static void SetupShadows(Renderable world, int lightNo, bool withParticles)
         {
             if (UseShadowMapping == false) return;
 
             if (Light.Lights.Count == 0)
             {
-                Log.WriteLine("SetupShadows requires at least one light source!", true);
+                Log.WriteLine("SetupShadows requires at least one light source!", false);
                 return;
             }
             GL.Disable(EnableCap.Blend);
@@ -98,6 +98,7 @@ namespace CSatEng
             {
                 depthShaderAlphaTest.UseProgram();
                 Particles.Render();
+                GLSLShader.UnBindShader();
             }
             VBO.FastRenderPass = false;
             fbo.UnBindFBO();
@@ -107,7 +108,9 @@ namespace CSatEng
             GL.ColorMask(true, true, true, true);
 
             GLExt.LoadIdentity();
-            BaseGame.NumOfObjects = 0;
+            GameClass.NumOfObjects = 0;
+
+            ShadowMapping.UnBindLightMask();
         }
 
         /// <summary>

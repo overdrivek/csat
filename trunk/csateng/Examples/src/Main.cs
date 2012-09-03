@@ -1,6 +1,6 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt
+ * Copyright (c) 2008-2012 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -15,8 +15,13 @@ namespace CSatEng
         [STAThread]
         static void Main()
         {
-            Log.Open("log.txt");
+            Log.Create("log.txt");
             Settings.ReadXML("settings.xml");
+
+            Settings.ModelDir = "../../data/model/";
+            Settings.TextureDir = "../../data/texture/";
+            Settings.ShaderDir = "../../data/shader/";
+            Settings.ParticleDir = "../../data/particles/";
 
             GraphicsContextFlags flags;
             if (Settings.UseGL3 == false) flags = GraphicsContextFlags.Default;
@@ -26,15 +31,15 @@ namespace CSatEng
             flags |= GraphicsContextFlags.Debug;
 #endif
 
-            using (GameLoop gameLoop = new GameLoop("Project XYZ", false, 3, 0, flags))
+            using (BaseGame bgame = new BaseGame("Project XYZ", 3, 0, flags))
             {
 #if !DEBUG
                 try
 #endif
                 {
-                    BaseGame game = new Tests();
-                    GameLoop.SetGame(game);
-                    gameLoop.Run(60.0);
+                    GameClass game = new Tests();
+                    BaseGame.SetGame(game);
+                    bgame.Run(120.0);
                 }
 #if !DEBUG
                 catch (Exception e)
@@ -46,15 +51,16 @@ namespace CSatEng
 
             Log.WriteLine("Exiting..");
 #if DEBUG
-            Console.ReadKey();
+            //Console.ReadKey();
 #endif
         }
     }
 
-    public class Tests : BaseGame
+    public class Tests : GameClass
     {
-        BaseGame game;
+        GameClass game;
         int testNo = 1;
+
         public static bool NextTest = true;
 
         public override void Update(float time)
@@ -62,6 +68,9 @@ namespace CSatEng
             if (NextTest == true && Keyboard[OpenTK.Input.Key.Escape] == false) // jos testissä painettu ESC
             {
                 if (game != null) game.Dispose();
+
+                //testNo = Rnd.Next(5) + 1; // debug
+
                 switch (testNo)
                 {
                     case 1:
@@ -77,7 +86,7 @@ namespace CSatEng
                         game.Init();
                         break;
                     case 4:
-                        game = new TestMD5();
+                        game = new TestAnimation();
                         game.Init();
                         break;
                     case 5:
@@ -86,7 +95,7 @@ namespace CSatEng
                         break;
 
                     case 6:
-                        GameLoop.Running = false;
+                        BaseGame.Running = false;
                         game.Dispose();
                         game = null;
                         return;

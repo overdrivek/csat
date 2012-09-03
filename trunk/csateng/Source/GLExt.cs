@@ -1,6 +1,6 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt
+ * Copyright (c) 2008-2012 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -20,6 +20,7 @@ namespace CSatEng
         public static Matrix4 ModelViewMatrix = Matrix4.Identity, TextureMatrix = Matrix4.Identity;
         public static Matrix4 ProjectionMatrix = Matrix4.Identity;
         public static Vector4 Color = Vector4.One;
+        public static bool LightingEnabled = true;
 
         public static void Color4(float r, float g, float b, float a)
         {
@@ -27,14 +28,14 @@ namespace CSatEng
             {
                 GL.Color4(r, g, b, a);
             }
-            else
-                Color = new Vector4(r, g, b, a);
+            Color = new Vector4(r, g, b, a);
         }
 
-        public static void SetLighting(bool active)
+        public static void SetLighting(bool enable)
         {
+            LightingEnabled = enable;
             if (GLSLShader.IsSupported == false)
-                if (active == true) GL.Enable(EnableCap.Lighting);
+                if (enable == true) GL.Enable(EnableCap.Lighting);
                 else GL.Disable(EnableCap.Lighting);
         }
 

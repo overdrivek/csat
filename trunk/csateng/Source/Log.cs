@@ -1,6 +1,6 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt
+ * Copyright (c) 2008-2012 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -13,7 +13,7 @@ namespace CSatEng
     {
         private static System.IO.StreamWriter logWriter = null;
 
-        public static void Open(string filename)
+        public static void Create(string filename)
         {
             if (logWriter == null) logWriter = new System.IO.StreamWriter(filename);
         }
@@ -27,31 +27,33 @@ namespace CSatEng
         {
             if (logWriter == null)
             {
-                Open("log.txt");
+                Create("log.txt");
             }
 
-            logWriter.WriteLine("[" + DateTime.Now.Hour + ":" + DateTime.Now.Minute + ":" + DateTime.Now.Second + "]: " + str);
+            logWriter.WriteLine("[" + DateTime.Now.Hour + ":" + DateTime.Now.Minute + ":" + DateTime.Now.Second + "] " + str);
             logWriter.Flush();
         }
 
         public static void WriteLine(string str)
         {
-            WriteLine(str, false);
+            WriteLine(str, true);
         }
-        public static void WriteLine(string str, bool isStupidInfo)
+        public static void WriteLine(string str, bool writeToLog)
         {
 
 #if DEBUG   // jos DEBUG, kirjoita myös konsoliin
             System.Diagnostics.Trace.WriteLine(str);
             Console.WriteLine(str);
 #endif
-            if (isStupidInfo == false) WriteToFile(str);
+            if (writeToLog) WriteToFile(str);
         }
 
         public static void Error(string str)
         {
             Log.WriteLine(str);
-            //System.Windows.Forms.MessageBox.Show(str, "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Exclamation);
+#if !DEBUG
+            System.Windows.Forms.MessageBox.Show(str, "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Exclamation);
+#endif
             throw new Exception(str);
         }
 

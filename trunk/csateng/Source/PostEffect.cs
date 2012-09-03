@@ -1,6 +1,6 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt
+ * Copyright (c) 2008-2012 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -12,50 +12,45 @@ namespace CSatEng
 {
     public class PostEffect
     {
-        List<GLSLShader> effects = new List<GLSLShader>();
-        float param = 0;
-        public static float EffParam = 0;
+        GLSLShader effect;
         static FBO destinationFbo;
         static int effCount = 0;
 
-        public static PostEffect Load(string shaderFileName, string flags, float effParam)
+        public static PostEffect Load(string shaderFileName, string flags)
         {
             PostEffect eff = new PostEffect();
-            eff.param = effParam;
-            if (flags == "") eff.effects.Add(GLSLShader.Load(shaderFileName, new ShaderCallback(CallBacks.EffectShaderCallBack)));
-            else
-            {
-                string[] par = flags.Split(' ');
-                for (int q = 0; q < par.Length; q++)
-                {
-                    eff.effects.Add(GLSLShader.Load(shaderFileName + ":" + par[q], new ShaderCallback(CallBacks.EffectShaderCallBack)));
-                }
-            }
+            eff.effect = GLSLShader.Load(shaderFileName + (flags == "" ? "" : ":" + flags));
             return eff;
+        }
+
+        public void SetParameter(string name, float val)
+        {
+            if (effect == null) return;
+
+            effect.SetUniform(name, val);
         }
 
         public void RenderEffect()
         {
+            if (effect == null) return;
+
             int curTex = 0;
-            foreach (GLSLShader eff in effects)
+            if (effCount % 2 == 0)
             {
-                if (effCount % 2 == 0)
-                {
-                    GL.ReadBuffer(ReadBufferMode.ColorAttachment0);
-                    GL.DrawBuffer(DrawBufferMode.ColorAttachment1);
-                    curTex = 0;
-                }
-                else
-                {
-                    GL.ReadBuffer(ReadBufferMode.ColorAttachment1);
-                    GL.DrawBuffer(DrawBufferMode.ColorAttachment0);
-                    curTex = 1;
-                }
-                PostEffect.EffParam = param;
-                eff.UseProgram();
-                destinationFbo.ColorTextures[curTex].DrawFullScreen(0, 0);
-                PostEffect.effCount++;
+                GL.ReadBuffer(ReadBufferMode.ColorAttachment0);
+                GL.DrawBuffer(DrawBufferMode.ColorAttachment1);
+                curTex = 0;
             }
+            else
+            {
+                GL.ReadBuffer(ReadBufferMode.ColorAttachment1);
+                GL.DrawBuffer(DrawBufferMode.ColorAttachment0);
+                curTex = 1;
+            }
+            effect.UseProgram();
+            destinationFbo.ColorTextures[curTex].DrawFullScreen(0, 0);
+            PostEffect.effCount++;
+
         }
 
         /// <summary>

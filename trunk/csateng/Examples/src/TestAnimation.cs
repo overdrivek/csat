@@ -1,6 +1,6 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt
+ * Copyright (c) 2008-2012 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -12,7 +12,7 @@ using OpenTK.Input;
 
 namespace CSatEng
 {
-    class TestMD5 : BaseGame
+    class TestAnimation : GameClass
     {
         Model[] actors = new Model[10];
         Model scene = new Model();
@@ -28,15 +28,11 @@ namespace CSatEng
             skybox = Sky.Load("sky/sky_", "jpg");
             world.Add(skybox);
 
-            //VBO.Flags = "LIGHTING";
-            //VBO.Flags = "LIGHTING:PHONG";
-            VBO.ShaderFileName = "shadowmapping.shader";
-            VBO.Flags = "SHADOWS";
-
+            GLSLShader.SetShader("shadowmapping.shader", "SHADOWS");
             DotScene ds = DotScene.Load("scene1/scene1.scene", scene);
             world.Add(scene);
 
-            actors[0] = AnimatedModelMD5.Load("ugly/ukko.mesh");
+            actors[0] = AnimatedModel.Load("ugly/ukko.mesh");
             actors[0].LoadMD5Animation("act1", "ugly/ukko_action1.anim");
             actors[0].LoadMD5Animation("act2", "ugly/ukko_action2.anim");
             actors[0].LoadMD5Animation("act3", "ugly/ukko_action3.anim");
@@ -140,13 +136,13 @@ namespace CSatEng
 
             if (Keyboard[Key.Space])
             {
-                AnimatedModelMD5 self = actors[0] as AnimatedModelMD5;
+                AnimatedModel self = actors[0] as AnimatedModel;
                 self.RenderSkeleton(); // note: ei näy gl3:ssa
             }
 
             lightImg.RenderBillboard(Light.Lights[0].Position, 0, 50, true);
             Camera.Set2D();
-            font.Write("Arrow keys: move the ugly.\nSpace: show skeleton.\nA,D,W,S: move the camera.\nHold left mouse button to rotate the camera.", 0, 0);
+            font.Write("Arrow keys: move the ugly.\n" + (Settings.UseGL3 == false ? "Space: show skeleton.\n" : "") + "A,D,W,S: move the camera.\nHold left mouse button to rotate the camera.", 0, 0);
             Camera.Set3D();
 
             base.Render();

@@ -1,6 +1,6 @@
 #region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt
+ * Copyright (c) 2008-2012 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -25,8 +25,8 @@ namespace CSatEng
             if (Particles.SoftParticles == false) softParticle = false;
 
             Billboard bb = new Billboard();
-            bb.billBoard = Texture2D.Load(fileName);
-            bb.billBoard.Vbo.Shader = GLSLShader.Load("particles.shader" + (softParticle ? ":SOFT" : ""), new ShaderCallback(CallBacks.ParticleShaderCallBack));
+            bb.billBoard = Texture2D.Load(fileName, true);
+            bb.billBoard.Vbo.Shader = GLSLShader.Load("particles.shader" + (softParticle ? ":SOFT" : ""));
             return bb;
         }
 
@@ -96,7 +96,7 @@ namespace CSatEng
             {
                 billBoard.Vbo.Dispose();
                 billBoard.Vbo = null;
-                Log.WriteLine("Disposed: Billboard", true);
+                Log.WriteLine("Disposed: Billboard", false);
             }
         }
     }

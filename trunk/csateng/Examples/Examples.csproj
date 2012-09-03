@@ -24,15 +24,20 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
     <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
+    <Optimize>false</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>CSatEng.MainClass</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="OpenTK">
@@ -44,7 +49,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="src\Main.cs" />
     <Compile Include="src\Test2D.cs" />
-    <Compile Include="src\TestMD5.cs" />
+    <Compile Include="src\TestAnimation.cs" />
     <Compile Include="src\TestParticles.cs" />
     <Compile Include="src\TestPath.cs" />
     <Compile Include="src\TestSoftParticles.cs" />

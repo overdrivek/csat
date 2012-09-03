@@ -1,6 +1,6 @@
 #region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt
+ * Copyright (c) 2008-2012 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -53,7 +53,7 @@ namespace CSatEng
         public Vector4 color, colorMax;
     }
 
-    public class Particles : SceneNode
+    public class Particles : Renderable
     {
         public static float ParticlePower = 0.1f;
         public static List<Particles> ParticleGroups = new List<Particles>();
@@ -91,7 +91,7 @@ namespace CSatEng
                 softParticles = false;
                 return;
             }
-            depthShader = GLSLShader.Load("depth.shader:DEPTH_W", null);
+            depthShader = GLSLShader.Load("depth.shader:DEPTH_W");
             softParticles = true;
         }
 
@@ -134,7 +134,7 @@ namespace CSatEng
             XMLRoot = XMLDoc.DocumentElement;
             if (XMLRoot.Name != "particles")
             {
-                Log.Error("Error [" + fileName + "]: Invalid .particles.xml File. Missing <particles>");
+                Log.Error("Error [" + fileName + "] Invalid .particles.xml File. Missing <particles>");
             }
 
             Name = XML.GetAttrib(XMLRoot, "name");
@@ -191,9 +191,9 @@ namespace CSatEng
         {
             Vector3 f = min;
             Vector3 r = max - min;
-            f.X += r.X * (float)BaseGame.Rnd.NextDouble();
-            f.Y += r.Y * (float)BaseGame.Rnd.NextDouble();
-            f.Z += r.Z * (float)BaseGame.Rnd.NextDouble();
+            f.X += r.X * (float)GameClass.Rnd.NextDouble();
+            f.Y += r.Y * (float)GameClass.Rnd.NextDouble();
+            f.Z += r.Z * (float)GameClass.Rnd.NextDouble();
             return f;
         }
 
@@ -213,11 +213,11 @@ namespace CSatEng
             pos = Random(origValues.pos, origValues.posMax);
             dir = Random(origValues.dir, origValues.dirMax);
             col = new Vector4(Random(origValues.color.Xyz, origValues.colorMax.Xyz), 1);
-            col.W = origValues.color.W + ((origValues.colorMax.W - origValues.color.W) * (float)BaseGame.Rnd.NextDouble());
-            life = origValues.life + ((origValues.life_max - origValues.life) * (float)BaseGame.Rnd.NextDouble());
-            size = origValues.size + ((origValues.size_max - origValues.size) * (float)BaseGame.Rnd.NextDouble());
-            zrot = origValues.zrotation + ((origValues.zrotation_max - origValues.zrotation) * (float)BaseGame.Rnd.NextDouble());
-            zrotAdder = origValues.zrotation_adder + ((origValues.zrotation_adder_max - origValues.zrotation_adder) * (float)BaseGame.Rnd.NextDouble());
+            col.W = origValues.color.W + ((origValues.colorMax.W - origValues.color.W) * (float)GameClass.Rnd.NextDouble());
+            life = origValues.life + ((origValues.life_max - origValues.life) * (float)GameClass.Rnd.NextDouble());
+            size = origValues.size + ((origValues.size_max - origValues.size) * (float)GameClass.Rnd.NextDouble());
+            zrot = origValues.zrotation + ((origValues.zrotation_max - origValues.zrotation) * (float)GameClass.Rnd.NextDouble());
+            zrotAdder = origValues.zrotation_adder + ((origValues.zrotation_adder_max - origValues.zrotation_adder) * (float)GameClass.Rnd.NextDouble());
             AddParticle(ref pos, ref dir, ref origValues.grav, life, zrot, zrotAdder, size, col);
         }
 
@@ -234,7 +234,7 @@ namespace CSatEng
             depthShader = null;
 
             particles.Clear();
-            Log.WriteLine("Disposed: Particles", true);
+            Log.WriteLine("Disposed: Particles", false);
         }
 
         public void AddParticle(ref Vector3 pos, ref Vector3 dir, ref Vector3 gravity, float life, float zrot, float zrotAdder, float size, Vector4 color)
@@ -300,17 +300,17 @@ namespace CSatEng
             GLExt.Color4(1f, 1, 1, 1f);
             GLExt.PushMatrix();
             GLExt.SetLighting(false);
-
+            
             List<SortedList_Particles> slist = new List<SortedList_Particles>();
 
             GL.Disable(EnableCap.CullFace);
+
             if (GLSLShader.IsSupported == false)
             {
-                GL.Disable(EnableCap.Lighting);
                 GL.Enable(EnableCap.AlphaTest);
                 GL.AlphaFunc(AlphaFunction.Greater, 0.1f);
             }
-
+            
             int c = 0;
             // j‰rjestet‰‰n taulukko kauimmaisesta l‰himp‰‰n. pit‰‰ rendata siin‰ j‰rjestyksess‰.
             // vain l‰pikuultavat pit‰‰ j‰rjest‰‰. t‰ysin n‰kyv‰t renderoidaan samantien.
@@ -369,10 +369,11 @@ namespace CSatEng
                 GLExt.PopMatrix();
             }
 
+            if (GLSLShader.IsSupported == false) GL.Disable(EnableCap.AlphaTest);
+
             if (VBO.FastRenderPass == false)
             {
                 slist.Sort(delegate(SortedList_Particles z1, SortedList_Particles z2) { return z2.Len.CompareTo(z1.Len); });
-                if (GLSLShader.IsSupported == false) GL.Disable(EnableCap.AlphaTest);
                 GL.Enable(EnableCap.Blend);
                 GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.One);
 
@@ -400,7 +401,7 @@ namespace CSatEng
             GL.Enable(EnableCap.CullFace);
             GLExt.Color4(1, 1, 1, 1);
             GLExt.SetLighting(true);
-            BaseGame.NumOfObjects += c;
+            GameClass.NumOfObjects += c;
         }
 
     }

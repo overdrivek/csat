@@ -1,6 +1,6 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt
+ * Copyright (c) 2008-2012 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -96,9 +96,9 @@ namespace CSatEng
             {
                 ushort[] ind = new ushort[] { 0, 1, 3, 1, 2, 3 };
                 vbo = new VBO(BufferUsageHint.StreamDraw);
-                string flags = VBO.Flags;
                 vbo.DataToVBO(letter, ind, VBO.VertexMode.UV1);
-                vbo.Shader = GLSLShader.Load("default2d.shader", null);
+
+                vbo.Shader = GLSLShader.Load("default2d.shader");
             }
             return font;
         }

@@ -1,6 +1,6 @@
 #region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt
+ * Copyright (c) 2008-2012 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -10,7 +10,7 @@ using OpenTK.Graphics.OpenGL;
 
 namespace CSatEng
 {
-    public class Camera : SceneNode
+    public class Camera : Node
     {
         public static Camera cam;
 
@@ -52,7 +52,6 @@ namespace CSatEng
             GLExt.SetProjectionMatrix(Matrix4.CreateOrthographicOffCenter(0, width, 0, height, -1, 1));
             GLExt.LoadIdentity();
             GL.Viewport(0, 0, width, height);
-            GL.Disable(EnableCap.DepthTest);
             GL.Disable(EnableCap.CullFace);
             GLExt.SetLighting(false);
         }
@@ -65,10 +64,10 @@ namespace CSatEng
             Near = near;
             Far = far;
 
-            GLExt.SetProjectionMatrix(Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(Fov), (float)width / (float)height, near, far));
+            GLExt.SetProjectionMatrix(Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(Fov), 
+                (float)width / (float)height, near, far));
             GLExt.LoadIdentity();
             GL.Viewport(0, 0, width, height);
-            GL.Enable(EnableCap.DepthTest);
             GL.Enable(EnableCap.CullFace);
             GLExt.SetLighting(true);
         }

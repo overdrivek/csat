@@ -1,6 +1,6 @@
 ﻿// flags:
-//   -none-  uses default rendering (no lighting)
-//   SOFT    uses softparticles (init with Particles.SetSoftParticles)
+//   -none-		uses default rendering (no lighting)
+//   SOFT		uses softparticles (init with Particles.SetSoftParticles)
 
 [VERTEX]
 uniform mat4 glProjectionMatrix;
@@ -34,7 +34,7 @@ varying vec2 vUV;
 
 #ifdef SOFT
 uniform sampler2D depthMap;
-uniform float power;
+uniform float particlePower;
 varying float vDepth; // Projection space vDepth information (before divide)
 varying vec2 vPos; // Poition information of the pixels
 #endif
@@ -45,7 +45,7 @@ void main()
 
 #ifdef SOFT
 	float d = texture2D(depthMap, vPos).x; // Scene depth
-	c = texture2D(textureMap, vUV) * clamp((d - vDepth)*power, 0.0, 1.0);
+	c = texture2D(textureMap, vUV) * clamp((d - vDepth)*particlePower, 0.0, 1.0);
 #else
 	c = texture2D(textureMap, vUV);
 	if(c.a == 0.0) discard;

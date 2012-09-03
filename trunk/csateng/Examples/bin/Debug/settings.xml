@@ -8,7 +8,6 @@
   <fbo_size>1024x1024</fbo_size>
   <use_gl3>false</use_gl3>
 
-  <!-- you can disable these if using GL1.5 - GL2.0 -->
   <disable_fbo>false</disable_fbo>
   <disable_shaders>false</disable_shaders>
   <disable_shadowmapping>false</disable_shadowmapping>

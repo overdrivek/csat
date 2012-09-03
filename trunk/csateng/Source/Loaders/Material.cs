@@ -1,6 +1,6 @@
 #region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt
+ * Copyright (c) 2008-2012 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -20,14 +20,15 @@ namespace CSatEng
         public EnvMaps EnvMap;
     }
 
-    public class MaterialInfo
+    public class Material
     {
         static int MaxTextures = Texture.MaxTextures;
-
-        static Dictionary<string, MaterialInfo> materials = new Dictionary<string, MaterialInfo>();
+        
+        static Dictionary<string, Material> materials = new Dictionary<string, Material>();
 
         string materialName = "";
-        static string curMaterial = "No material";
+        static string currentMaterialName = "No material";
+        public static Material CurrentMaterial = null;
 
         /// <summary>
         /// glsl ohjelman nimi. objektille voidaan asettaa shader editoimalla materiaalitiedostoa
@@ -43,10 +44,9 @@ namespace CSatEng
         public Vector4 DiffuseColor = new Vector4(0.5f, 0.5f, 0.5f, 1); // Diffuse color
         public Vector4 AmbientColor = new Vector4(0.1f, 0.1f, 0.1f, 1); // Ambient color
         public Vector4 SpecularColor = new Vector4(0.5f, 0.5f, 0.5f, 1); // Specular color
-        public Vector4 EmissionColor = new Vector4(0.1f, 0.1f, 0.1f, 1);
 
-        public MaterialInfo() { }
-        public MaterialInfo(string fileName)
+        public Material() { }
+        public Material(string fileName)
         {
             LoadMaterial(fileName);
         }
@@ -57,13 +57,13 @@ namespace CSatEng
         /// </summary>
         /// <param name="materialName"></param>
         /// <returns></returns>
-        static MaterialInfo CreateMaterial(string materialName)
+        static Material CreateMaterial(string materialName)
         {
             if (materials.ContainsKey(materialName))
             {
                 return materials[materialName];
             }
-            MaterialInfo mat = new MaterialInfo();
+            Material mat = new Material();
             mat.materialName = materialName;
             materials.Add(materialName, mat);
             return mat;
@@ -73,7 +73,7 @@ namespace CSatEng
         {
             if (materialName != "")
             {
-                Log.WriteLine("Disposed: " + materialName, true);
+                Log.WriteLine("Disposed: " + materialName, false);
                 materials.Remove(materialName);
                 materialName = "";
                 for (int q = 0; q < MaxTextures; q++)
@@ -86,7 +86,7 @@ namespace CSatEng
         public static void DisposeAll()
         {
             List<string> mat = new List<string>();
-            foreach (KeyValuePair<string, MaterialInfo> dta in materials) mat.Add(dta.Key);
+            foreach (KeyValuePair<string, Material> dta in materials) mat.Add(dta.Key);
             for (int q = 0; q < mat.Count; q++) materials[mat[q]].Dispose();
             materials.Clear();
         }
@@ -94,9 +94,9 @@ namespace CSatEng
         /// <summary>
         /// lataa materiaalitiedot .material tiedostosta (ogre materiaali)
         /// </summary>
-        public static MaterialInfo Load(string fileName)
+        public static Material Load(string fileName)
         {
-            MaterialInfo mat = new MaterialInfo(fileName);
+            Material mat = new Material(fileName);
             return mat;
         }
 
@@ -110,7 +110,7 @@ namespace CSatEng
                 // pilko se
                 string[] lines = data.Split('\n');
 
-                MaterialInfo mat = new MaterialInfo();
+                Material mat = new Material();
                 int curTexture = -1;
 
                 for (int q = 0; q < lines.Length; q++)
@@ -123,8 +123,8 @@ namespace CSatEng
                     if (ln[0] == "material")
                     {
                         curTexture = -1;
-                        mat = MaterialInfo.CreateMaterial(ln[1]);
-                        Log.WriteLine("Material: " + mat.materialName, true);
+                        mat = Material.CreateMaterial(ln[1]);
+                        Log.WriteLine("Material: " + mat.materialName, false);
                         continue;
                     }
 
@@ -178,12 +178,6 @@ namespace CSatEng
                         mat.SpecularColor = new Vector4(MathExt.GetFloat(ln[1]), MathExt.GetFloat(ln[2]), MathExt.GetFloat(ln[3]), MathExt.GetFloat(ln[4]));
                         continue;
                     }
-                    if (ln[0] == "emissive")
-                    {
-                        mat.EmissionColor = new Vector4(MathExt.GetFloat(ln[1]), MathExt.GetFloat(ln[2]), MathExt.GetFloat(ln[3]), 1);
-                        continue;
-                    }
-
                 }
             }
         }
@@ -193,7 +187,7 @@ namespace CSatEng
         /// </summary>
         public void ForceSetMaterial()
         {
-            curMaterial = "";
+            currentMaterialName = "";
             SetMaterial();
         }
 
@@ -202,32 +196,33 @@ namespace CSatEng
         /// </summary>
         public void SetMaterial()
         {
-            if (curMaterial == materialName) return;
-            curMaterial = materialName;
+            if (currentMaterialName == materialName) return;
+            currentMaterialName = materialName;
             for (int q = 0; q < MaxTextures; q++)
                 if (Textures[q].Tex != null)
                     Textures[q].Tex.Bind(q);
+            
+            CurrentMaterial = this;
 
             if (GLSLShader.IsSupported == false)
             {
                 GL.Material(MaterialFace.Front, MaterialParameter.Ambient, AmbientColor);
                 GL.Material(MaterialFace.Front, MaterialParameter.Diffuse, DiffuseColor);
                 GL.Material(MaterialFace.Front, MaterialParameter.Specular, SpecularColor);
-                GL.Material(MaterialFace.Front, MaterialParameter.Emission, EmissionColor);
             }
         }
 
         public static void SetMaterial(string materialName)
         {
-            MaterialInfo mat = materials[materialName];
+            Material mat = materials[materialName];
             if (mat != null)
             {
                 mat.SetMaterial();
             }
         }
-        public static MaterialInfo GetMaterial(string materialName)
+        public static Material GetMaterial(string materialName)
         {
-            return MaterialInfo.CreateMaterial(materialName);
+            return Material.CreateMaterial(materialName);
         }
 
     }
