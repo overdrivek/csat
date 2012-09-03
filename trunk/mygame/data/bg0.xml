@@ -1,8 +1,0 @@
-<objects>
-	<object name = "door" look = "Tämä ovi vie uima-altaalle." touch = "Ovi on lukossa."/>
-	<object name = "face" look = "Jopas on ruma naama." touch = "En varmasti ota sitä mukaani."/>
-	<object name = "window" look = "Mitäköhän tuolla on?" talk = "-Huhuu, ketään paikalla?"/>
-	<object name = "grass" look = "Miksiköhän pöydällä kasvaa ruohoa?" touch = "En ole puutarhuri."/>
-	<object name = "obj1" look = "Tärkeä esine." take = "Otit oudon esineen."/>
-	<object name = "obj2" look = "Todella tärkeä esine." take = "Otit oudon esineen."/>
-</objects>
