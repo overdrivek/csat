@@ -1,6 +1,6 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt
+ * Copyright (c) 2008-2012 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -25,7 +25,7 @@ namespace CSatEng
         /// <summary>
         /// mitä objektia liikutetaan
         /// </summary>
-        SceneNode attachedObj;
+        Node attachedObj;
 
         public void AddPath(string name, Vertex[] path)
         {
@@ -86,7 +86,7 @@ namespace CSatEng
                 // korvataan alkuperäinen reitti uudella reitillä
                 path = newPath;
             }
-            Log.WriteLine("NewPath: " + path.Count, true);
+            Log.WriteLine("NewPath: " + path.Count, false);
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace CSatEng
         /// <param name="obj"></param>
         /// <param name="loop"></param>
         /// <param name="lookAtNextPoint"></param>
-        public void Attach(SceneNode obj, bool loop, bool lookAtNextPoint)
+        public void Attach(Node obj, bool loop, bool lookAtNextPoint)
         {
             attachedObj = obj;
             obj.Position = path[0];

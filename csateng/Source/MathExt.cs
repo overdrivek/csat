@@ -1,12 +1,13 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt
+ * Copyright (c) 2008-2012 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
 #endregion
 using System;
 using OpenTK;
+using System.Globalization;
 
 namespace CSatEng
 {
@@ -16,16 +17,19 @@ namespace CSatEng
         public static readonly float DegToRad = (float)(Math.PI / 180);
 
         /// <summary>
-        /// palauttaa str:stä float luvun. jos pisteen kanssa ei onnistu, kokeillaan pilkun kanssa.
+        /// palauttaa str:stä float luvun
         /// </summary>
         public static float GetFloat(string str)
         {
+            return float.Parse(str, CultureInfo.InvariantCulture);
+            /*
             float n;
             if (float.TryParse(str, out n) == true) return n;
             str = str.Replace('.', ','); // pisteet pilkuiksi
             if (float.TryParse(str, out n) == true) return n;
             Log.Error("GetFloat failed: " + str);
             return 0;
+             */ 
         }
 
         public static Vector3 VectorMatrixMult(ref Vector3 vec, ref Matrix4 mat)

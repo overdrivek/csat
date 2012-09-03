@@ -1,6 +1,6 @@
 #region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt
+ * Copyright (c) 2008-2012 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -18,21 +18,21 @@ namespace CSatEng
     {
         public List<string> DynamicObjects;
         public List<string> StaticObjects;
-        protected SceneNode attachNode;
+        protected Node attachNode;
         static string dir = "";
 
-        public DotScene(string fileName, SceneNode root)
+        public DotScene(string fileName, Node root)
         {
             LoadDotScene(fileName, root);
         }
 
-        public static DotScene Load(string fileName, SceneNode root)
+        public static DotScene Load(string fileName, Node root)
         {
             DotScene ds = new DotScene(fileName, root);
             return ds;
         }
 
-        void LoadDotScene(string fileName, SceneNode root)
+        void LoadDotScene(string fileName, Node root)
         {
             this.StaticObjects = new List<string>();
             this.DynamicObjects = new List<string>();
@@ -48,7 +48,7 @@ namespace CSatEng
             string matFile = Settings.ModelDir + fileNameWithoutExtension + ".material";
             if (System.IO.File.Exists(matFile))
             {
-                new MaterialInfo(matFile);
+                new Material(matFile);
             }
 
             // ladataan userdatat .scene.userdata.xml tiedostosta jos löytyy
@@ -78,7 +78,7 @@ namespace CSatEng
             XMLRoot = XMLDoc.DocumentElement;
             if (XMLRoot.Name != "scene")
             {
-                Log.Error("Error [" + fileName + "]: Invalid .scene File. Missing <scene>");
+                Log.Error("Error [" + fileName + "] Invalid .scene File. Missing <scene>");
             }
 
             // figure out where to attach any nodes we create
@@ -162,7 +162,7 @@ namespace CSatEng
                     while (pElement != null)
                     {
                         mesh.MaterialName = XML.GetAttrib(pElement, "materialName");
-                        mesh.Material = MaterialInfo.GetMaterial(mesh.MaterialName);
+                        mesh.Material = Material.GetMaterial(mesh.MaterialName);
 
                         pElement = (XmlElement)pElement.NextSibling;
                     }
@@ -173,6 +173,7 @@ namespace CSatEng
             {
                 Log.Error("Error loading " + meshFile + "\n" + e.Message);
             }
+
             return null;
         }
 
@@ -195,12 +196,17 @@ namespace CSatEng
             // Process colourDiffuse
             XmlElement pElement = (XmlElement)XMLNode.SelectSingleNode("colourDiffuse");
             if (pElement != null)
-                pLight.Diffuse = XML.ParseColor(pElement);
-
+            {
+                Vector3 v = XML.ParseColor(pElement);
+                pLight.Diffuse = new Vector4(v.X, v.Y, v.Z, 1.0f);
+            }
             // Process colourSpecular 
             pElement = (XmlElement)XMLNode.SelectSingleNode("colourSpecular");
             if (pElement != null)
-                pLight.Specular = XML.ParseColor(pElement);
+            {
+                Vector3 v = XML.ParseColor(pElement);
+                pLight.Specular = new Vector4(v.X, v.Y, v.Z, 1.0f);
+            }
 
             /*
             // Process lightRange 
@@ -239,13 +245,13 @@ namespace CSatEng
         }
         */
 
-        protected void processNode(XmlElement XMLNode, SceneNode pParent)
+        protected void processNode(XmlElement XMLNode, Node pParent)
         {
             // Construct the node's name
             String name = XML.GetAttrib(XMLNode, "name");
 
             // Create the scene node
-            SceneNode pNode = new SceneNode();
+            Node pNode = new Node();
             Vector3 pos = Vector3.Zero, scale = Vector3.Zero;
             Quaternion orientation = new Quaternion();
 
@@ -400,7 +406,7 @@ namespace CSatEng
             XMLRoot = XMLDoc.DocumentElement;
             if (XMLRoot.Name != "userData")
             {
-                Log.Error("Error [" + fileName + "]: Invalid .userdata File. Missing <userData>");
+                Log.Error("Error [" + fileName + "] Invalid .userdata File. Missing <userData>");
             }
 
             XmlElement pElement;

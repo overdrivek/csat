@@ -5,6 +5,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSatEng", "csateng\CSatEng.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Examples", "csateng\Examples\Examples.csproj", "{B1C0CF5A-7DE8-4A9E-A021-ABFCC436A3E6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestGame_1", "TestGame1\TestGame_1.csproj", "{613B3669-2CB7-4F66-A7EE-22824A440434}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test_dialog", "Test_dialog\Test_dialog.csproj", "{D165A61F-4A92-44E5-8710-195582DFE4F0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestGame_start", "TestGame_start\TestGame_start.csproj", "{19CE6A4A-3DCF-4906-B9C2-3E85E3A02B3C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -19,6 +25,18 @@ Global
 		{B1C0CF5A-7DE8-4A9E-A021-ABFCC436A3E6}.Debug|x86.Build.0 = Debug|x86
 		{B1C0CF5A-7DE8-4A9E-A021-ABFCC436A3E6}.Release|x86.ActiveCfg = Release|x86
 		{B1C0CF5A-7DE8-4A9E-A021-ABFCC436A3E6}.Release|x86.Build.0 = Release|x86
+		{613B3669-2CB7-4F66-A7EE-22824A440434}.Debug|x86.ActiveCfg = Debug|x86
+		{613B3669-2CB7-4F66-A7EE-22824A440434}.Debug|x86.Build.0 = Debug|x86
+		{613B3669-2CB7-4F66-A7EE-22824A440434}.Release|x86.ActiveCfg = Release|x86
+		{613B3669-2CB7-4F66-A7EE-22824A440434}.Release|x86.Build.0 = Release|x86
+		{D165A61F-4A92-44E5-8710-195582DFE4F0}.Debug|x86.ActiveCfg = Debug|x86
+		{D165A61F-4A92-44E5-8710-195582DFE4F0}.Debug|x86.Build.0 = Debug|x86
+		{D165A61F-4A92-44E5-8710-195582DFE4F0}.Release|x86.ActiveCfg = Release|x86
+		{D165A61F-4A92-44E5-8710-195582DFE4F0}.Release|x86.Build.0 = Release|x86
+		{19CE6A4A-3DCF-4906-B9C2-3E85E3A02B3C}.Debug|x86.ActiveCfg = Debug|x86
+		{19CE6A4A-3DCF-4906-B9C2-3E85E3A02B3C}.Debug|x86.Build.0 = Debug|x86
+		{19CE6A4A-3DCF-4906-B9C2-3E85E3A02B3C}.Release|x86.ActiveCfg = Release|x86
+		{19CE6A4A-3DCF-4906-B9C2-3E85E3A02B3C}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

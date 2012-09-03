@@ -36,7 +36,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;SHOWSHADERS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -64,11 +64,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Source\BaseGame.cs" />
-    <Compile Include="Source\Callbacks.cs" />
+    <Compile Include="Source\GameClass.cs" />
+    <Compile Include="Source\Loaders\ObjData.cs" />
+    <Compile Include="Source\Renderable.cs" />
     <Compile Include="Source\GLExt.cs" />
     <Compile Include="Source\Intersection.cs" />
-    <Compile Include="Source\Loaders\AnimatedModelMD5.cs" />
+    <Compile Include="Source\Loaders\AnimatedModel.cs" />
     <Compile Include="Source\Loaders\BitmapFont.cs" />
     <Compile Include="Source\Camera.cs" />
     <Compile Include="Source\Loaders\Billboard.cs" />
@@ -77,7 +78,7 @@
     <Compile Include="Source\FBO.cs" />
     <Compile Include="Source\Fog.cs" />
     <Compile Include="Source\Frustum.cs" />
-    <Compile Include="Source\GameLoop.cs" />
+    <Compile Include="Source\BaseGame.cs" />
     <Compile Include="Source\Loaders\GLSLShader.cs" />
     <Compile Include="Source\Light.cs" />
     <Compile Include="Source\Loaders\Particles.cs" />
@@ -86,7 +87,7 @@
     <Compile Include="Source\MathExt.cs" />
     <Compile Include="Source\Model.cs" />
     <Compile Include="Source\PostEffect.cs" />
-    <Compile Include="Source\SceneNode.cs" />
+    <Compile Include="Source\Node.cs" />
     <Compile Include="Source\Path.cs" />
     <Compile Include="Source\Settings.cs" />
     <Compile Include="Source\ShadowMapping.cs" />

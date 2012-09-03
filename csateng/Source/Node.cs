@@ -1,39 +1,38 @@
 #region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt
+ * Copyright (c) 2008-2012 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
 #endregion
 
-// note: SceneNode this == Childs[0]
+// note: Node this == Childs[0]
 
 using System;
-using OpenTK.Graphics.OpenGL;
-using OpenTK;
 using System.Collections.Generic;
+using OpenTK;
 
 namespace CSatEng
 {
-    public class SortedList_Models
+    public class SortedList_Model
     {
         public float Len = 0;
         public Model model;
-        public SortedList_Models(float len, Model model)
+        public SortedList_Model(float len, Model model)
         {
             Len = len;
             this.model = model;
         }
     }
 
-    public class SceneNode
+    public class Node
     {
         /// <summary>
-        /// scenenodeen liitetyt toiset scenenodet
+        /// nodeen liitetyt toiset nodet
         /// </summary>
-        public List<SceneNode> Childs = new List<SceneNode>();
-        static protected List<SceneNode> visibleObjects = new List<SceneNode>();
-        static protected List<SortedList_Models> transparentObjects = new List<SortedList_Models>();
+        public List<Node> Childs = new List<Node>();
+        static protected List<Node> visibleObjects = new List<Node>();
+        static protected List<SortedList_Model> transparentObjects = new List<SortedList_Model>();
         public static uint ObjectCount = 0;
 
         public string Name;
@@ -58,21 +57,21 @@ namespace CSatEng
         /// </summary>
         public Matrix4 WorldMatrix = Matrix4.Identity;
 
-        public SceneNode()
+        public Node()
         {
             Name = "node" + ObjectCount++;
             Childs.Add(this);
         }
-        public SceneNode(string name)
+        public Node(string name)
         {
             Name = name;
             Childs.Add(this);
         }
 
-        public SceneNode Search(string name)
+        public Node Search(string name)
         {
             GetList(true);
-            foreach (SceneNode node in ObjList)
+            foreach (Node node in ObjList)
             {
                 if (node.Name == name) return node;
             }
@@ -88,12 +87,12 @@ namespace CSatEng
                 {
                     ObjList[q].Dispose();
                 }
-                Log.WriteLine("Disposed: " + Name, true);
+                Log.WriteLine("Disposed: " + Name, false);
                 Name = "";
             }
         }
 
-        public void Add(SceneNode obj)
+        public void Add(Node obj)
         {
             Childs.Add(obj);
 
@@ -106,10 +105,10 @@ namespace CSatEng
                 Camera.cam = (Camera)obj;
             }
 
-            Log.WriteLine(obj.Name + " added to " + Name + ".", true);
+            Log.WriteLine(obj.Name + " added to " + Name + ".", false);
         }
 
-        public void Remove(SceneNode obj)
+        public void Remove(Node obj)
         {
             if (obj == null) return;
             if (obj is Light)
@@ -122,7 +121,7 @@ namespace CSatEng
             }
             Childs.Remove(obj);
 
-            Log.WriteLine(obj.Name + " removed from " + Name + ".", true);
+            Log.WriteLine(obj.Name + " removed from " + Name + ".", false);
         }
 
         // XZ-tasolla liikkuminen
@@ -166,9 +165,9 @@ namespace CSatEng
             Position.Z -= (float)Math.Cos(rotation.Y + angle) * spd;
         }
 
-        void Translate(SceneNode node)
+        void Translate(Node node)
         {
-            SceneNode obj = node;
+            Node obj = node;
             if (node == null) obj = this;
 
             GLExt.Translate(obj.Position.X, obj.Position.Y, obj.Position.Z);
@@ -184,7 +183,7 @@ namespace CSatEng
         /// </summary>
         public void MakeLists()
         {
-            foreach (SceneNode o in Childs)
+            foreach (Node o in Childs)
             {
                 if (o == this) continue;
 
@@ -202,13 +201,13 @@ namespace CSatEng
                         cent.Z += m.WorldMatrix.M43;
                         if (Frustum.ObjectInFrustum(cent, m.Boundings, m.Scale))
                         {
-                            BaseGame.NumOfObjects++;
+                            GameClass.NumOfObjects++;
 
                             if (m.IsTransparent == false) visibleObjects.Add(m);
                             else
                             {
                                 float len = (Camera.cam.Position - m.Position).LengthSquared;
-                                transparentObjects.Add(new SortedList_Models(len, m));
+                                transparentObjects.Add(new SortedList_Model(len, m));
                             }
                         }
                     }
@@ -222,7 +221,7 @@ namespace CSatEng
             }
         }
 
-        public static List<SceneNode> ObjList = new List<SceneNode>();
+        public static List<Node> ObjList = new List<Node>();
         /// <summary>
         /// luo ObjList-listan kaikista childeist‰
         /// </summary>
@@ -230,7 +229,7 @@ namespace CSatEng
         public void GetList(bool setTrue)
         {
             if (setTrue) ObjList.Clear();
-            foreach (SceneNode o in Childs)
+            foreach (Node o in Childs)
             {
                 if (o == this) continue;
 
@@ -249,7 +248,7 @@ namespace CSatEng
         public void CalcPositions(bool getWMatrix)
         {
             GLExt.PushMatrix();
-            foreach (SceneNode o in Childs)
+            foreach (Node o in Childs)
             {
                 if (o == this) continue;
                 GLExt.PushMatrix();
@@ -285,117 +284,7 @@ namespace CSatEng
             MakeLists();
 
             // j‰rjest‰ l‰pin‰kyv‰t listassa olevat objektit et‰isyyden mukaan, kauimmaiset ekaks
-            transparentObjects.Sort(delegate(SortedList_Models z1, SortedList_Models z2) { return z2.Len.CompareTo(z1.Len); });
-        }
-
-        protected virtual void RenderModel()
-        {
-        }
-
-        /// <summary>
-        /// lasketaan objektien paikka ja lis‰t‰‰n n‰kyv‰t objektit listoihin, sitten renderoidaan n‰kyv‰t.
-        /// </summary>
-        public virtual void Render()
-        {
-            Light.UpdateLights();
-            Frustum.CalculateFrustum();
-
-            visibleObjects.Clear();
-            transparentObjects.Clear();
-
-            GLExt.PushMatrix();
-
-            // lasketaan kaikkien objektien paikat valmiiksi. 
-            // n‰kyv‰t objektit asetetaan visible ja transparent listoihin
-            CalculatePositions();
-
-            // renderointi
-            foreach (SceneNode o in visibleObjects)
-            {
-                o.RenderModel();
-            }
-            foreach (SortedList_Models o in transparentObjects)
-            {
-                Model m = o.model;
-                m.RenderModel();
-            }
-            Texture.UnBind(Settings.COLOR_TEXUNIT);
-            GLExt.PopMatrix();
-        }
-
-        /// <summary>
-        /// renderoidaan n‰kyv‰t objektit listoista jotka Render() metodi on luonut.
-        /// </summary>
-        public void RenderAgain()
-        {
-            Light.UpdateLights();
-            GLExt.PushMatrix();
-
-            // renderointi
-            foreach (SceneNode o in visibleObjects)
-            {
-                o.RenderModel();
-            }
-            foreach (SortedList_Models o in transparentObjects)
-            {
-                Model m = o.model;
-                m.RenderModel();
-            }
-            Texture.UnBind(Settings.COLOR_TEXUNIT);
-            GLExt.PopMatrix();
-        }
-
-        protected void Render(SceneNode obj)
-        {
-            obj.Render();
-        }
-
-        public void RenderSceneWithParticles(FBO destination)
-        {
-            if (Particles.SoftParticles)
-            {
-                if (destination.ColorTextures.Length < 2) Log.Error("RenderSceneWithParticles: fbo must have at least 2 colorbuffers.");
-
-                // rendaa skenen depth colorbufferiin, ei textureita/materiaaleja
-                destination.BindFBO();
-                {
-                    GL.ReadBuffer(ReadBufferMode.ColorAttachment1);
-                    GL.DrawBuffer(DrawBufferMode.ColorAttachment1);
-
-                    GL.ClearColor(float.MaxValue, float.MaxValue, float.MaxValue, float.MaxValue);
-                    destination.Clear();
-                    GL.ClearColor(0.0f, 0.0f, 0.1f, 0);
-                    VBO.FastRenderPass = true;
-                    Particles.SetDepthProgram();
-                    Render();
-                    VBO.FastRenderPass = false;
-
-                    // rendaa skene uudelleen textureineen
-                    GL.ReadBuffer(ReadBufferMode.ColorAttachment0);
-                    GL.DrawBuffer(DrawBufferMode.ColorAttachment0);
-
-                    destination.Clear();
-                    RenderAgain();
-
-                    GL.ReadBuffer(ReadBufferMode.ColorAttachment1);
-                    destination.BindColorBuffer(1, Settings.DEPTH_TEXUNIT);
-                    Particles.Render();
-                    destination.UnBindColorBuffer(Settings.DEPTH_TEXUNIT);
-                    GL.ReadBuffer(ReadBufferMode.ColorAttachment0);
-                }
-                destination.UnBindFBO();
-            }
-            else
-            {
-                // rendaa skene textureineen
-                destination.BindFBO();
-                {
-                    destination.Clear();
-                    Render();
-                    Particles.Render();
-                }
-                destination.UnBindFBO();
-            }
+            transparentObjects.Sort(delegate(SortedList_Model z1, SortedList_Model z2) { return z2.Len.CompareTo(z1.Len); });
         }
 
     }

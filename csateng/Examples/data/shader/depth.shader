@@ -1,7 +1,7 @@
 // flags:
-//  -none-         default shadow mapping depth
-//  ALPHATEST  shadow mapping depth   
-//  DEPTH_W        soft particles depth (w) 
+//  -none-		default shadow mapping depth
+//  ALPHATEST	shadow mapping depth   
+//  DEPTH_W		soft particles depth (w) 
 
 [VERTEX]
 uniform mat4 glProjectionMatrix;

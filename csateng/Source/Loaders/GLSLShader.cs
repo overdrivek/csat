@@ -1,12 +1,10 @@
 #region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt
+ * Copyright (c) 2008-2012 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
 #endregion
-#define SHOWSHADERS
-
 using System.Collections.Generic;
 using System.IO;
 using OpenTK;
@@ -14,45 +12,87 @@ using OpenTK.Graphics.OpenGL;
 
 namespace CSatEng
 {
-    public delegate void ShaderCallback(int programID);
-
     public class GLSLShader
     {
+        static string shaderFileName = "default.shader";
+        static string shaderFlags = "";
+
         static Dictionary<string, GLSLShader> shaders = new Dictionary<string, GLSLShader>();
         public static bool IsSupported = true;
+
+        /// <summary>
+        /// k‰ytet‰‰n esim shadow mappingissa, kun vaihdettu k‰yttˆˆn depth-shader,
+        /// mutta VBO rendaus ei sit‰ tied‰ joten ei voida k‰ytt‰‰ VBO:n Shader:ia.
+        /// </summary>
         public static GLSLShader CurrentShader;
 
         int vertexObject = -1, fragmentObject = -1;
         public int ProgramID = -1;
         public string ShaderName = "";
 
-        ShaderCallback callBack;
+        int[] uniformLoc = new int[100];
+        enum U
+        {
+            vertex, normal, uv, uv2,
+            projMatrix, modelMatrix, normalMatrix, textureMatrix,
+            texMap, depthMap, lightmaskMap,
+            matDiffuse, matSpec, matAmb,
+            lightDiffuse, lightSpec, lightAmb, lightShininess, lightEnabled,
+            fogColor, fogDensity,
+            particlePower,
+            light,
+            light0, light1, light2, light3,
+            last
+        };
+        static string[] uniformNames = { 
+                                       "glVertex", "glNormal", "glTexCoord", "glTexCoord2", // attribs
+                                       "glProjectionMatrix", "glModelViewMatrix", "glNormalMatrix", "glTextureMatrix",
+                                       "textureMap", "depthMap", "lightmaskMap", 
+                                       "materialDiffuse", "materialSpecular", "materialAmbient", 
+                                       "lightDiffuse", "lightSpecular", "lightAmbient", "shininess", "enabled",
+                                       "glFogColor", "glFogDensity",
+                                       "particlePower",
+                                       "glLight",
+                                       "glLight[0]",
+                                       "glLight[1]",
+                                       "glLight[2]",
+                                       "glLight[3]",
+                                       };
 
-        int projMatrixLoc = -1, modelMatrixLoc = -1, normalMatrixLoc = -1;
-        int texMapLoc, lightLoc, vertexLoc, normalLoc, UVLoc, textureMatrixLoc, materialDiffuseLoc;
-        int fogColorLoc, fogDensityLoc;
+        /// <summary>
+        /// flagsit m‰‰r‰‰ mit‰ shaderista ladataan, esim "LIGHTING", "PERPIXEL", "FOG", "SHADOWS".
+        /// pit‰‰ asettaa ennen 3d-mallin lataamista.
+        /// </summary>
+        public static void SetShader(string shaderName, string flags)
+        {
+            shaderFileName = shaderName;
+            shaderFlags = flags;
+        }
+        public static GLSLShader Load()
+        {
+            if (shaderFileName == "")
+                shaderFileName = "default.shader";
+
+            return Load(GLSLShader.shaderFileName + ":" + GLSLShader.shaderFlags);
+        }
 
         /// <summary>
         /// lataa glsl shader (vertex ja fragment shader samassa tiedostossa).
         /// asettaaa ladatun shaderin k‰yttˆˆn.
         /// </summary>
-        public static GLSLShader Load(string fileName, ShaderCallback callback)
+        public static GLSLShader Load(string fileName)
         {
+            if (IsSupported == false) return null;
+            if (fileName == "" || fileName == ":") return null;
+
             GLSLShader shader = new GLSLShader();
             shader.LoadShader(fileName);
 
-            shader.callBack = callback;
-            if (fileName.Contains("SHADOWS")) shader.callBack = CallBacks.ShadowShaderCallBack;
-            if (fileName.Contains("LIGHTING")) shader.callBack = CallBacks.LightingShaderCallBack;
-
-            shader.UseProgram();
             return shader;
         }
 
         void LoadShader(string shaderFileName)
         {
-            if (IsSupported == false) return;
-
             string file = shaderFileName;
             if (shaderFileName.Contains(":")) file = shaderFileName.Substring(0, shaderFileName.IndexOf(':'));
             ShaderName = shaderFileName;
@@ -61,19 +101,18 @@ namespace CSatEng
             {
                 string shader = shd.ReadToEnd();
                 CreateShaders(shaderFileName, shader);
+
                 UseProgram();
-                vertexLoc = GL.GetAttribLocation(ProgramID, "glVertex");
-                normalLoc = GL.GetAttribLocation(ProgramID, "glNormal");
-                UVLoc = GL.GetAttribLocation(ProgramID, "glTexCoord");
-                projMatrixLoc = GL.GetUniformLocation(ProgramID, "glProjectionMatrix");
-                modelMatrixLoc = GL.GetUniformLocation(ProgramID, "glModelViewMatrix");
-                normalMatrixLoc = GL.GetUniformLocation(ProgramID, "glNormalMatrix");
-                textureMatrixLoc = GL.GetUniformLocation(ProgramID, "glTextureMatrix");
-                texMapLoc = GL.GetUniformLocation(ProgramID, "textureMap");
-                lightLoc = GL.GetUniformLocation(ProgramID, "glLight");
-                materialDiffuseLoc = GL.GetUniformLocation(ProgramID, "materialDiffuse"); // t‰t‰ v‰ri‰ voidaan muuttaa GLExt.Color metodilla
-                fogColorLoc = GL.GetUniformLocation(ProgramID, "glFogColor");
-                fogDensityLoc = GL.GetUniformLocation(ProgramID, "glFogDensity");
+
+                // hae attrib paikat (0-3)
+                for (int q = 0; q < 4; q++)
+                    uniformLoc[q] = GL.GetAttribLocation(ProgramID, uniformNames[q]);
+
+                // hae uniformien paikat
+                for (int q = 4; q != (int)U.last; q++)
+                {
+                    uniformLoc[q] = GL.GetUniformLocation(ProgramID, uniformNames[q]);
+                }
             }
         }
 
@@ -98,7 +137,7 @@ namespace CSatEng
                 return;
             }
 
-            Log.WriteLine("Shader: " + shaderFileName, true);
+            Log.WriteLine("Shader: " + shaderFileName);
             shaders.Add(shaderFileName, this);
             if (shaderStr.Contains("[SETUP]") == false) shaderStr = "[SETUP]\n" + shaderStr;
             int s = shaderStr.IndexOf("[SETUP]") + 8;
@@ -145,16 +184,21 @@ namespace CSatEng
                 fs = fs.Replace("shadow2DProj", "textureProj");
             }
 
+#if DEBUG
 #if SHOWSHADERS
-            Log.WriteLine("----VS------");
+            System.Console.WriteLine("----VS------");
             string[] lines = vs.Split('\n');
-            for (int q = 0; q < lines.Length; q++) Log.WriteLine("" + (q + 1) + ": " + lines[q]);
+            for (int q = 0; q < lines.Length; q++)
+                System.Console.WriteLine("" + (q + 1) + ": " + lines[q]);
 
-            Log.WriteLine("----FS------");
+            System.Console.WriteLine("----FS------");
             lines = fs.Split('\n');
-            for (int q = 0; q < lines.Length; q++) Log.WriteLine("" + (q + 1) + ": " + lines[q]);
-#endif
+            for (int q = 0; q < lines.Length; q++)
+                System.Console.WriteLine("" + (q + 1) + ": " + lines[q]);
 
+            System.Console.Write("\n");
+#endif
+#endif
             vertexObject = GL.CreateShader(ShaderType.VertexShader);
             fragmentObject = GL.CreateShader(ShaderType.FragmentShader);
 
@@ -183,56 +227,94 @@ namespace CSatEng
             GL.AttachShader(ProgramID, vertexObject);
             GL.LinkProgram(ProgramID);
             Log.WriteLine(GL.GetProgramInfoLog(ProgramID));
+            if (GL.GetProgramInfoLog(ProgramID).Contains("error"))
+                Log.Error("GLSL compiling error.");
 
             GLExt.CheckGLError("GLSL");
         }
 
+        public void SetUniform(string name, float val)
+        {
+            GL.Uniform1(GL.GetUniformLocation(ProgramID, name), val);
+        }
+
         public void SetUniforms()
         {
-            GL.UniformMatrix4(projMatrixLoc, false, ref GLExt.ProjectionMatrix);
-            GL.UniformMatrix4(modelMatrixLoc, false, ref GLExt.ModelViewMatrix);
+            if (IsSupported == false) return;
+
+            GL.UniformMatrix4(uniformLoc[(int)U.projMatrix], false, ref GLExt.ProjectionMatrix);
+            GL.UniformMatrix4(uniformLoc[(int)U.modelMatrix], false, ref GLExt.ModelViewMatrix);
 
             if (VBO.FastRenderPass == true) return;
 
-            if (normalMatrixLoc != -1)
+            if (uniformLoc[(int)U.normalMatrix] != -1)
             {
                 Matrix4 normMatrix = GLExt.ModelViewMatrix;
                 normMatrix.Row3 = new Vector4(0, 0, 0, 1);
                 normMatrix = Matrix4.Transpose(Matrix4.Invert(normMatrix));
-                GL.UniformMatrix4(normalMatrixLoc, false, ref normMatrix);
+                GL.UniformMatrix4(uniformLoc[(int)U.normalMatrix], false, ref normMatrix);
             }
-            if (textureMatrixLoc != -1) GL.UniformMatrix4(textureMatrixLoc, false, ref GLExt.TextureMatrix);
-            if (texMapLoc != -1) GL.Uniform1(texMapLoc, Settings.COLOR_TEXUNIT);
-            if (materialDiffuseLoc != -1) GL.Uniform4(materialDiffuseLoc, GLExt.Color);
+            if (uniformLoc[(int)U.textureMatrix] != -1) GL.UniformMatrix4(uniformLoc[(int)U.textureMatrix], false, ref GLExt.TextureMatrix);
+            if (uniformLoc[(int)U.texMap] != -1) GL.Uniform1(uniformLoc[(int)U.texMap], Settings.COLOR_TEXUNIT);
+            if (uniformLoc[(int)U.matDiffuse] != -1) GL.Uniform4(uniformLoc[(int)U.matDiffuse], GLExt.Color);
 
-            if (fogColorLoc != -1)
+            if (uniformLoc[(int)U.fogColor] != -1)
             {
-                GL.Uniform3(fogColorLoc, Fog.Color);
-                GL.Uniform1(fogDensityLoc, Fog.Density);
+                GL.Uniform3(uniformLoc[(int)U.fogColor], Fog.Color);
+                GL.Uniform1(uniformLoc[(int)U.fogDensity], Fog.Density);
             }
 
-            // todo: multiple lights
-            if (lightLoc != -1)
+            if (uniformLoc[(int)U.depthMap] != -1)
             {
-                Vector3 lp = Light.Lights[0].Matrix.Row3.Xyz;
-                GL.Uniform3(lightLoc, lp);
+                GL.Uniform1(uniformLoc[(int)U.depthMap], Settings.DEPTH_TEXUNIT);
+            }
+            if (uniformLoc[(int)U.lightmaskMap] != -1)
+            {
+                ShadowMapping.BindLightMask();
+                GL.Uniform1(uniformLoc[(int)U.lightmaskMap], Settings.LIGHTMASK_TEXUNIT);
+            }
+            if (uniformLoc[(int)U.particlePower] != -1)
+            {
+                GL.Uniform1(uniformLoc[(int)U.particlePower], Particles.ParticlePower);
+            }
+
+
+            // TODO multiple lights
+            if (uniformLoc[(int)U.light] != -1)
+            {
+                GL.Uniform3(uniformLoc[(int)U.light], Light.Lights[0].Matrix.Row3.Xyz);
+
+                GL.Uniform4(uniformLoc[(int)U.lightDiffuse], Light.Lights[0].Diffuse);
+                GL.Uniform4(uniformLoc[(int)U.lightAmb], Light.Lights[0].Ambient);
+
+                if (uniformLoc[(int)U.lightShininess] != -1) // shininess (jos lˆytyy, k‰yt‰ perpixel lightingi‰)
+                {
+                    GL.Uniform4(uniformLoc[(int)U.matSpec], Material.CurrentMaterial.SpecularColor);
+                    GL.Uniform4(uniformLoc[(int)U.matAmb], Material.CurrentMaterial.AmbientColor);
+
+                    GL.Uniform4(uniformLoc[(int)U.lightSpec], Light.Lights[0].Specular);
+                    GL.Uniform1(uniformLoc[(int)U.lightShininess], Light.Lights[0].Shininess);
+                }
             }
         }
 
         public void SetAttributes()
         {
-            GL.VertexAttribPointer(vertexLoc, 3, VertexAttribPointerType.Float, true, Vertex.Size, 0);
-            GL.EnableVertexAttribArray(vertexLoc);
-            if (normalLoc != -1)
+            if (IsSupported == false || CurrentShader == null) return;
+
+            GL.VertexAttribPointer(uniformLoc[(int)U.vertex], 3, VertexAttribPointerType.Float, true, Vertex.Size, 0);
+            GL.EnableVertexAttribArray(uniformLoc[(int)U.vertex]);
+            if (uniformLoc[(int)U.normal] != -1)
             {
-                GL.VertexAttribPointer(normalLoc, 3, VertexAttribPointerType.Float, true, Vertex.Size, Vector3.SizeInBytes);
-                GL.EnableVertexAttribArray(normalLoc);
+                GL.VertexAttribPointer(uniformLoc[(int)U.normal], 3, VertexAttribPointerType.Float, true, Vertex.Size, Vector3.SizeInBytes);
+                GL.EnableVertexAttribArray(uniformLoc[(int)U.normal]);
             }
-            if (UVLoc != -1)
+            if (uniformLoc[(int)U.uv] != -1)
             {
-                GL.VertexAttribPointer(UVLoc, 3, VertexAttribPointerType.Float, true, Vertex.Size, 2 * Vector3.SizeInBytes);
-                GL.EnableVertexAttribArray(UVLoc);
+                GL.VertexAttribPointer(uniformLoc[(int)U.uv], 3, VertexAttribPointerType.Float, true, Vertex.Size, 2 * Vector3.SizeInBytes);
+                GL.EnableVertexAttribArray(uniformLoc[(int)U.uv]);
             }
+            // TODO uv2
         }
 
         public void UseProgram()
@@ -243,7 +325,13 @@ namespace CSatEng
                 CurrentShader = this;
                 GL.UseProgram(ProgramID);
             }
-            if (callBack != null) callBack(ProgramID);
+        }
+
+        public static void UnBindShader()
+        {
+            if (IsSupported == false) return;
+            CurrentShader = null;
+            GL.UseProgram(0);
         }
 
         public void Dispose()
@@ -254,7 +342,7 @@ namespace CSatEng
                 if (vertexObject != -1) GL.DeleteShader(vertexObject);
                 GL.DeleteProgram(ProgramID);
                 shaders.Remove(ShaderName);
-                Log.WriteLine("Disposed: " + ShaderName, true);
+                Log.WriteLine("Disposed: " + ShaderName, false);
             }
             ProgramID = fragmentObject = vertexObject = -1;
             ShaderName = "";

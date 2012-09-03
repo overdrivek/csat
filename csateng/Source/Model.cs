@@ -1,6 +1,6 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt
+ * Copyright (c) 2008-2012 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -13,13 +13,13 @@ using OpenTK;
 
 namespace CSatEng
 {
-    public class Model : SceneNode, ICloneable
+    public class Model : Renderable, ICloneable
     {
         public Vertex[] VertexBuffer;
         public ushort[] IndexBuffer; // tämä on 0,1,2,3,4,..
         public VBO Vbo;
         public BoundingSphere Boundings;
-        public MaterialInfo Material = new MaterialInfo();
+        public Material Material = new Material();
         public string MaterialName = "";
 
         public bool DoubleSided = false;
@@ -41,7 +41,7 @@ namespace CSatEng
         {
             Model clone = (Model)this.MemberwiseClone();
             // eri grouppi eli kloonattuihin objekteihin voi lisäillä muita objekteja sen vaikuttamatta alkuperäiseen.
-            clone.Childs = new List<SceneNode>(Childs);
+            clone.Childs = new List<Node>(Childs);
             return clone;
         }
     }

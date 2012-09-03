@@ -1,5 +1,5 @@
 CSatEng
-(c) mjt, 2008-2011
+(c) mjt, 2008-2012
 matola@sci.fi
 
 MIT-lisenssi (Licenses/csat-license.txt).

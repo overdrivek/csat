@@ -1,6 +1,6 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt
+ * Copyright (c) 2008-2012 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -124,9 +124,12 @@ namespace CSatEng
                 GL.Ext.FramebufferTexture2D(FramebufferTarget.FramebufferExt, FramebufferAttachment.DepthAttachmentExt, TextureTarget.Texture2D, depthTexture, 0);
 
                 // This is to allow usage of shadow2DProj function in the shader
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureCompareMode, (int)TextureCompareMode.CompareRToTexture);
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureCompareFunc, (int)All.Lequal);
-                if (Settings.UseGL3 == false) GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.DepthTextureMode, (int)All.Intensity);
+                if (GLSLShader.IsSupported)
+                {
+                    GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureCompareMode, (int)TextureCompareMode.CompareRToTexture);
+                    GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureCompareFunc, (int)All.Lequal);
+                    if (Settings.UseGL3 == false) GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.DepthTextureMode, (int)All.Intensity);
+                }
             }
 
             bool ok = CheckFBOError();
@@ -250,7 +253,7 @@ namespace CSatEng
                 if (depthTexture != 0) GL.DeleteTextures(1, ref depthTexture);
                 GL.Ext.DeleteFramebuffers(1, ref fboHandle);
                 depthTexture = fboHandle = 0;
-                Log.WriteLine("Disposed: FBO", true);
+                Log.WriteLine("Disposed: FBO", false);
             }
         }
 

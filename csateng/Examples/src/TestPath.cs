@@ -1,6 +1,6 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt
+ * Copyright (c) 2008-2012 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -12,7 +12,7 @@ using OpenTK.Input;
 
 namespace CSatEng
 {
-    class TestPath : BaseGame
+    class TestPath : GameClass
     {
         Path camPath;
 
@@ -22,11 +22,11 @@ namespace CSatEng
             ShadowMapping.Create(depthFBO, "lightmask.png");
 
             Fog.CreateFog(0.005f, Fog.Color);
-            VBO.Flags = "FOG";
+            GLSLShader.SetShader("default.shader", "FOG");
             skybox = Sky.Load("sky/sky2_", "jpg");
             world.Add(skybox);
 
-            VBO.Flags = "LIGHTING:PHONG:FOG";
+            GLSLShader.SetShader("default.shader", "LIGHTING:PERPIXEL:FOG");
             Model scene = new Model();
             DotScene ds = DotScene.Load("scene1/scene1.scene", scene);
             world.Add(scene);
@@ -47,28 +47,32 @@ namespace CSatEng
             base.Dispose();
         }
 
-        int counter = 0;
+        float counter = 0;
         string str = "Looking at next point";
         Vector3 lookAt = Vector3.Zero;
+        int curAnim = 0;
         public override void Update(float time)
         {
             if (Keyboard[Key.Escape]) Tests.NextTest = true;
 
-            counter++;
-            if (counter == 100)
+            counter+=time;
+            if ((int)counter == 4 && curAnim!=(int)counter)
             {
+                curAnim = (int)counter;
                 camPath.LookAtNextPoint = false;
                 str = "Looking at origin";
                 lookAt = Vector3.Zero;
             }
-            if (counter == 200)
+            if ((int)counter == 8 && curAnim != (int)counter)
             {
+                curAnim = (int)counter;
                 camPath.LookAtNextPoint = false;
                 str = "Looking at random point";
                 lookAt = new Vector3((float)Rnd.NextDouble() * 100, (float)Rnd.NextDouble() * 50, (float)Rnd.NextDouble() * 100);
             }
-            if (counter == 300)
+            if ((int)counter == 12 && curAnim != (int)counter)
             {
+                curAnim = (int)counter;
                 camPath.LookAtNextPoint = true;
                 counter = 0;
                 str = "Looking at next point";

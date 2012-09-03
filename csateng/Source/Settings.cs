@@ -1,6 +1,6 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt
+ * Copyright (c) 2008-2012 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -18,6 +18,8 @@ namespace CSatEng
         public static readonly int LIGHTMASK_TEXUNIT = 2;
         public static readonly int LIGHTMAP_TEXUNIT = 3;
         public static readonly int BUMP_TEXUNIT = 4;
+
+        public static readonly int LIGHTS_MAX = 4;
 
         public static string ModelDir = "../../data/model/";
         public static string TextureDir = "../../data/texture/";
@@ -77,11 +79,13 @@ namespace CSatEng
             dis = doc.SelectSingleNode("//settings/disable_npot_textures/text()");
             DisableNPOTTextures = dis.Value == "true";
 
+            dis = doc.SelectSingleNode("//settings/disable_float_textures/text()");
+            DisableFloatTextures = dis.Value == "true";
+
             dis = doc.SelectSingleNode("//settings/disable_shaders/text()");
             DisableShaders = dis.Value == "true";
 
-            dis = doc.SelectSingleNode("//settings/disable_float_textures/text()");
-            DisableFloatTextures = dis.Value == "true";
+            if (UseGL3) DisableShaders = false;
         }
     }
 }

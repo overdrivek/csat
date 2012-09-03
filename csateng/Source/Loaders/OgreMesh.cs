@@ -1,6 +1,6 @@
 #region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt
+ * Copyright (c) 2008-2012 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -15,6 +15,8 @@ namespace CSatEng
 {
     public class OgreMesh : Model
     {
+        public static Dictionary<string, OgreMesh> meshes = new Dictionary<string, OgreMesh>();
+
         #region ogremesh loader
         public OgreMesh() { }
         public OgreMesh(string name, string fileName)
@@ -24,7 +26,13 @@ namespace CSatEng
 
         public static OgreMesh Load(string name, string fileName)
         {
-            OgreMesh mesh = new OgreMesh(name, fileName);
+            OgreMesh mesh;
+            // jos mesh on jo ladattu, kloonaa se
+            meshes.TryGetValue(fileName, out mesh);
+            if (mesh != null)
+                return (OgreMesh)mesh.Clone();
+
+            mesh = new OgreMesh(name, fileName);
             return mesh;
         }
 
@@ -52,7 +60,7 @@ namespace CSatEng
             XMLRoot = XMLDoc.DocumentElement;
             if (XMLRoot.Name != "mesh")
             {
-                Log.Error("Error [" + fileName + "]: Invalid .mesh.xml File. Missing <mesh>");
+                Log.Error("Error [" + fileName + "] Invalid .mesh.xml File. Missing <mesh>");
             }
 
             bool isPath = false; // jos meshi on pathi
@@ -73,7 +81,7 @@ namespace CSatEng
                 string shader = Material.ShaderName;
                 if (shader != "")
                 {
-                    Vbo.Shader = GLSLShader.Load(shader, null);
+                    Vbo.Shader = GLSLShader.Load(shader);
                 }
             }
             else
@@ -105,7 +113,7 @@ namespace CSatEng
             }
         }
 
-        void processSubmesh(XmlElement XMLNode, SceneNode pParent, bool path)
+        void processSubmesh(XmlElement XMLNode, Node pParent, bool path)
         {
             XmlElement pElement;
             if (path == false)
@@ -113,7 +121,7 @@ namespace CSatEng
                 if (MaterialName == "")
                 {
                     MaterialName = XML.GetAttrib(XMLNode, "material");
-                    Material = MaterialInfo.GetMaterial(MaterialName);
+                    Material = Material.GetMaterial(MaterialName);
                 }
 
                 pElement = (XmlElement)XMLNode.SelectSingleNode("faces");
@@ -182,7 +190,7 @@ namespace CSatEng
             {
                 if (Material != null) Material.Dispose();
                 if (Vbo != null) Vbo.Dispose();
-                Log.WriteLine("Disposed: " + Name + " (mesh)", true);
+                Log.WriteLine("Disposed: " + Name + " (mesh)", false);
                 Name = "";
             }
         }

@@ -1,95 +1,250 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt
+ * Copyright (c) 2008-2012 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
 #endregion
 using System;
+using OpenTK;
+using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 
 namespace CSatEng
 {
-
-    public class BaseGame
+    public class BaseGame : GameWindow
     {
-        public static Random Rnd = new Random();
-        public static KeyboardDevice Keyboard;
-        public static MouseDevice Mouse; //public static OpenTK.Input.Mouse mouse;
-        public static ClearBufferMask ClearFlags = ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit;
-        public static int NumOfObjects = 0;
+        public static bool Running = true;
+        public static GameClass Game;
+        public static GameWindow Instance;
 
-        protected Sky skybox;
-        protected FBO colorFBO, depthFBO;
-        protected SceneNode world = new SceneNode("World");
-        protected Camera camera = new Camera();
-        protected BitmapFont font = null;
-        protected int oldMouseX, oldMouseY;
-        protected bool mouseLeftPressed = false, mouseRightPressed = false, mouseMiddlePressed = false;
-
-        public BaseGame()
+        public BaseGame(string projectName, int glVersionMajor, int glVersionMinor, GraphicsContextFlags flags)
+            : base(Settings.Width, Settings.Height,
+            new GraphicsMode(Settings.Bpp, Settings.DepthBpp, 0, Settings.FSAA, 0, 2, false),
+            projectName, 0, DisplayDevice.Default,
+            glVersionMajor, glVersionMinor,
+            flags)
         {
-            GameLoop.Running = true;
+            Init();
+            Running = true;
         }
 
-        public virtual void Dispose()
+        void Init()
         {
-            if (font != null) font.Dispose();
-            if (colorFBO != null) colorFBO.Dispose();
-            if (depthFBO != null) depthFBO.Dispose();
-            if (skybox != null) skybox.Dispose();
-            skybox = null;
-            colorFBO = null;
-            depthFBO = null;
-            font = null;
-            world = null;
-            SceneNode.ObjectCount = 0;
+            Instance = this;
+
+            Log.WriteLine("CSatEng 0.9.1 // (c) mjt, 2012");
+            Log.WriteLine("OS: " + System.Environment.OSVersion.ToString());
+            Log.WriteLine("Renderer: " + GL.GetString(StringName.Renderer));
+            Log.WriteLine("Vendor: " + GL.GetString(StringName.Vendor));
+            Log.WriteLine("Version: " + GL.GetString(StringName.Version));
+            Log.WriteLine(".Net: " + Environment.Version);
+
+            string version = GL.GetString(StringName.Version);
+            if (version.Contains("Compatibility")) Settings.UseGL3 = false; // ei käytetä ainoastaan gl3 core käskyjä
+            int major = (int)version[0];
+            int minor = (int)version[2];
+            if (major <= 1 && minor < 5) Log.Error("You need at least OpenGL 1.5 to run this program. Please update your drivers.");
+
+            string ext = "";
+            if (Settings.UseGL3 == false) ext = GL.GetString(StringName.Extensions);
+            else
+            {
+                int extC;
+                GL.GetInteger(GetPName.NumExtensions, out extC);
+                for (int q = 0; q < extC; q++) ext += GL.GetString(StringName.Extensions, q) + " ";
+            }
+
+            Log.WriteLine("--------------------------------------------");
+            Log.WriteLine("Extensions:\n" + ext);
+            Log.WriteLine("--------------------------------------------");
+
+            if (ext.Contains("texture_non_power_of_two"))
+            {
+                if (Settings.DisableNPOTTextures)
+                {
+                    Log.WriteLine("NPOT textures supported but disabled.");
+                    Texture.IsNPOTSupported = false;
+                }
+                else
+                {
+                    Log.WriteLine("NPOT textures supported.");
+                    Texture.IsNPOTSupported = true;
+                }
+            }
+            else
+            {
+                Log.WriteLine("NPOT textures not supported.");
+                Texture.IsNPOTSupported = false;
+            }
+
+            // löytyykö float texture extension
+            if (ext.Contains("texture_float") && ext.Contains("color_buffer_float"))
+            {
+                if (Settings.DisableFloatTextures)
+                {
+                    Log.WriteLine("Float textures supported but disabled.");
+                    Texture.IsFloatTextureSupported = false;
+                }
+                else
+                {
+                    Log.WriteLine("Float textures supported.");
+                    Texture.IsFloatTextureSupported = true;
+                }
+            }
+            else
+            {
+                Log.WriteLine("Float textures not supported.");
+                Texture.IsFloatTextureSupported = false;
+            }
+
+            // tarkista voidaanko shadereita käyttää.
+            if (ext.Contains("vertex_shader") &&
+                ext.Contains("fragment_shader"))
+            {
+                if (Settings.DisableShaders)
+                {
+                    Log.WriteLine("Shaders supported but disabled.");
+                    GLSLShader.IsSupported = false;
+                }
+                else
+                {
+                    Log.WriteLine("Shaders supported.");
+                    GLSLShader.IsSupported = true;
+                }
+            }
+            else
+            {
+                Log.WriteLine("Shaders not supported.");
+                GLSLShader.IsSupported = false;
+            }
+
+            if (ext.Contains("EXT_framebuffer_object"))
+            {
+                if (Settings.DisableFbo)
+                {
+                    Log.WriteLine("FBOs supported but disabled.");
+                    FBO.IsSupported = false;
+                }
+                else
+                {
+                    Log.WriteLine("FBOs supported.");
+                    FBO.IsSupported = true;
+                }
+            }
+            else
+            {
+                Log.WriteLine("FBOs not supported.");
+                FBO.IsSupported = false;
+            }
+
+            GL.GetInteger(GetPName.MaxCombinedTextureImageUnits, out Texture.MaxTextures);
+            Log.WriteLine("Max textureUnits: " + Texture.MaxTextures);
+            Texture.BindedTextures = new uint[Texture.MaxTextures];
+
+            VSync = Settings.VSync ? VSyncMode.On : VSyncMode.Off;
+            Settings.Device = DisplayDevice.Default;
+            if (Settings.FullScreen)
+            {
+                Settings.Device.ChangeResolution(Settings.Device.SelectResolution(Settings.Width, Settings.Height, Settings.Bpp, 60f));
+                WindowState = OpenTK.WindowState.Fullscreen;
+            }
+
+            GL.Enable(EnableCap.DepthTest);
+            GL.ClearDepth(1.0);
+            GL.DepthFunc(DepthFunction.Lequal);
+            GL.ClearColor(0.0f, 0.0f, 0.1f, 0);
+            GL.Enable(EnableCap.CullFace);
+            GL.CullFace(CullFaceMode.Back);
+            if (Settings.UseGL3 == false)
+            {
+                GL.Enable(EnableCap.Texture2D);
+                GL.Enable(EnableCap.ColorMaterial);
+                GL.Enable(EnableCap.Normalize);
+            }
+            GameClass.Keyboard = Keyboard;
+            GameClass.Mouse = Mouse;
+
+            if (GLSLShader.IsSupported)
+                GLSLShader.SetShader("default.shader", "");
+            else
+                GLSLShader.SetShader("", "");
+
+            Loading();
         }
 
-        /// <summary>
-        /// putsaa listat ja poista gl-datat
-        /// </summary>
-        public void ClearArrays()
+        void Loading()
         {
-            Texture.DisposeAll();
-            GLSLShader.DisposeAll();
-            MaterialInfo.DisposeAll();
-            Particles.DisposeAll();
-
-            Light.Lights.Clear();
-            Path.Paths.Clear();
-            CallBacks.Clear();
-
-            world = null;
-            world = new SceneNode("World");
-            SceneNode.ObjectCount = 0;
-            for (int q = 0; q < Texture.MaxTextures; q++) Texture.UnBind(q);
-            Texture.UnBind(0);
-            VBO.ShaderFileName = "default.shader";
-            VBO.Flags = "";
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            try
+            {
+                BitmapFont font = BitmapFont.Load("fonts/comic12.png");
+                Texture.UnBind(0);
+                Camera.Set2D();
+                font.Write("Loading...", 0, 0);
+                font.Dispose();
+                Texture.UnBind(0);
+            }
+            catch (Exception) { }
+            SwapBuffers();
         }
 
-        public virtual void Init()
+        public static void SetGame(GameClass game)
         {
+            if (Game != null)
+                Game.Dispose();
+
+            Game = game;
+            if (game != null)
+                game.Init();
         }
 
-        public virtual void Update(float time)
+        public override void Dispose()
         {
-            if (Mouse[MouseButton.Left]) mouseLeftPressed = true; else mouseLeftPressed = false;
-            if (Mouse[MouseButton.Right]) mouseRightPressed = true; else mouseRightPressed = false;
-            if (Mouse[MouseButton.Middle]) mouseMiddlePressed = true; else mouseMiddlePressed = false;
-
-            oldMouseX = Mouse.X;
-            oldMouseY = Mouse.Y;
+            if (Settings.FullScreen) Settings.Device.RestoreResolution();
+            base.Dispose();
         }
 
-        public virtual void Render()
+        protected override void OnResize(EventArgs e)
         {
+            if (Game == null) return;
+            Settings.Width = Width;
+            Settings.Height = Height;
+            Camera.Resize();
         }
 
+        protected override void OnUpdateFrame(FrameEventArgs e)
+        {
+            if (Running == false)
+            {
+                Game = null;
+                this.Exit();
+                return;
+            }
+            if (Game == null) return;
+
+            Game.Update((float)e.Time);
+
+            if (Keyboard[Key.AltLeft] && Keyboard[Key.Enter])
+            {
+                if (this.WindowState == WindowState.Fullscreen)
+                    this.WindowState = WindowState.Normal;
+                else
+                    this.WindowState = WindowState.Fullscreen;
+            }
+        }
+
+        protected override void OnRenderFrame(FrameEventArgs e)
+        {
+            if (Game == null || Running == false) return;
+            GameClass.NumOfObjects = 0;
+            Game.Render();
+            SwapBuffers();
+
+#if DEBUG
+            this.Title = "Test project [objs: " + GameClass.NumOfObjects + "]   FPS: " + (1 / e.Time).ToString("0.");
+#endif
+        }
     }
-
 }

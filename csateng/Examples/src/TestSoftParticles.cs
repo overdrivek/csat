@@ -6,20 +6,24 @@ using System.Collections.Generic;
 
 namespace CSatEng
 {
-    class TestSoftParticles : BaseGame
+    class TestSoftParticles : GameClass
     {
         Model[] actors = new Model[10];
         Model scene = new Model();
         Billboard lightImg;
         Particles explosion, smoke;
-        PostEffect blur, bloom;
-
+        PostEffect blurH, blurV, bloom;
+        
         public override void Init()
         {
             colorFBO = new FBO(0, 0, 2, true); // 2 colorbufferia
             depthFBO = new FBO(0, 0, 0, true);
-            blur = PostEffect.Load("blur.shader", "HORIZ VERT", 1f / (float)colorFBO.Width);
-            bloom = PostEffect.Load("bloom.shader", "", 0.001f);
+            blurH = PostEffect.Load("blur.shader", "HORIZ");
+            blurH.SetParameter("size", 1f / (float)colorFBO.Width);
+            blurV = PostEffect.Load("blur.shader", "VERT");
+            blurV.SetParameter("size", 1f / (float)colorFBO.Width);
+            bloom = PostEffect.Load("bloom.shader", "");
+            bloom.SetParameter("size", 0.001f);
 
             Particles.EnableSoftParticles();
             ShadowMapping.Create(depthFBO, "lightmask.png");
@@ -31,15 +35,11 @@ namespace CSatEng
 
             lightImg = Billboard.Load("lightimg.png");
 
-            //VBO.Flags = "LIGHTING";
-            //VBO.Flags = "LIGHTING:PHONG";
-            VBO.ShaderFileName = "shadowmapping.shader";
-            VBO.Flags = "SHADOWS";
-
+            GLSLShader.SetShader("shadowmapping.shader", "SHADOWS");
             DotScene ds = DotScene.Load("scene1/scene1.scene", scene);
             world.Add(scene);
 
-            actors[0] = AnimatedModelMD5.Load("ugly/ukko.mesh");
+            actors[0] = AnimatedModel.Load("ugly/ukko.mesh");
             actors[0].LoadMD5Animation("act1", "ugly/ukko_action1.anim");
             actors[0].LoadMD5Animation("act2", "ugly/ukko_action2.anim");
             actors[0].LoadMD5Animation("act3", "ugly/ukko_action3.anim");
@@ -170,7 +170,11 @@ namespace CSatEng
             Camera.Set2D();
             {
                 PostEffect.Begin(colorFBO);
-                if (Keyboard[Key.R]) blur.RenderEffect();
+                if (Keyboard[Key.R])
+                {
+                    blurH.RenderEffect();
+                    blurV.RenderEffect();
+                }
                 if (Keyboard[Key.T]) bloom.RenderEffect();
 
                 PostEffect.End().DrawFullScreen(0, 0);

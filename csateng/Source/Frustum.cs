@@ -1,12 +1,12 @@
 #region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt
+ * Copyright (c) 2008-2012 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
 #endregion
 /* 
- * tutoriaali:
+ * tut:
  * http://www.crownandcutlass.com/features/technicaldetails/frustum.html
  *
  */

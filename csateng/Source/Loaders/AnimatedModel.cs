@@ -1,6 +1,6 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt
+ * Copyright (c) 2008-2012 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  * 
@@ -40,7 +40,7 @@ using OpenTK;
 
 namespace CSatEng
 {
-    public class AnimatedModelMD5 : Model
+    public class AnimatedModel : Model
     {
         private bool animated = false;
         private int numJoints;
@@ -51,7 +51,7 @@ namespace CSatEng
         private Vector3[] normals;
         private List<Vertex[]> meshes;
 
-        public AnimatedModelMD5(string fileName)
+        public AnimatedModel(string fileName)
         {
             LoadMD5(fileName);
         }
@@ -113,7 +113,7 @@ namespace CSatEng
                     model[q].texture.Dispose();
                     model[q].vbo.Dispose();
                 }
-                Log.WriteLine("Disposed: " + Name, true);
+                Log.WriteLine("Disposed: " + Name, false);
                 Name = "";
             }
         }
@@ -121,9 +121,9 @@ namespace CSatEng
         /// <summary>
         /// lataa md5 model
         /// </summary>
-        public static AnimatedModelMD5 Load(string fileName)
+        public static AnimatedModel Load(string fileName)
         {
-            AnimatedModelMD5 model = new AnimatedModelMD5(fileName);
+            AnimatedModel model = new AnimatedModel(fileName);
             return model;
         }
 
@@ -277,7 +277,7 @@ namespace CSatEng
             // laske normaalit
             for (int k = 0; k < numMesh; k++) MathExt.CalcNormals(ref finalVert, ref model[k].faces, ref normals, false);
 
-            Log.WriteLine("Model: " + Name, true);
+            Log.WriteLine("Model: " + Name, false);
         }
 
         /// <summary>
@@ -391,16 +391,18 @@ namespace CSatEng
         {
             if (Settings.UseGL3 == false)
             {
+                GLSLShader.UnBindShader();
+
                 GL.Disable(EnableCap.Texture2D);
                 GL.Disable(EnableCap.DepthTest);
                 GLExt.PushMatrix();
                 {
-                    GLExt.Translate(Position.X, Position.Y, Position.Z);
-                    GLExt.RotateX(Rotation.X);
-                    GLExt.RotateY(Rotation.Y);
-                    GLExt.RotateZ(Rotation.Z);
-                    GLExt.RotateX(-90);
-                    GLExt.Scale(Scale.X, Scale.Y, Scale.Z);
+                    GL.Translate(Position.X, Position.Y, Position.Z);
+                    GL.Rotate(Rotation.X, 1, 0, 0);
+                    GL.Rotate(Rotation.Y, 0, 1, 0);
+                    GL.Rotate(Rotation.Z, 0, 0, 1);
+                    GL.Rotate(-90, 1, 0, 0);
+                    GL.Scale(Scale.X, Scale.Y, Scale.Z);
                     GL.PointSize(5);
                     GLExt.Color4(1, 0, 0, 1);
                     GL.Begin(BeginMode.Points);
@@ -450,7 +452,7 @@ namespace CSatEng
                         break;
                     }
                 }
-                if (found == false) Log.WriteLine("Can't find animation: " + animName, true);
+                if (found == false) Log.WriteLine("Can't find animation: " + animName);
             }
         }
 
@@ -799,7 +801,7 @@ namespace CSatEng
                 Update(0);
                 animations.Add(anim);
 
-                Log.WriteLine("Animation: " + fileName, true);
+                Log.WriteLine("Animation: " + fileName, false);
 
                 SetAnimation(animName);
             }

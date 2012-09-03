@@ -1,6 +1,6 @@
 #region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2011 mjt
+ * Copyright (c) 2008-2012 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
@@ -10,7 +10,7 @@ using OpenTK.Graphics.OpenGL;
 
 namespace CSatEng
 {
-    public class Sky : SceneNode
+    public class Sky : Renderable
     {
         OgreMesh[] skyboxSides = new OgreMesh[6];
 
@@ -23,13 +23,13 @@ namespace CSatEng
             }
         }
 
-        public void SetSkyShader(string shaderFileName, ShaderCallback callback)
+        public void SetSkyShader(string shaderFileName)
         {
             GetList(true);
             for (int q = 0; q < ObjList.Count; q++)
             {
                 OgreMesh m = ObjList[q] as OgreMesh;
-                m.Vbo.Shader = GLSLShader.Load(shaderFileName, callback);
+                m.Vbo.Shader = GLSLShader.Load(shaderFileName);
             }
         }
 
@@ -41,7 +41,7 @@ namespace CSatEng
         {
             Sky sky = new Sky();
             string[] sideStr = { "top", "bottom", "left", "right", "front", "back" };
-            SceneNode skyNode = new SceneNode();
+            Node skyNode = new Node();
             DotScene ds = DotScene.Load("sky/sky.scene", skyNode);
 
             int side = 0;
@@ -61,7 +61,7 @@ namespace CSatEng
 
                     string fileName = skyName + sideStr[side] + "." + ext;
                     m.MaterialName = fileName;
-                    m.Material = MaterialInfo.GetMaterial(fileName + "_material");
+                    m.Material = Material.GetMaterial(fileName + "_material");
                     m.Material.Textures[Settings.COLOR_TEXUNIT].Tex = Texture.Load(m.MaterialName);
                     side++;
                 }
@@ -81,7 +81,7 @@ namespace CSatEng
         protected override void RenderModel()
         {
             if (VBO.FastRenderPass) return;
-            BaseGame.NumOfObjects++;
+            GameClass.NumOfObjects++;
 
             GL.Disable(EnableCap.DepthTest);
             GL.DepthMask(false); // ei kirjoiteta z-bufferiin
