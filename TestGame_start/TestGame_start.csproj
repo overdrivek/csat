@@ -57,12 +57,6 @@
     <None Include="data\shader\default2d.shader" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\CSatEng_SVN\csateng\CSatEng.csproj">
-      <Project>{BE7FBE03-6952-4987-9E49-343951B632BF}</Project>
-      <Name>CSatEng</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="alut.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -89,6 +83,12 @@
     <Content Include="wrap_oal.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\csateng\CSatEng.csproj">
+      <Project>{BE7FBE03-6952-4987-9E49-343951B632BF}</Project>
+      <Name>CSatEng</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
