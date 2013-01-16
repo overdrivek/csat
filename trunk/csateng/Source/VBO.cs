@@ -184,8 +184,6 @@ namespace CSatEng
 
             if (GLSLShader.IsSupported == false) // jos gl 1.5 tai shaderit otettu pois käytöstä
             {
-                GLSLShader.UnBindShader();
-
                 GL.LoadMatrix(ref GLExt.ModelViewMatrix);
                 BeginRender_noShaders();
                 GL.DrawElements(BeginMode.Triangles, numOfIndices, DrawElementsType.UnsignedShort, IntPtr.Zero);

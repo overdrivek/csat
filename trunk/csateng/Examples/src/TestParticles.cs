@@ -1,6 +1,6 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2008-2012 mjt[matola@sci.fi]
+ * Copyright (c) 2008-2012 mjt
  * This notice may not be removed from any source distribution.
  * See license.txt for licensing details.
  */
