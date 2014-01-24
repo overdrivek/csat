@@ -1,8 +1,8 @@
 #region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2008-2012 mjt
+ * Copyright (c) 2008-2014 mjt
  * This notice may not be removed from any source distribution.
- * See license.txt for licensing details.
+ * See csat-license.txt for licensing details.
  */
 #endregion
 using System;
@@ -108,23 +108,21 @@ namespace CSatEng
             GL.GetBufferParameter(BufferTarget.ElementArrayBuffer, BufferParameterName.BufferSize, out size);
             if (indices.Length * sizeof(short) != size) throw new ApplicationException("DataToVBO: Element data not uploaded correctly");
 
-            if (GLSLShader.IsSupported)
-            {
-                Shader = GLSLShader.Load();
+            Shader = GLSLShader.Load();
 
-                if (Shader != null)
+            if (Shader != null)
+            {
+                if (Settings.UseGL3)
                 {
-                    if (Settings.UseGL3)
-                    {
-                        GL.GenVertexArrays(1, out vaoID);
-                        GL.BindVertexArray(vaoID);
-                    }
-                    GL.BindBuffer(BufferTarget.ArrayBuffer, vertexID);
-                    GL.BindBuffer(BufferTarget.ElementArrayBuffer, indexID);
-                    Shader.SetAttributes();
-                    if (Settings.UseGL3) GL.BindVertexArray(0);
+                    GL.GenVertexArrays(1, out vaoID);
+                    GL.BindVertexArray(vaoID);
                 }
+                GL.BindBuffer(BufferTarget.ArrayBuffer, vertexID);
+                GL.BindBuffer(BufferTarget.ElementArrayBuffer, indexID);
+                Shader.SetAttributes();
+                if (Settings.UseGL3) GL.BindVertexArray(0);
             }
+
             GLExt.CheckGLError("DataToVBO");
         }
 
@@ -134,62 +132,12 @@ namespace CSatEng
             GL.BufferSubData(BufferTarget.ArrayBuffer, (IntPtr)0, (IntPtr)(verts.Length * Vertex.Size), verts);
         }
 
-        void BeginRender_noShaders()
-        {
-            if (vertexID == -1 || indexID == -1) Log.Error("VBO destroyed!");
-            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexID);
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, indexID);
-            GL.EnableClientState(ArrayCap.NormalArray);
-            GL.NormalPointer(NormalPointerType.Float, Vertex.Size, (IntPtr)Vector3.SizeInBytes);
-            if (vertexFlags == VertexMode.UV1 || vertexFlags == VertexMode.UV2)
-            {
-                GL.ClientActiveTexture(TextureUnit.Texture0);
-                GL.EnableClientState(ArrayCap.TextureCoordArray);
-                GL.TexCoordPointer(2, TexCoordPointerType.Float, Vertex.Size, (IntPtr)(2 * Vector3.SizeInBytes));
-                if (vertexFlags == VertexMode.UV2)
-                {
-                    GL.ClientActiveTexture(TextureUnit.Texture1);
-                    GL.EnableClientState(ArrayCap.TextureCoordArray);
-                    GL.TexCoordPointer(2, TexCoordPointerType.Float, Vertex.Size, (IntPtr)(2 * Vector3.SizeInBytes + Vector2.SizeInBytes));
-                }
-            }
-            GL.EnableClientState(ArrayCap.VertexArray);
-            GL.VertexPointer(3, VertexPointerType.Float, Vertex.Size, IntPtr.Zero);
-        }
-
-        void EndRender_noShaders()
-        {
-            GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
-            GL.DisableClientState(ArrayCap.NormalArray);
-            GL.DisableClientState(ArrayCap.VertexArray);
-            if (vertexFlags == VertexMode.UV1 || vertexFlags == VertexMode.UV2)
-            {
-                GL.ClientActiveTexture(TextureUnit.Texture0);
-                GL.DisableClientState(ArrayCap.TextureCoordArray);
-                if (vertexFlags == VertexMode.UV2)
-                {
-                    GL.ClientActiveTexture(TextureUnit.Texture1);
-                    GL.DisableClientState(ArrayCap.TextureCoordArray);
-                }
-            }
-        }
-
         /// <summary>
         /// renderoi vbo
         /// </summary>
         public void Render()
         {
             GL.ActiveTexture(TextureUnit.Texture0);
-
-            if (GLSLShader.IsSupported == false) // jos gl 1.5 tai shaderit otettu pois käytöstä
-            {
-                GL.LoadMatrix(ref GLExt.ModelViewMatrix);
-                BeginRender_noShaders();
-                GL.DrawElements(BeginMode.Triangles, numOfIndices, DrawElementsType.UnsignedShort, IntPtr.Zero);
-                EndRender_noShaders();
-                return;
-            }
 
             if (VBO.FastRenderPass == false)
                 if (Shader != null)

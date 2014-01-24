@@ -1,8 +1,8 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2008-2012 mjt
+ * Copyright (c) 2008-2014 mjt
  * This notice may not be removed from any source distribution.
- * See license.txt for licensing details.
+ * See csat-license.txt for licensing details.
  */
 #endregion
 using System;
@@ -124,12 +124,10 @@ namespace CSatEng
                 GL.Ext.FramebufferTexture2D(FramebufferTarget.FramebufferExt, FramebufferAttachment.DepthAttachmentExt, TextureTarget.Texture2D, depthTexture, 0);
 
                 // This is to allow usage of shadow2DProj function in the shader
-                if (GLSLShader.IsSupported)
-                {
-                    GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureCompareMode, (int)TextureCompareMode.CompareRToTexture);
-                    GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureCompareFunc, (int)All.Lequal);
-                    if (Settings.UseGL3 == false) GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.DepthTextureMode, (int)All.Intensity);
-                }
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureCompareMode, (int)TextureCompareMode.CompareRToTexture);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureCompareFunc, (int)All.Lequal);
+
+                if (Settings.UseGL3 == false) GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.DepthTextureMode, (int)All.Intensity);
             }
 
             bool ok = CheckFBOError();

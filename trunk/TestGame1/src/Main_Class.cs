@@ -1,8 +1,8 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2008-2012 mjt
+ * Copyright (c) 2008-2014 mjt
  * This notice may not be removed from any source distribution.
- * See license.txt for licensing details.
+ * See csat-license.txt for licensing details.
  */
 #endregion
 using System;
@@ -18,15 +18,23 @@ namespace CSatEng
             Log.Create("log.txt");
             Settings.ReadXML("settings.xml");
 
+            int version;
             GraphicsContextFlags flags;
-            if (Settings.UseGL3 == false) flags = GraphicsContextFlags.Default;
-            else flags = GraphicsContextFlags.ForwardCompatible;
-
+            if (Settings.UseGL3 == false)
+            {
+                flags = GraphicsContextFlags.Default;
+                version = 2;
+            }
+            else
+            {
+                flags = GraphicsContextFlags.ForwardCompatible;
+                version = 3;
+            }
 #if DEBUG
             flags |= GraphicsContextFlags.Debug;
 #endif
 
-            using (BaseGame bgame = new BaseGame("Project XYZ", 3, 0, flags))
+            using (BaseGame bgame = new BaseGame("Project XYZ", version, 0, flags))
             {
                 BaseGame.Instance.WindowBorder = OpenTK.WindowBorder.Fixed;
 
@@ -36,7 +44,7 @@ namespace CSatEng
                 {
                     GameClass game = new GameMenu();
                     BaseGame.SetGame(game);
-                    bgame.Run(120.0);                    
+                    bgame.Run(120.0);
                 }
 #if !DEBUG
                 catch (Exception e)

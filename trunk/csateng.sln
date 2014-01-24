@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test_dialog", "Test_dialog\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestGame_start", "TestGame_start\TestGame_start.csproj", "{19CE6A4A-3DCF-4906-B9C2-3E85E3A02B3C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mygame", "mygame\mygame.csproj", "{1BD39924-7032-4402-B41C-355E298AD67C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -37,6 +39,10 @@ Global
 		{19CE6A4A-3DCF-4906-B9C2-3E85E3A02B3C}.Debug|x86.Build.0 = Debug|x86
 		{19CE6A4A-3DCF-4906-B9C2-3E85E3A02B3C}.Release|x86.ActiveCfg = Release|x86
 		{19CE6A4A-3DCF-4906-B9C2-3E85E3A02B3C}.Release|x86.Build.0 = Release|x86
+		{1BD39924-7032-4402-B41C-355E298AD67C}.Debug|x86.ActiveCfg = Debug|x86
+		{1BD39924-7032-4402-B41C-355E298AD67C}.Debug|x86.Build.0 = Debug|x86
+		{1BD39924-7032-4402-B41C-355E298AD67C}.Release|x86.ActiveCfg = Release|x86
+		{1BD39924-7032-4402-B41C-355E298AD67C}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

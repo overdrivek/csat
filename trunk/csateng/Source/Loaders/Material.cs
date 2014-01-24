@@ -1,8 +1,8 @@
 #region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2008-2012 mjt
+ * Copyright (c) 2008-2014 mjt
  * This notice may not be removed from any source distribution.
- * See license.txt for licensing details.
+ * See csat-license.txt for licensing details.
  */
 #endregion
 using System.Collections.Generic;
@@ -203,13 +203,6 @@ namespace CSatEng
                     Textures[q].Tex.Bind(q);
             
             CurrentMaterial = this;
-
-            if (GLSLShader.IsSupported == false)
-            {
-                GL.Material(MaterialFace.Front, MaterialParameter.Ambient, AmbientColor);
-                GL.Material(MaterialFace.Front, MaterialParameter.Diffuse, DiffuseColor);
-                GL.Material(MaterialFace.Front, MaterialParameter.Specular, SpecularColor);
-            }
         }
 
         public static void SetMaterial(string materialName)

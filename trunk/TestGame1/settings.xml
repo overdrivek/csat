@@ -9,7 +9,6 @@
   <use_gl3>false</use_gl3>
 
   <disable_fbo>false</disable_fbo>
-  <disable_shaders>false</disable_shaders>
   <disable_shadowmapping>false</disable_shadowmapping>
   <disable_softparticles>false</disable_softparticles>
   <disable_npot_textures>false</disable_npot_textures>

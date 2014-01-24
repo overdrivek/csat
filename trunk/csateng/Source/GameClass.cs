@@ -1,8 +1,8 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2008-2012 mjt
+ * Copyright (c) 2008-2014 mjt
  * This notice may not be removed from any source distribution.
- * See license.txt for licensing details.
+ * See csat-license.txt for licensing details.
  */
 #endregion
 using System;
@@ -66,11 +66,8 @@ namespace CSatEng
             for (int q = 0; q < Texture.MaxTextures; q++) Texture.UnBind(q);
             GLSLShader.UnBindShader();
 
-            if (GLSLShader.IsSupported)
-                GLSLShader.SetShader("default.shader", "");
-            else
-                GLSLShader.SetShader("", "");
-
+            GLSLShader.SetShader("default.shader", "");
+            
             GC.Collect();
             GC.WaitForPendingFinalizers();
         }

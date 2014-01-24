@@ -1,8 +1,8 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2008-2012 mjt
+ * Copyright (c) 2008-2014 mjt
  * This notice may not be removed from any source distribution.
- * See license.txt for licensing details.
+ * See csat-license.txt for licensing details.
  */
 #endregion
 using OpenTK;
@@ -19,18 +19,11 @@ namespace CSatEng
         {
             Fog.Color = color;
             Fog.Density = density;
-            if (GLSLShader.IsSupported == true) return;
-            GL.Enable(EnableCap.Fog);
-            GL.Fog(FogParameter.FogMode, (int)FogMode.Exp2);
-            GL.Fog(FogParameter.FogColor, new float[] { Color.X, Color.Y, Color.Z });
-            GL.Fog(FogParameter.FogDensity, density);
         }
 
         public static void DisableFog()
         {
             Fog.Density = 0;
-            if (GLSLShader.IsSupported == true) return;
-            GL.Disable(EnableCap.Fog);
         }
     }
 }

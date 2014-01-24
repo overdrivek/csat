@@ -1,8 +1,8 @@
 #region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2008-2012 mjt
+ * Copyright (c) 2008-2014 mjt
  * This notice may not be removed from any source distribution.
- * See license.txt for licensing details.
+ * See csat-license.txt for licensing details.
  */
 #endregion
 using System;
@@ -56,14 +56,6 @@ namespace CSatEng
                 GL.Enable(EnableCap.Blend);
                 GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
             }
-            else
-            {
-                if (GLSLShader.IsSupported == false)
-                {
-                    GL.Enable(EnableCap.AlphaTest);
-                    GL.AlphaFunc(AlphaFunction.Greater, 0.1f);
-                }
-            }
 
             GLExt.PushMatrix();
             {
@@ -82,7 +74,6 @@ namespace CSatEng
             GLExt.PopMatrix();
 
             if (blend) GL.Disable(EnableCap.Blend);
-            else if (GLSLShader.IsSupported == false) GL.Disable(EnableCap.AlphaTest);
         }
 
         public void RenderBillboard(Vector3 pos, float zrot, float size, bool blend)

@@ -1,8 +1,8 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2008-2012
+ * Copyright (c) 2008-2014
  * This notice may not be removed from any source distribution.
- * See license.txt for licensing details.
+ * See csat-license.txt for licensing details.
  */
 #endregion
 using System;
@@ -58,13 +58,23 @@ namespace CSatEng
             else
                 Settings.FullScreen = false;
 
+            int version;
             GraphicsContextFlags flags;
-            if (Settings.UseGL3 == false) flags = GraphicsContextFlags.Default;
-            else flags = GraphicsContextFlags.ForwardCompatible;
+            if (Settings.UseGL3 == false)
+            {
+                flags = GraphicsContextFlags.Default;
+                version = 2;
+            }
+            else
+            {
+                flags = GraphicsContextFlags.ForwardCompatible;
+                version = 3;
+            }
 #if DEBUG
             flags |= GraphicsContextFlags.Debug;
 #endif
-            using (BaseGame bgame = new BaseGame("Project XYZ", 3, 0, flags))
+
+            using (BaseGame bgame = new BaseGame("Project XYZ", version, 0, flags))
             {
 #if !DEBUG
                 try
@@ -75,9 +85,9 @@ namespace CSatEng
                     bgame.Run(120.0);
                 }
 #if !DEBUG
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    Log.WriteLine(e.ToString());
+                    Log.WriteLine(ex.ToString());
                 }
 #endif
             }

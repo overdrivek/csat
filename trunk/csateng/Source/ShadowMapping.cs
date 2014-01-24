@@ -1,8 +1,8 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2008-2012 mjt
+ * Copyright (c) 2008-2014 mjt
  * This notice may not be removed from any source distribution.
- * See license.txt for licensing details.
+ * See csat-license.txt for licensing details.
  */
 #endregion
 using System;
@@ -28,11 +28,9 @@ namespace CSatEng
                 return;
             }
 
-            if (FBO.IsSupported == false || GLSLShader.IsSupported == false)
+            if (FBO.IsSupported == false)
             {
-                string ext;
-                if (FBO.IsSupported == false) ext = "FBOs"; else ext = "Shaders";
-                Log.WriteLine(ext + " not supported so no shadow mapping.");
+                Log.WriteLine("FBOs not supported so no shadow mapping.");
                 UseShadowMapping = false;
                 return;
             }
