@@ -1,8 +1,8 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2008-2012 mjt
+ * Copyright (c) 2008-2014 mjt
  * This notice may not be removed from any source distribution.
- * See license.txt for licensing details.
+ * See csat-license.txt for licensing details.
  */
 #endregion
 using System.Xml;
@@ -32,7 +32,7 @@ namespace CSatEng
         public static bool VSync;
         public static bool UseGL3;
 
-        public static bool DisableFbo, DisableShadowMapping, DisableSoftParticles, DisableNPOTTextures, DisableShaders, DisableFloatTextures;
+        public static bool DisableFbo, DisableShadowMapping, DisableSoftParticles, DisableNPOTTextures, DisableFloatTextures;
 
         public static void ReadXML(string fileName)
         {
@@ -81,11 +81,6 @@ namespace CSatEng
 
             dis = doc.SelectSingleNode("//settings/disable_float_textures/text()");
             DisableFloatTextures = dis.Value == "true";
-
-            dis = doc.SelectSingleNode("//settings/disable_shaders/text()");
-            DisableShaders = dis.Value == "true";
-
-            if (UseGL3) DisableShaders = false;
         }
     }
 }

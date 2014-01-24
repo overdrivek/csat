@@ -1,8 +1,8 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2008-2012 mjt
+ * Copyright (c) 2008-2014 mjt
  * This notice may not be removed from any source distribution.
- * See license.txt for licensing details.
+ * See csat-license.txt for licensing details.
  */
 #endregion
 using System.Collections.Generic;
@@ -24,29 +24,16 @@ namespace CSatEng
 
         public static void Color4(float r, float g, float b, float a)
         {
-            if (GLSLShader.IsSupported == false)
-            {
-                GL.Color4(r, g, b, a);
-            }
             Color = new Vector4(r, g, b, a);
         }
 
         public static void SetLighting(bool enable)
         {
             LightingEnabled = enable;
-            if (GLSLShader.IsSupported == false)
-                if (enable == true) GL.Enable(EnableCap.Lighting);
-                else GL.Disable(EnableCap.Lighting);
         }
 
         public static void SetProjectionMatrix(Matrix4 projMatrix)
         {
-            if (GLSLShader.IsSupported == false)
-            {
-                GL.MatrixMode(OpenTK.Graphics.OpenGL.MatrixMode.Projection);
-                GL.LoadMatrix(ref projMatrix);
-                GL.MatrixMode(OpenTK.Graphics.OpenGL.MatrixMode.Modelview);
-            }
             ProjectionMatrix = projMatrix;
         }
 

@@ -1,8 +1,8 @@
 ﻿#region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2008-2012 mjt
+ * Copyright (c) 2008-2014 mjt
  * This notice may not be removed from any source distribution.
- * See license.txt for licensing details.
+ * See csat-license.txt for licensing details.
  */
 #endregion
 using System;
@@ -34,7 +34,7 @@ namespace CSatEng
         {
             Instance = this;
 
-            Log.WriteLine("CSatEng 0.9.1 // (c) mjt, 2012");
+            Log.WriteLine("CSatEng 0.9.2 // (c) mjt, 2008-2014");
             Log.WriteLine("OS: " + System.Environment.OSVersion.ToString());
             Log.WriteLine("Renderer: " + GL.GetString(StringName.Renderer));
             Log.WriteLine("Vendor: " + GL.GetString(StringName.Vendor));
@@ -42,10 +42,10 @@ namespace CSatEng
             Log.WriteLine(".Net: " + Environment.Version);
 
             string version = GL.GetString(StringName.Version);
-            if (version.Contains("Compatibility")) Settings.UseGL3 = false; // ei käytetä ainoastaan gl3 core käskyjä
+            if (version.Contains("Compatibility")) Settings.UseGL3 = false;
             int major = (int)version[0];
             int minor = (int)version[2];
-            if (major <= 1 && minor < 5) Log.Error("You need at least OpenGL 1.5 to run this program. Please update your drivers.");
+            if (major < 2) Log.Error("You need at least OpenGL 2.0 to run this program. Please update your drivers.");
 
             string ext = "";
             if (Settings.UseGL3 == false) ext = GL.GetString(StringName.Extensions);
@@ -53,7 +53,7 @@ namespace CSatEng
             {
                 int extC;
                 GL.GetInteger(GetPName.NumExtensions, out extC);
-                for (int q = 0; q < extC; q++) ext += GL.GetString(StringName.Extensions, q) + " ";
+                for (int q = 0; q < extC; q++) ext += GL.GetString(StringNameIndexed.Extensions, q) + " ";
             }
 
             Log.WriteLine("--------------------------------------------");
@@ -100,25 +100,8 @@ namespace CSatEng
             }
 
             // tarkista voidaanko shadereita käyttää.
-            if (ext.Contains("vertex_shader") &&
-                ext.Contains("fragment_shader"))
-            {
-                if (Settings.DisableShaders)
-                {
-                    Log.WriteLine("Shaders supported but disabled.");
-                    GLSLShader.IsSupported = false;
-                }
-                else
-                {
-                    Log.WriteLine("Shaders supported.");
-                    GLSLShader.IsSupported = true;
-                }
-            }
-            else
-            {
-                Log.WriteLine("Shaders not supported.");
-                GLSLShader.IsSupported = false;
-            }
+            if (!ext.Contains("vertex_shader") || !ext.Contains("fragment_shader"))
+                Log.Error("Shaders not supported. Please update your drivers.");
 
             if (ext.Contains("EXT_framebuffer_object"))
             {
@@ -166,10 +149,7 @@ namespace CSatEng
             GameClass.Keyboard = Keyboard;
             GameClass.Mouse = Mouse;
 
-            if (GLSLShader.IsSupported)
-                GLSLShader.SetShader("default.shader", "");
-            else
-                GLSLShader.SetShader("", "");
+            GLSLShader.SetShader("default.shader", "");
 
             Loading();
         }

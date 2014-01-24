@@ -70,7 +70,7 @@ namespace CSatEng
             base.Update(time);
         }
 
-        float mouseZ = 0;
+        float mouseZ = 1;
         float ang = 0;
         public override void Render()
         {
@@ -79,10 +79,10 @@ namespace CSatEng
 
             back.DrawFullScreen(0, 0);
 
-            GLExt.Color4(0.4f, 0.1f, 0.7f, 1f);
+            GLExt.Color4(0.5f, 0.5f, 0.5f, 0.5f);
             // images at random z (0.0 - 1.0)
             for (int q = 0; q < 100; q++)
-                back.Draw(x[q], y[q], z[q], 0, 0.5f, 0.5f, false); // no blending
+                back.Draw(x[q], y[q], z[q], 0, 0.2f, 0.2f, false); // no blending
             GLExt.Color4(1, 1, 1, 1);
 
 
@@ -91,7 +91,7 @@ namespace CSatEng
             back.Draw(Settings.Width / 2 + 10, 10, 0, 1, 1, true); // blending
             GLExt.Color4(1, 1, 1, 1);
 
-            // MUST invert mouse y
+            // must invert mouse y
             img.Draw(Mouse.X, Settings.Height - Mouse.Y,
                 mouseZ,
                 ang, 1, 1, true);
@@ -99,7 +99,7 @@ namespace CSatEng
             font.Write("2D-test.", 0, 0);
             font.Write("\nUse mouse wheel to move mouse pointer at Z-axis.\n\nPress ESC\nto start the next test.", 10, 20);
 
-            Console.WriteLine("> " + Mouse.X + "  " + Mouse.Y);
+            //Console.WriteLine("> " + Mouse.X + "  " + Mouse.Y);
 
             base.Render();
         }

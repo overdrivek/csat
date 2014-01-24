@@ -1,8 +1,8 @@
 #region --- MIT License ---
 /* Licensed under the MIT/X11 license.
- * Copyright (c) 2008-2012 mjt
+ * Copyright (c) 2008-2014 mjt
  * This notice may not be removed from any source distribution.
- * See license.txt for licensing details.
+ * See csat-license.txt for licensing details.
  */
 #endregion
 using System.Collections.Generic;
@@ -18,7 +18,6 @@ namespace CSatEng
         static string shaderFlags = "";
 
         static Dictionary<string, GLSLShader> shaders = new Dictionary<string, GLSLShader>();
-        public static bool IsSupported = true;
 
         /// <summary>
         /// käytetään esim shadow mappingissa, kun vaihdettu käyttöön depth-shader,
@@ -82,7 +81,6 @@ namespace CSatEng
         /// </summary>
         public static GLSLShader Load(string fileName)
         {
-            if (IsSupported == false) return null;
             if (fileName == "" || fileName == ":") return null;
 
             GLSLShader shader = new GLSLShader();
@@ -240,8 +238,6 @@ namespace CSatEng
 
         public void SetUniforms()
         {
-            if (IsSupported == false) return;
-
             GL.UniformMatrix4(uniformLoc[(int)U.projMatrix], false, ref GLExt.ProjectionMatrix);
             GL.UniformMatrix4(uniformLoc[(int)U.modelMatrix], false, ref GLExt.ModelViewMatrix);
 
@@ -300,7 +296,7 @@ namespace CSatEng
 
         public void SetAttributes()
         {
-            if (IsSupported == false || CurrentShader == null) return;
+            if (CurrentShader == null) return;
 
             GL.VertexAttribPointer(uniformLoc[(int)U.vertex], 3, VertexAttribPointerType.Float, true, Vertex.Size, 0);
             GL.EnableVertexAttribArray(uniformLoc[(int)U.vertex]);
@@ -319,7 +315,6 @@ namespace CSatEng
 
         public void UseProgram()
         {
-            if (IsSupported == false) return;
             if (CurrentShader != this)
             {
                 CurrentShader = this;
@@ -329,7 +324,6 @@ namespace CSatEng
 
         public static void UnBindShader()
         {
-            if (IsSupported == false) return;
             CurrentShader = null;
             GL.UseProgram(0);
         }
